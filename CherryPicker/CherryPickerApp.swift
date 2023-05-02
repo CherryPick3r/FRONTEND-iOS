@@ -24,6 +24,8 @@ struct CherryPickerApp: App {
         WindowGroup {
             if isCherryPick {
                 CherryPickView(isCherryPick: $isCherryPick, cherryPickMode: .cherryPick)
+                    .environmentObject(userViewModel)
+                    .preferredColorScheme(colorScheme())
             } else {
                 StartView(isCherryPick: $isCherryPick)
                     .environmentObject(userViewModel)
