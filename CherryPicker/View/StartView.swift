@@ -43,6 +43,7 @@ struct StartView: View {
                 
                 Spacer()
             }
+            .navigationTitle("")
             .modifier(BackgroundModifier())
             .toolbar {
                 ToolbarItem {

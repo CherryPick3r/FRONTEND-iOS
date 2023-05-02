@@ -246,7 +246,7 @@ struct CherryPickView: View {
                     Text(title)
                         .font(.subheadline)
                         .fontWeight(.bold)
-                        .foregroundColor(Color("background-shape-color"))
+                        .foregroundColor(.white)
                     
                     Spacer()
                     
