@@ -273,6 +273,7 @@ struct RestaurantDetailView: View {
     func closeButton() -> some View {
         Button {
             withAnimation(.easeInOut) {
+                showContents = false
                 isCherryPick = false
                 isCherryPickDone = false
             }
