@@ -11,8 +11,6 @@ import SwiftUI
 struct CherryPickerApp: App {
     @StateObject var userViewModel = UserViewModel()
     
-    @State private var isCherryPick = false
-    
     init() {
         let appearance = UINavigationBarAppearance()
         appearance.titleTextAttributes = [.foregroundColor: UIColor(Color("main-point-color"))]
@@ -22,15 +20,9 @@ struct CherryPickerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            if isCherryPick {
-                CherryPickView(isCherryPick: $isCherryPick, cherryPickMode: .cherryPick)
-                    .environmentObject(userViewModel)
-                    .preferredColorScheme(colorScheme())
-            } else {
-                StartView(isCherryPick: $isCherryPick)
-                    .environmentObject(userViewModel)
-                    .preferredColorScheme(colorScheme())
-            }
+            AppView()
+                .environmentObject(userViewModel)
+                .preferredColorScheme(colorScheme())
         }
     }
     

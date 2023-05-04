@@ -55,7 +55,7 @@ struct MenuView: View {
     
     @ViewBuilder
     func menuBackground() -> some View {
-        RoundedRectangle(cornerRadius: 20)
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
             .fill(Color("background-shape-color"))
             .shadow(color: .black.opacity(0.1), radius: 2)
     }
@@ -224,10 +224,10 @@ struct MenuView: View {
             .padding()
             .background {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 20)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .fill(Color("background-shape-color"))
                     
-                    RoundedRectangle(cornerRadius: 20)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .strokeBorder(Color("main-point-color"), lineWidth: 2)
                 }
                 .shadow(color: .black.opacity(0.1), radius: 2)
@@ -252,7 +252,7 @@ struct MenuView: View {
             }
             .padding()
             .background {
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(Color("main-point-color"))
                     .shadow(color: .black.opacity(0.1), radius: 2)
             }
