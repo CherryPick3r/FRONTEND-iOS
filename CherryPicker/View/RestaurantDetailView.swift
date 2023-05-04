@@ -245,6 +245,7 @@ struct RestaurantDetailView: View {
     func restartButton() -> some View {
         Button {
             withAnimation(.easeInOut) {
+                showContents = false
                 isCherryPick = true
                 isCherryPickDone = false
             }
