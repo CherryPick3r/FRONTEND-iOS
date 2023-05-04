@@ -19,10 +19,9 @@ struct StartView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Spacer()
-                
                 Text("🍒")
                     .font(.system(size: 100))
+                    .padding(.top, 50)
                 
                 Spacer()
                 
@@ -40,9 +39,9 @@ struct StartView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("secondary-text-color-strong"))
-                
-                Spacer()
+                    .padding(.bottom, 50)
             }
+            .navigationTitle("")
             .modifier(BackgroundModifier())
             .toolbar {
                 ToolbarItem {
@@ -84,16 +83,17 @@ struct StartView: View {
             }
             .background {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 20)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .fill(Color("background-shape-color"))
                     
-                    RoundedRectangle(cornerRadius: 20)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .strokeBorder(Color("main-point-color"), lineWidth: 2)
                     .shadow(radius: 10)
                 }
             }
         }
-        .padding(70)
+        .padding(.horizontal, 70)
+        .padding(.vertical, 40)
     }
     
     @ViewBuilder

@@ -12,59 +12,118 @@ enum CherryPickMode {
     case cherryPick
 }
 
+enum UserSelection {
+    case none
+    case like
+    case hate
+}
+
 struct CherryPickView: View {
     @Binding var isCherryPick: Bool
+    @Binding var isCherryPickDone: Bool
     
     @State var cherryPickMode: CherryPickMode
+    
     @State private var showRestaurantCard = false
     @State private var showIndicators = false
+    @State private var likeAndHateButtonsScale: CGFloat = 1.2
+    @State private var likeAndHateButtonsSubScale: CGFloat = 1.1
+    @State private var likeThumbOffset: CGFloat = 10
+    @State private var hateThumbOffset: CGFloat = -10
+    @State private var cardOffsetX: CGFloat = .zero
+    @State private var cardOffsetY: CGFloat = .zero
+    @State private var cardSize = 1.0
+    @State private var userSelection: UserSelection = .none
+    @State private var indicatorsOpacity = 1.0
+    
+    //임시용
+    @State private var isBookmarked = false
+    @State private var cardCount = 3
+    @State private var isLoading = false
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Spacer()
+            GeometryReader { reader in
+                let height = reader.size.height == 551 ?  reader.size.height / 11 * 10 : reader.size.height / 6 * 5
+                let width = reader.size.width / 4 * 2.8
                 
-                ZStack {
-                    likeAndHateButtons()
+                VStack {
+                    Spacer()
                     
-                    if showRestaurantCard {
-                        restaurantCard()
-                            .transition(.move(edge: .bottom))
+                    if !isLoading {
+                        //                    HStack {
+                        //                        Spacer()
+                        //
+                        ZStack {
+                            likeAndHateButtons()
+                                .opacity(indicatorsOpacity)
+                            
+                            if showRestaurantCard {
+                                restaurantCard(width: width, height: height)
+                                    .frame(width: width)
+                                    .transition(.move(edge: .bottom))
+                            }
+                        }
+                        .frame(height: height)
+                        
+                        //                        Spacer()
+                        //                    }
+                        
+                        Spacer()
+                        
+                        if showIndicators {
+                            Text("스와이프로 취향을 알려주세요!")
+                                .fontWeight(.bold)
+                                .foregroundColor(Color("secondary-text-color-strong"))
+                                .opacity(indicatorsOpacity)
+                        }
+                    } else {
+                        HStack {
+                            Spacer()
+                            
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .controlSize(.large)
+                            
+                            Spacer()
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .modifier(BackgroundModifier())
+                .navigationTitle(cherryPickMode == .cherryPick ? "CherryPicker" : "초기취향 선택")
+                .toolbar {
+                    ToolbarItem {
+                        Button {
+                            withAnimation(.easeInOut) {
+                                isCherryPick = false
+                            }
+                        } label: {
+                            Label("닫기", systemImage: "xmark.circle.fill")
+                                .font(.title2)
+                                .shadow(color: .black.opacity(0.15), radius: 5)
+                        }
+                        
                     }
                 }
-                
-                Spacer()
-                
-                if showIndicators {
-                    Text("스와이프로 취향을 알려주세요!")
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("secondary-text-color-strong"))
+                .onAppear() {
+                    withAnimation(.spring()) {
+                        showRestaurantCard = true
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation(.easeInOut) {
+                            showIndicators = true
+                        }
+                    }
                 }
-                
-                Spacer()
-            }
-            .modifier(BackgroundModifier())
-            .navigationTitle(cherryPickMode == .cherryPick ? "CherryPicker" : "초기취향 선택")
-            .toolbar {
-                ToolbarItem {
-                    Button {
+                .onChange(of: cardCount) { newValue in
+                    if newValue == 0 {
                         withAnimation(.easeInOut) {
                             isCherryPick = false
+                            isCherryPickDone = true
                         }
-                    } label: {
-                        Label("닫기", systemImage: "xmark.circle.fill")
-                    }
-                    
-                }
-            }
-            .onAppear() {
-                withAnimation(.spring()) {
-                    showRestaurantCard = true
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    withAnimation(.easeInOut) {
-                        showIndicators = true
                     }
                 }
             }
@@ -90,13 +149,34 @@ struct CherryPickView: View {
                         Color("main-point-color-weak")
                     ], startPoint: isLikeButton ? .top : .bottom, endPoint: isLikeButton ? .bottom : .top)
                         .opacity(0.7))
+                    .scaleEffect(likeAndHateButtonsSubScale)
+                    .animation(Animation.spring(dampingFraction: 1.5).repeatForever(autoreverses: true), value: likeAndHateButtonsSubScale)
+                    .onAppear {
+                        self.likeAndHateButtonsSubScale = 1.0
+                    }
                 
                 Circle()
                     .fill(Color("background-shape-color"))
                     .padding(7)
+                    .scaleEffect(likeAndHateButtonsScale)
+                    .animation(Animation.spring(dampingFraction: 1.5).repeatForever(autoreverses: true), value: likeAndHateButtonsScale)
+                    .onAppear {
+                        self.likeAndHateButtonsScale = 1.0
+                    }
                 
                 Image(systemName: thumb)
                     .padding(isLikeButton ? .leading : .trailing, 15)
+                    .offset(x: isLikeButton ? likeThumbOffset : hateThumbOffset)
+                    .animation(Animation.spring(dampingFraction: 0.991).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
+                    .onAppear {
+                        if isLikeButton {
+                            likeThumbOffset = 0
+                        }
+                        
+                        if !isLikeButton {
+                            hateThumbOffset = 0
+                        }
+                    }
             }
             .frame(maxWidth: 80)
             .padding(5)
@@ -119,14 +199,71 @@ struct CherryPickView: View {
     }
     
     @ViewBuilder
-    func restaurantCard() -> some View {
+    func restaurantCard(width: CGFloat, height: CGFloat) -> some View {
+        let isTutorial = cherryPickMode == .tutorial
+        
         ZStack {
-            VStack {
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    Image("restaurant-sample1")
+                        .resizable()
+                        .scaledToFill()
+                    
+                    Image("restaurant-sample2")
+                        .resizable()
+                        .scaledToFill()
+                }
+                .frame(width: width)
+                .frame(height: height / 3)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: .black.opacity(0.25), radius: 5)
+                .padding()
+                
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack {
+                        Text("이이요")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color("main-text-color"))
+                        
+                        Text("일식당")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("main-point-color-weak"))
+                        
+                        Spacer()
+                        
+                        Button {
+                            withAnimation(.easeInOut) {
+                                isBookmarked.toggle()
+                            }
+                        } label: {
+                            Label("즐겨찾기", systemImage: isBookmarked ? "bookmark.fill" : "bookmark")
+                                .labelStyle(.iconOnly)
+                                .font(.title2)
+                        }
+                    }
+                    
+                    Text("식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"")
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("secondary-text-color-strong"))
+                    
+                }
+                .padding(.horizontal)
+                
                 Spacer()
             }
-            .blur(radius: cherryPickMode == .tutorial ? 30 : 0)
+            .blur(radius: isTutorial ? 10 : 0)
+            .overlay {
+                if isTutorial {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color("background-shape-color"))
+                        .opacity(0.8)
+                }
+            }
             
-            if cherryPickMode == .tutorial {
+            if isTutorial {
                 VStack(spacing: 15) {
                     Text("지금은 초기취향 선택 중 이에요")
                     
@@ -146,69 +283,92 @@ struct CherryPickView: View {
             VStack {
                 Spacer()
                 
-                keywordTags()
-                    .frame(height: 240)
+                KeywordTagsView()
+                    .frame(height: height / 2 - 50)
             }
             .padding()
         }
-        .frame(width: 290, height: 510)
         .background {
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color("background-shape-color"))
                 .shadow(color: .black.opacity(0.15), radius: 5)
         }
-    }
-    
-    @ViewBuilder
-    func keywordTagGauge(title: String, value: CGFloat) -> some View {
-        GeometryReader { reader in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color("main-point-color-weak"))
-                    .frame(width: reader.size.width)
-                
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color("main-point-color"))
-                    .frame(width: reader.size.width * (value / 1200))
-                
-                HStack {
-                    Text(title)
-                        .font(.subheadline)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("background-shape-color"))
+        .padding(.horizontal, 45)
+        .offset(x: cardOffsetX, y: cardOffsetY)
+        .scaleEffect(cardSize)
+        .gesture(
+            DragGesture()
+                .onChanged({ drag in
+                    let moveX = drag.translation.width
                     
-                    Spacer()
+                    cardOffsetX = moveX
+                    cardOffsetY = drag.translation.height / 10
                     
-                    Text("\(Int(round(value)))")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color"))
-                }
-                .padding(10)
+                    withAnimation(.spring()) {
+                        cardSize = 0.9
+                    }
+                    
+                    indicatorsOpacity = moveX > 0 ? (200 - moveX) / 200 : (-200 - moveX) / -200
+                    
+                    if drag.translation.width > 200 {
+                        userSelection = .like
+                    } else if drag.translation.width < -200 {
+                        userSelection = .hate
+                    } else {
+                        userSelection = .none
+                    }
+                })
+                .onEnded({ drag in
+                    withAnimation(.spring()) {
+                        if userSelection != .none {
+                            cardOffsetX = userSelection == .like ? 500 : -500
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                withAnimation(.spring()) {
+                                    showRestaurantCard = false
+                                }
+                                
+                                withAnimation(.easeInOut) {
+                                    isLoading = true
+                                }
+                                
+                                cardOffsetX = .zero
+                                cardOffsetY = .zero
+                            }
+                            
+                            cardCount -= 1
+                        } else {
+                            cardOffsetX = .zero
+                            cardOffsetY = .zero
+                            
+                            withAnimation(.easeInOut) {
+                                indicatorsOpacity = 1.0
+                            }
+                        }
+                        
+                        cardSize = 1.0
+                    }
+                })
+        )
+        .onDisappear() {
+            withAnimation(.easeInOut) {
+                indicatorsOpacity = 1.0
+                
+                //임시용
+                isLoading = false
+                isBookmarked = false
             }
-        }
-    }
-    
-    @ViewBuilder
-    func keywordTags() -> some View {
-        VStack(spacing: 10) {
             
-            keywordTagGauge(title: "음식이 맛있어요", value: 935)
-            
-            keywordTagGauge(title: "특별한 메뉴가 있어요", value: 409)
-            
-            keywordTagGauge(title: "재료가 신선해요", value: 376)
-            
-            keywordTagGauge(title: "친절해요", value: 348)
-            
-            keywordTagGauge(title: "혼밥하기 좋아요", value: 121)
+            withAnimation(.spring()) {
+                showRestaurantCard = true
+            }
         }
     }
 }
 
 struct CherryPickView_Previews: PreviewProvider {
     static var previews: some View {
-        CherryPickView(isCherryPick: .constant(true), cherryPickMode: .tutorial)
+        CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), cherryPickMode: .cherryPick)
             .tint(Color("main-point-color"))
     }
 }
