@@ -301,6 +301,8 @@ struct CherryPickView: View {
                 .onChanged({ drag in
                     let moveX = drag.translation.width
                     
+                    print(moveX)
+                    
                     cardOffsetX = moveX
                     cardOffsetY = drag.translation.height / 10
                     

@@ -10,12 +10,18 @@ import SwiftUI
 struct RestaurantDetailView: View {
     @Namespace var heroEffect
     
+    @Environment(\.colorScheme) var colorScheme
+    
     @Binding var isCherryPick: Bool
     @Binding var isCherryPickDone: Bool
     
     @State private var isDetailInformation = false
-    @State private var showContents = false
+    @State private var showDetailInformation = false
+    @State private var showInformation = false
+    @State private var showIndicators = false
     @State private var showImages = false
+    @State private var informationOffsetY = CGFloat.zero
+    @State private var imageBlur = 0.0
     
     //임시
     @State private var imagePage = 0
@@ -25,45 +31,57 @@ struct RestaurantDetailView: View {
             let height = reader.size.height
             
             ZStack {
-                Image("restaurant-sample1")
-                    .resizable()
-                    .scaledToFill()
-                    .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
-                    .frame(width: reader.size.width)
-                    .overlay {
-                        ZStack {
-                            LinearGradient(colors: [
-                                Color("main-point-color").opacity(0),
-                                Color("main-point-color").opacity(0.1),
-                                Color("main-point-color").opacity(0.3),
-                                Color("main-point-color").opacity(0.5),
-                                Color("main-point-color").opacity(0.8),
-                                Color("main-point-color").opacity(1)
-                            ], startPoint: .top, endPoint: .bottom)
-                            .opacity(0.10)
-                            
-                            VStack {
-                                LinearGradient(colors: [
-                                    Color.black.opacity(1),
-                                    Color.black.opacity(0)
-                                ], startPoint: .top, endPoint: .bottom)
-                                .opacity(0.3)
-                                .frame(height: 100)
+                if !showImages {
+                    Image("restaurant-sample1")
+                        .resizable()
+                        .scaledToFill()
+                        .overlay {
+                            ZStack {
+                                if !isDetailInformation {
+                                    LinearGradient(colors: [
+                                        Color("main-point-color").opacity(0),
+                                        Color("main-point-color").opacity(0.1),
+                                        Color("main-point-color").opacity(0.3),
+                                        Color("main-point-color").opacity(0.5),
+                                        Color("main-point-color").opacity(0.8),
+                                        Color("main-point-color").opacity(1)
+                                    ], startPoint: .top, endPoint: .bottom)
+                                    .opacity(0.10)
+                                    
+                                    VStack {
+                                        LinearGradient(colors: [
+                                            Color.black.opacity(1),
+                                            Color.black.opacity(0)
+                                        ], startPoint: .top, endPoint: .bottom)
+                                        .opacity(0.3)
+                                        .frame(height: 100)
+                                        
+                                        Spacer()
+                                    }
+                                }
                                 
-                                Spacer()
+                                Color("background-color")
+                                    .opacity(0.3 * (imageBlur / 100))
                             }
                         }
-                    }
-                    .onTapGesture {
-                        withAnimation(.spring()) {
-                            showImages = true
-                            showContents = false
+                        .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
+                        .blur(radius: 20 * imageBlur / 100)
+                        .onTapGesture {
+                            if !isDetailInformation {
+                                withAnimation(.spring()) {
+                                    showInformation = false
+                                    showIndicators = false
+                                    showImages = true
+                                }
+                            }
                         }
-                    }
-
+                        .frame(width: reader.size.width)
+                } else {
+                    Color("background-color")
+                }
                 
                 VStack {
-                    if showContents {
+                    if showIndicators {
                         HStack {
                             Spacer()
                             
@@ -84,29 +102,36 @@ struct RestaurantDetailView: View {
                     
                     Spacer()
                     
-                    if showContents {
-                        information()
-                            .transition(.move(edge: .bottom))
-                    }
-                }
-                .offset(y: height == 647 || height == 716 ? 15 : 0)
-                .overlay {
-                    if showContents {
+                    if showIndicators {
                         HStack {
                             Spacer()
                             
                             toolButtons()
                         }
+                        .padding(.bottom)
+                        .offset(y: informationOffsetY)
                         .transition(.move(edge: .trailing))
                     }
+                    
+                    if showInformation {
+                        information(height: height - (reader.safeAreaInsets.top + reader.safeAreaInsets.bottom + 30))
+                            .transition(.move(edge: .bottom))
+                            
+                    }
+                    
+                    if isDetailInformation {
+                        Spacer()
+                    }
+                }
+                .offset(y: height == 647 || height == 716 ? 15 : 0)
+            }
+            .onAppear() {
+                withAnimation(.spring()) {
+                    showInformation = true
+                    showIndicators = true
                 }
             }
             .ignoresSafeArea()
-            .onAppear() {
-                withAnimation(.spring()) {
-                    showContents = true
-                }
-            }
             .overlay {
                 if showImages {
                     images()
@@ -116,113 +141,234 @@ struct RestaurantDetailView: View {
     }
     
     @ViewBuilder
-    func information() -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(alignment: .bottom) {
-                Text("이이요")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-text-color"))
-                
-                Text("일식당")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color("main-point-color-weak"))
-                    .padding(.bottom, 5)
-                
-                Spacer()
-            }
-            .padding([.horizontal, .top], 20)
-            
-            Text("식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"")
-                .font(.subheadline)
-                .fontWeight(.bold)
-                .foregroundColor(Color("secondary-text-color-strong"))
-                .padding(.horizontal, 20)
-            
-            VStack(alignment: .leading, spacing: isDetailInformation ? 15 : 5) {
-                Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color("main-point-color-weak"))
-                
-                if !isDetailInformation {
-                    HStack {
-                        Label("11:50 ~ 22:00", systemImage: "clock")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color("main-point-color-weak"))
-                        
-                        Text("휴무 : 일요일")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color("main-point-color-strong"))
-                    }
-                    
-                    
-                } else {
-                    
-                }
-            }
-            .padding(.horizontal, 20)
-            
-            if !isDetailInformation {
-                representativeMenu()
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 15)
-            } else {
-                
-            }
+    func information(height: CGFloat) -> some View {
+        let isNoneNotchiPhone = height == 597
+
+        VStack(alignment: .leading, spacing: isNoneNotchiPhone ? 10 : 15) {
+            informationContent(height: height, detailMenuDisable: isNoneNotchiPhone)
         }
+        .onAppear() {
+            print(height)
+        }
+        .padding(isNoneNotchiPhone ? 15 : 20)
+        .padding(.bottom, isDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
         .background {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color("background-shape-color"))
                 .shadow(color: .black.opacity(0.25), radius: 5)
-                .overlay {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            
-                            Text("총 1093명이 체리픽 받았어요!")
-                                .font(.subheadline)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color("shape-light-color"))
-                                .padding(.horizontal)
-                                .padding(.vertical, 10)
-                                .background {
-                                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                        .fill(Color("main-point-color"))
-                                        .shadow(color: .black.opacity(0.25), radius: 5)
-                                }
-                                .padding(.trailing)
-                        }
-                        
-                        Spacer()
-                    }
-                    .offset(y: -20)
-                }
         }
+        .overlay {
+            VStack {
+                HStack {
+                    Spacer()
+                    
+                    Text("총 1093명이 체리픽 받았어요!")
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("shape-light-color"))
+                        .padding(.horizontal)
+                        .padding(.vertical, 10)
+                        .background {
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .fill(Color("main-point-color"))
+                                .shadow(color: .black.opacity(0.25), radius: 5)
+                        }
+                        .padding(.trailing)
+                }
+                
+                Spacer()
+            }
+            .offset(y: -20)
+        }
+        .padding(.top)
+        .offset(y: informationOffsetY)
+        .gesture(
+            DragGesture()
+                .onChanged({ drag in
+                    let moveY = drag.translation.height
+                    print("offset: \(informationOffsetY)")
+                    
+                    if showDetailInformation {
+                        if moveY < 0 {
+                            informationOffsetY = moveY / 10
+                        } else {
+                            informationOffsetY = moveY
+                            imageBlur -= imageBlur > 0 ? 1 : 0
+                        }
+                    } else {
+                        if moveY > 0 {
+                            if isDetailInformation {
+                                informationOffsetY = moveY
+                                imageBlur += imageBlur < 100 ? 1 : 0
+                            } else {
+                                informationOffsetY = moveY / 10
+                            }
+                        } else {
+                            informationOffsetY = moveY
+                            
+                            if moveY < 0 {
+                                withAnimation(.spring()) {
+                                    showIndicators = false
+                                }
+                                
+                                isDetailInformation = true
+                                
+                                
+                            } else {
+                                if !isDetailInformation {
+                                    imageBlur = -moveY
+                                }
+                            }
+                        }
+                    }
+                })
+                .onEnded({ drag in
+                    if isDetailInformation {
+                        if showDetailInformation {
+                            if informationOffsetY > 100 {
+                                withAnimation(.spring()) {
+                                    showIndicators = true
+                                    showDetailInformation = false
+                                    informationOffsetY = .zero
+                                    isDetailInformation = false
+                                }
+                                
+                                withAnimation(.easeInOut) {
+                                    imageBlur = 0
+                                }
+                            } else {
+                                withAnimation(.spring()) {
+                                    informationOffsetY = .zero
+                                    showIndicators = false
+                                    showDetailInformation = true
+                                    isDetailInformation = true
+                                }
+                                
+                                withAnimation(.easeInOut) {
+                                    imageBlur = 150
+                                }
+                            }
+                        } else {
+                            if informationOffsetY < 350 {
+                                withAnimation(.spring()) {
+                                    showDetailInformation = true
+                                }
+                                
+                                withAnimation(.easeInOut) {
+                                    isDetailInformation = true
+                                    imageBlur = 150
+                                }
+                                
+                                withAnimation(.spring()) {
+                                    informationOffsetY = .zero
+                                }
+                            } else {
+                                withAnimation(.spring()) {
+                                    showIndicators = true
+                                    informationOffsetY = .zero
+                                    isDetailInformation = false
+                                }
+                                
+                                withAnimation(.easeInOut) {
+                                    imageBlur = 0
+                                }
+                            }
+                        }
+                    } else {
+                        withAnimation(.spring()) {
+                            informationOffsetY = .zero
+                        }
+                    }
+                })
+        )
         .padding(.horizontal)
     }
     
     @ViewBuilder
-    func representativeMenu() -> some View {
-        VStack(spacing: 15) {
+    func informationContent(height: CGFloat, detailMenuDisable: Bool) -> some View {
+        HStack(alignment: .bottom) {
+            Text("이이요")
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(Color("main-text-color"))
+            
+            Text("일식당")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(Color("main-point-color-weak"))
+                .padding(.bottom, 5)
+            
+            Spacer()
+        }
+        
+        Text("식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"")
+            .font(.subheadline)
+            .fontWeight(.bold)
+            .foregroundColor(Color("secondary-text-color-strong"))
+        
+        VStack(alignment: .leading, spacing: isDetailInformation ? 15 : 5) {
+            Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
+                .font(.footnote)
+                .fontWeight(.semibold)
+                .foregroundColor(Color("main-point-color-weak"))
+            
+            if !isDetailInformation {
+                HStack {
+                    Label("11:50 ~ 22:00", systemImage: "clock")
+                        .font(.footnote)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("main-point-color-weak"))
+                    
+                    Text("휴무 : 일요일")
+                        .font(.footnote)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("main-point-color-strong"))
+                }
+            } else {
+                detailHours()
+            }
+        }
+        
+        if isDetailInformation {
+            VStack(alignment: .leading) {
+                Text("키워드 태그")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color"))
+                
+                KeywordTagsView()
+                    .frame(height: height / 3)
+            }
+            .padding(.bottom, 5)
+        }
+        
+        representativeMenu(detailMenuDisable: detailMenuDisable)
+    }
+    
+    @ViewBuilder
+    func representativeMenu(detailMenuDisable: Bool) -> some View {
+        VStack(spacing: 10) {
             HStack {
-                Text("대표메뉴")
-                    .font(.subheadline)
+                Text(isDetailInformation ? "메뉴" : "대표메뉴")
+                    .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color"))
                 
                 Spacer()
             }
             
-            VStack(spacing: 0) {
+            VStack(spacing: 10) {
                 menu(title: "초밥(11P)", price: 20000)
                 
                 menu(title: "회덮밥(점심)", price: 13500)
                 
                 menu(title: "이이요 스페셜 카이센동", price: 35000)
+                
+                if isDetailInformation && !detailMenuDisable {
+                    menu(title: "야끼돈부리", price: 16000)
+                    
+                    menu(title: "도미연어덮밥", price: 16500)
+                }
             }
         }
     }
@@ -238,14 +384,80 @@ struct RestaurantDetailView: View {
         }
         .font(.footnote)
         .fontWeight(.semibold)
-        .padding(.bottom, 10)
+    }
+    
+    @ViewBuilder
+    func detailHours() -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("영업시간")
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(Color("main-point-color"))
+            
+            HStack {
+                Group {
+                    hour(week: "월", startTime: "11:50", endTime: "22:00")
+                    
+                    Spacer()
+                }
+                
+                Group {
+                    hour(week: "화", startTime: "11:50", endTime: "22:00")
+                    
+                    Spacer()
+                }
+                
+                Group {
+                    hour(week: "수", startTime: "11:50", endTime: "22:00")
+                    
+                    Spacer()
+                }
+                
+                Group {
+                    hour(week: "목", startTime: "11:50", endTime: "22:00")
+                    
+                    Spacer()
+                }
+                
+                Group {
+                    hour(week: "금", startTime: "11:50", endTime: "22:00")
+                    
+                    Spacer()
+                }
+                
+                Group {
+                    hour(week: "토", startTime: "11:50", endTime: "22:00")
+                    
+                    Spacer()
+                }
+                
+                hour(week: "일")
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func hour(week: String, startTime: String? = nil, endTime: String? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(week)
+            
+            Text(startTime ?? "정기")
+                .foregroundColor(startTime == nil ? Color("main-point-color-strong") : Color("main-point-color"))
+            
+            Text(endTime ?? "휴무")
+                .foregroundColor(endTime == nil ? Color("main-point-color-strong") : Color("main-point-color"))
+        }
+        .font(.caption)
+        .fontWeight(.semibold)
+        .foregroundColor(Color("main-point-color"))
     }
     
     @ViewBuilder
     func restartButton() -> some View {
         Button {
             withAnimation(.easeInOut) {
-                showContents = false
+                showInformation = false
+                showIndicators = false
                 isCherryPick = true
                 isCherryPickDone = false
             }
@@ -274,7 +486,8 @@ struct RestaurantDetailView: View {
     func closeButton() -> some View {
         Button {
             withAnimation(.easeInOut) {
-                showContents = false
+                showInformation = false
+                showIndicators = false
                 isCherryPick = false
                 isCherryPickDone = false
             }
@@ -334,12 +547,13 @@ struct RestaurantDetailView: View {
                 Button {
                     withAnimation(.spring()) {
                         showImages = false
-                        showContents = true
+                        showInformation = true
+                        showIndicators = true
                     }
                 } label: {
                     Label("닫기", systemImage: "xmark.circle.fill")
                         .labelStyle(.iconOnly)
-                        .font(.title)
+                        .font(.largeTitle)
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.25), radius: 5)
                 }
@@ -371,7 +585,7 @@ struct RestaurantDetailView: View {
                         } label: {
                             Label("이전", systemImage: "chevron.backward.circle.fill")
                                 .labelStyle(.iconOnly)
-                                .font(.title)
+                                .font(.largeTitle)
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.25), radius: 5)
                         }
@@ -387,7 +601,7 @@ struct RestaurantDetailView: View {
                         } label: {
                             Label("다음", systemImage: "chevron.forward.circle.fill")
                                 .labelStyle(.iconOnly)
-                                .font(.title)
+                                .font(.largeTitle)
                                 .foregroundColor(.white)
                                 .shadow(color: .black.opacity(0.25), radius: 5)
                         }
