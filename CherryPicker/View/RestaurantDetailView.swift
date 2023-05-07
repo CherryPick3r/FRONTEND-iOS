@@ -100,6 +100,7 @@ struct RestaurantDetailView: View {
                             }
                         }
                         .padding(.top, reader.safeAreaInsets.top)
+                        .padding(.bottom, 20)
                         .transition(.move(edge: .top))
                     }
                     
@@ -619,7 +620,7 @@ struct RestaurantDetailView: View {
                         detailImageOffsetY = moveY
                         
                         if detailImageOffsetY != .zero {
-                            detailImageBackgroundOpacity = moveY > 0 ? (150 - moveY) / 150 : (150 + moveY) / -150
+                            detailImageBackgroundOpacity = moveY > 0 ? (500 - moveY) / 500 : (500 + moveY) / 500
                             
                             withAnimation(.spring()) {
                                 showInformation = true

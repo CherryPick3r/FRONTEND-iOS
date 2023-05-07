@@ -93,7 +93,7 @@ struct MenuView: View {
             }
             
             NavigationLink {
-                
+                UserPreferenceView()
             } label: {
                 HStack {
                     Text("취향분석")
