@@ -22,6 +22,9 @@ struct RestaurantDetailView: View {
     @State private var showImages = false
     @State private var informationOffsetY = CGFloat.zero
     @State private var imageBlur = 0.0
+    @State private var detailImageOffsetY = CGFloat.zero
+    @State private var detailImageBackgroundOpacity = 1.0
+    
     
     //임시
     @State private var imagePage = 0
@@ -61,7 +64,7 @@ struct RestaurantDetailView: View {
                                 }
                                 
                                 Color("background-color")
-                                    .opacity(0.3 * (imageBlur / 100))
+                                    .opacity(0.1 * (imageBlur / 100))
                             }
                         }
                         .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
@@ -186,7 +189,6 @@ struct RestaurantDetailView: View {
             DragGesture()
                 .onChanged({ drag in
                     let moveY = drag.translation.height
-                    print("offset: \(informationOffsetY)")
                     
                     if showDetailInformation {
                         if moveY < 0 {
@@ -212,8 +214,6 @@ struct RestaurantDetailView: View {
                                 }
                                 
                                 isDetailInformation = true
-                                
-                                
                             } else {
                                 if !isDetailInformation {
                                     imageBlur = -moveY
@@ -442,14 +442,14 @@ struct RestaurantDetailView: View {
             Text(week)
             
             Text(startTime ?? "정기")
-                .foregroundColor(startTime == nil ? Color("main-point-color-strong") : Color("main-point-color"))
+                .foregroundColor(startTime == nil ? Color("main-point-color-strong") : Color("main-text-color"))
             
             Text(endTime ?? "휴무")
-                .foregroundColor(endTime == nil ? Color("main-point-color-strong") : Color("main-point-color"))
+                .foregroundColor(endTime == nil ? Color("main-point-color-strong") : Color("main-text-color"))
         }
         .font(.caption)
         .fontWeight(.semibold)
-        .foregroundColor(Color("main-point-color"))
+        .foregroundColor(Color("main-text-color"))
     }
     
     @ViewBuilder
@@ -558,6 +558,7 @@ struct RestaurantDetailView: View {
                         .shadow(color: .black.opacity(0.25), radius: 5)
                 }
                 .padding()
+                .opacity(detailImageBackgroundOpacity)
 
             }
             Spacer()
@@ -609,10 +610,48 @@ struct RestaurantDetailView: View {
                 }
                 .padding()
             }
+            .offset(y: detailImageOffsetY)
+            .gesture(
+                DragGesture()
+                    .onChanged({ drag in
+                        let moveY = drag.translation.height
+                        
+                        detailImageOffsetY = moveY
+                        
+                        if detailImageOffsetY != .zero {
+                            detailImageBackgroundOpacity = moveY > 0 ? (150 - moveY) / 150 : (150 + moveY) / -150
+                            
+                            withAnimation(.spring()) {
+                                showInformation = true
+                                showIndicators = true
+                            }
+                        }
+                    })
+                    .onEnded({ drag in
+                        if !(-150...150).contains(drag.translation.height) {
+                            withAnimation(.spring()) {
+                                showImages = false
+                            }
+                        } else {
+                            withAnimation(.spring()) {
+                                showInformation = false
+                                showIndicators = false
+                            }
+                        }
+                        
+                        withAnimation(.spring()) {
+                            detailImageOffsetY = .zero
+                        }
+                        
+                        withAnimation(.easeInOut) {
+                            detailImageBackgroundOpacity = 1.0
+                        }
+                    })
+            )
             
             Spacer()
         }
-        .background(.black)
+        .background(.black.opacity(detailImageBackgroundOpacity))
     }
 }
 
