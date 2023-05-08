@@ -254,7 +254,7 @@ struct MenuView: View {
             .background {
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(Color("main-point-color"))
-                    .shadow(color: .black.opacity(0.1), radius: 2)
+                    .shadow(color: .black.opacity(0.1), radius: 5)
             }
         }
         .padding()

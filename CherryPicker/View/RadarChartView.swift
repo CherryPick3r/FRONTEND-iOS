@@ -17,7 +17,6 @@ struct RadarChartGrid: Shape {
         var path = Path()
         
         for category in 1...categories {
-            path.move(to: CGPoint(x: rect.midX, y: rect.midY))
             path.addLine(to: CGPoint(x: rect.midX + cos(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * radius, y: rect.midY + sin(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * radius))
         }
         
@@ -78,6 +77,8 @@ struct RadarChartView: View {
         Color("drunkard-tag-color")
     ]
     
+    @State private var dataLoad = false
+    
     init(data: [Double], gridColor: Color, dataColor: Color, gridLineWidth: CGFloat, dataLineWidth: CGFloat, labels: [String]) {
         self.data = data
         self.gridColor = gridColor
@@ -106,17 +107,30 @@ struct RadarChartView: View {
                         .fontWeight(.semibold)
                         .position(x: point.x, y: point.y)
                         .foregroundColor(isMax ? tagColors[index] : Color("secondary-text-color-weak"))
-                            .shadow(color: .black.opacity(isMax ? 0.1 : 0), radius: 5)
+                            .shadow(color: .black.opacity(isMax ? 0.25 : 0), radius: 5)
                 }
                 
-                RadarChartGrid(categories: data.count, divisions: 10)
-                    .stroke(gridColor, lineWidth: gridLineWidth)
+                RadarChartGrid(categories: data.count, divisions: 6)
+                    .stroke(style: StrokeStyle(lineWidth: gridLineWidth, dash: [5]))
+                    .foregroundColor(gridColor)
                 
                 RadarChartPath(data: data)
-                    .fill(dataColor)
+                    .fill(dataColor.opacity(0.5))
+                    .frame(height: dataLoad ? nil : 0)
+                    .onAppear() {
+                        withAnimation(.spring(response: 1.5)) {
+                            dataLoad = true
+                        }
+                    }
                 
                 RadarChartPath(data: data)
                     .stroke(dataColor, lineWidth: dataLineWidth)
+                    .frame(height: dataLoad ? nil : 0)
+                    .onAppear() {
+                        withAnimation(.spring(response: 1.5)) {
+                            dataLoad = true
+                        }
+                    }
             }
         }
         
