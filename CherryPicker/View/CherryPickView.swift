@@ -51,9 +51,6 @@ struct CherryPickView: View {
                     Spacer()
                     
                     if !isLoading {
-                        //                    HStack {
-                        //                        Spacer()
-                        //
                         ZStack {
                             likeAndHateButtons()
                                 .opacity(indicatorsOpacity)
@@ -65,9 +62,6 @@ struct CherryPickView: View {
                             }
                         }
                         .frame(height: height)
-                        
-                        //                        Spacer()
-                        //                    }
                         
                         Spacer()
                         
@@ -154,6 +148,7 @@ struct CherryPickView: View {
                     .onAppear {
                         self.likeAndHateButtonsSubScale = 1.0
                     }
+                    
                 
                 Circle()
                     .fill(Color("background-shape-color"))
@@ -326,6 +321,11 @@ struct CherryPickView: View {
                             cardOffsetX = userSelection == .like ? 500 : -500
                             
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                likeAndHateButtonsScale = 1.2
+                                likeAndHateButtonsSubScale = 1.1
+                                likeThumbOffset = 10.0
+                                hateThumbOffset = -10.0
+                                
                                 withAnimation(.spring()) {
                                     showRestaurantCard = false
                                 }
