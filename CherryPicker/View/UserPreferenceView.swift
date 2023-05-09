@@ -27,32 +27,43 @@ struct UserPreferenceView: View {
     @State private var tagOffsetX = CGFloat.zero
     
     var body: some View {
-        ScrollView {
-            VStack {
-                HStack {
-                    Text("체리체리1q2w3e님은,")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color"))
-                    
-                    Spacer()
-                }
-                .padding(.vertical)
-                
-                LazyVGrid(columns: columns) {
-                    userInitialPreference()
-                    
-                    userType()
-                    
-                    weeklyStats()
-                    
-                    weeklyTag()
-                }
+        ViewThatFits(in: .vertical) {
+            content()
+            
+            ScrollView {
+                content()
             }
-            .padding(.horizontal)
         }
         .background(Color("background-color"))
         .navigationTitle("취향분석")
+    }
+    
+    @ViewBuilder
+    func content() -> some View {
+        VStack {
+            HStack {
+                Text("체리체리1q2w3e님은,")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color"))
+                
+                Spacer()
+            }
+            .padding(.vertical)
+            
+            LazyVGrid(columns: columns) {
+                userInitialPreference()
+                
+                userType()
+                
+                weeklyStats()
+                
+                weeklyTag()
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal)
     }
     
     @ViewBuilder
@@ -201,7 +212,7 @@ struct UserPreferenceView: View {
                         Spacer()
                         
                         NavigationLink {
-                            
+                            RestaurantListView(listMode: .cherryPick)
                         } label: {
                             Text("더보기")
                                 .font(.footnote)
@@ -232,7 +243,7 @@ struct UserPreferenceView: View {
                         Spacer()
                         
                         NavigationLink {
-                            
+                            RestaurantListView(listMode: .bookmark)
                         } label: {
                             Text("더보기")
                                 .font(.footnote)
@@ -335,6 +346,7 @@ struct UserPreferenceView: View {
                     }
                 }
             }
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .background {
                 contentBackground()
             }

@@ -11,9 +11,12 @@ struct RestaurantDetailView: View {
     @Namespace var heroEffect
     
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var dismiss
     
     @Binding var isCherryPick: Bool
     @Binding var isCherryPickDone: Bool
+    
+    private let isResultView: Bool
     
     @State private var isDetailInformation = false
     @State private var showDetailInformation = false
@@ -24,10 +27,18 @@ struct RestaurantDetailView: View {
     @State private var imageBlur = 0.0
     @State private var detailImageOffsetY = CGFloat.zero
     @State private var detailImageBackgroundOpacity = 1.0
-    
+    @State private var opacity = 1.0
+    @State private var topButtonsOffsetY = CGFloat.zero
+    @State private var toolButtonsOffsetX = CGFloat.zero
     
     //임시
     @State private var imagePage = 0
+    
+    init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true) {
+        self._isCherryPick = isCherryPick
+        self._isCherryPickDone = isCherryPickDone
+        self.isResultView = isResultView
+    }
     
     var body: some View {
         GeometryReader { reader in
@@ -35,50 +46,8 @@ struct RestaurantDetailView: View {
             
             ZStack {
                 if !showImages {
-                    Image("restaurant-sample1")
-                        .resizable()
-                        .scaledToFill()
-                        .overlay {
-                            ZStack {
-                                if !isDetailInformation {
-                                    LinearGradient(colors: [
-                                        Color("main-point-color").opacity(0),
-                                        Color("main-point-color").opacity(0.1),
-                                        Color("main-point-color").opacity(0.3),
-                                        Color("main-point-color").opacity(0.5),
-                                        Color("main-point-color").opacity(0.8),
-                                        Color("main-point-color").opacity(1)
-                                    ], startPoint: .top, endPoint: .bottom)
-                                    .opacity(0.10)
-                                    
-                                    VStack {
-                                        LinearGradient(colors: [
-                                            Color.black.opacity(1),
-                                            Color.black.opacity(0)
-                                        ], startPoint: .top, endPoint: .bottom)
-                                        .opacity(0.3)
-                                        .frame(height: 100)
-                                        
-                                        Spacer()
-                                    }
-                                }
-                                
-                                Color("background-color")
-                                    .opacity(0.1 * (imageBlur / 100))
-                            }
-                        }
-                        .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
-                        .blur(radius: 20 * imageBlur / 100)
-                        .onTapGesture {
-                            if !isDetailInformation {
-                                withAnimation(.spring()) {
-                                    showInformation = false
-                                    showIndicators = false
-                                    showImages = true
-                                }
-                            }
-                        }
-                        .frame(width: reader.size.width)
+                    backgroundImage()
+                        .frame(width: reader.size.width, height: height + reader.safeAreaInsets.top + reader.safeAreaInsets.bottom)
                 } else {
                     Color("background-color")
                 }
@@ -88,7 +57,9 @@ struct RestaurantDetailView: View {
                         HStack {
                             Spacer()
                             
-                            restartButton()
+                            if isResultView {
+                                restartButton()
+                            }
                             
                             Spacer()
                         }
@@ -99,9 +70,9 @@ struct RestaurantDetailView: View {
                                 closeButton()
                             }
                         }
+                        .offset(y: topButtonsOffsetY)
                         .padding(.top, reader.safeAreaInsets.top)
-                        .padding(.bottom, 20)
-                        .transition(.move(edge: .top))
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
                     
                     Spacer()
@@ -112,15 +83,15 @@ struct RestaurantDetailView: View {
                             
                             toolButtons()
                         }
+                        .offset(x: toolButtonsOffsetX)
                         .padding(.bottom)
                         .offset(y: informationOffsetY)
-                        .transition(.move(edge: .trailing))
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                     
                     if showInformation {
                         information(height: height - (reader.safeAreaInsets.top + reader.safeAreaInsets.bottom + 30))
-                            .transition(.move(edge: .bottom))
-                            
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     
                     if isDetailInformation {
@@ -129,6 +100,46 @@ struct RestaurantDetailView: View {
                 }
                 .offset(y: height == 647 || height == 716 ? 15 : 0)
             }
+            .modifier(BackgroundModifier())
+            .gesture(
+                DragGesture()
+                    .onChanged({ drag in
+                        let moveX = drag.translation.height
+                        
+                        opacity = (150 - moveX / 10) / 150
+                        
+                        topButtonsOffsetY = -moveX / 10
+                        
+                        toolButtonsOffsetX = moveX / 10
+                        
+                        informationOffsetY = moveX / 10
+                    })
+                    .onEnded({ drag in
+                        if drag.translation.height > 150 {
+                            withAnimation(.easeInOut) {
+                                showInformation = false
+                                showIndicators = false
+                                if isResultView {
+                                    isCherryPick = false
+                                    isCherryPickDone = false
+                                } else {
+                                    dismiss()
+                                }
+                            }
+                        } else {
+                            withAnimation(.easeInOut) {
+                                opacity = 1.0
+                            }
+                            
+                            withAnimation(.spring()) {
+                                topButtonsOffsetY = .zero
+                                toolButtonsOffsetX = .zero
+                                informationOffsetY = .zero
+                            }
+                        }
+                    })
+            )
+            .opacity(opacity)
             .onAppear() {
                 withAnimation(.spring()) {
                     showInformation = true
@@ -142,6 +153,58 @@ struct RestaurantDetailView: View {
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    func imageShadowOverlay() -> some View {
+        ZStack {
+            if !isDetailInformation {
+                LinearGradient(colors: [
+                    Color("main-point-color").opacity(0),
+                    Color("main-point-color").opacity(0.1),
+                    Color("main-point-color").opacity(0.3),
+                    Color("main-point-color").opacity(0.5),
+                    Color("main-point-color").opacity(0.8),
+                    Color("main-point-color").opacity(1)
+                ], startPoint: .top, endPoint: .bottom)
+                .opacity(0.10)
+                
+                VStack {
+                    LinearGradient(colors: [
+                        Color.black.opacity(1),
+                        Color.black.opacity(0)
+                    ], startPoint: .top, endPoint: .bottom)
+                    .opacity(0.3)
+                    .frame(height: 100)
+                    
+                    Spacer()
+                }
+            }
+            
+            Color("background-color")
+                .opacity(0.1 * (imageBlur / 100))
+        }
+    }
+    
+    @ViewBuilder
+    func backgroundImage() -> some View {
+        Image("restaurant-sample1")
+            .resizable()
+            .scaledToFill()
+            .overlay {
+                imageShadowOverlay()
+            }
+            .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
+            .blur(radius: 20 * imageBlur / 100)
+            .onTapGesture {
+                if !isDetailInformation {
+                    withAnimation(.spring()) {
+                        showInformation = false
+                        showIndicators = false
+                        showImages = true
+                    }
+                }
+            }
     }
     
     @ViewBuilder
@@ -184,6 +247,7 @@ struct RestaurantDetailView: View {
             }
             .offset(y: -20)
         }
+        .frame(maxWidth: 500)
         .padding(.top)
         .offset(y: informationOffsetY)
         .gesture(
@@ -489,8 +553,12 @@ struct RestaurantDetailView: View {
             withAnimation(.easeInOut) {
                 showInformation = false
                 showIndicators = false
-                isCherryPick = false
-                isCherryPickDone = false
+                if isResultView {
+                    isCherryPick = false
+                    isCherryPickDone = false
+                } else {
+                    dismiss()
+                }
             }
         } label: {
             Label("닫기", systemImage: "xmark.circle.fill")
@@ -499,6 +567,7 @@ struct RestaurantDetailView: View {
                 .foregroundColor(Color("main-point-color"))
                 .shadow(color: .black.opacity(0.25), radius: 5)
         }
+        .padding(.vertical, 10)
         .padding(.trailing)
     }
     
@@ -531,10 +600,13 @@ struct RestaurantDetailView: View {
         .padding(.vertical)
         .padding(.horizontal, 10)
         .background {
-            Color("main-point-color").opacity(0.3)
-                .shadow(color: .black.opacity(0.25), radius: 3)
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            ZStack {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color("main-point-color").opacity(0.3))
+            }
         }
         .padding()
     }
