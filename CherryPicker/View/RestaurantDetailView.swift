@@ -57,7 +57,9 @@ struct RestaurantDetailView: View {
                         HStack {
                             Spacer()
                             
-                            restartButton()
+                            if isResultView {
+                                restartButton()
+                            }
                             
                             Spacer()
                         }
@@ -565,6 +567,7 @@ struct RestaurantDetailView: View {
                 .foregroundColor(Color("main-point-color"))
                 .shadow(color: .black.opacity(0.25), radius: 5)
         }
+        .padding(.vertical, 10)
         .padding(.trailing)
     }
     

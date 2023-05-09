@@ -54,7 +54,17 @@ struct RestaurantListView: View {
             
             listSortMenu()
             
-            list()
+            ViewThatFits(in: .vertical) {
+                VStack {
+                    list()
+                    
+                    Spacer()
+                }
+                
+                ScrollView {
+                    list()
+                }
+            }
         }
         .modifier(BackgroundModifier())
         .navigationTitle(listMode.rawValue)
@@ -228,14 +238,12 @@ struct RestaurantListView: View {
     
     @ViewBuilder
     func list() -> some View {
-        ScrollView {
-            LazyVGrid(columns: columns) {
-                ForEach(0..<10) { index in
-                    subRestaurant()
-                }
+        LazyVGrid(columns: columns) {
+            ForEach(0..<12, id: \.self) { index in
+                subRestaurant()
             }
-            .padding([.horizontal])
         }
+        .padding([.horizontal])
     }
     
     @ViewBuilder

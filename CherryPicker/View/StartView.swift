@@ -105,67 +105,67 @@ struct StartView: View {
     
     @ViewBuilder
     func signIn() -> some View {
-            VStack {
-                HStack {
-                    Text("로그인이 필요해요")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color"))
-                    
-                    Spacer()
-                }
-                .padding()
-                .padding(.top)
-                
-                SignInWithAppleButton(
-                    onRequest: { request in
-                        // 로그인 요청 시 처리할 코드
-                        
-                        //서버 연결되면 삭제 예정
-                        withAnimation(.easeInOut) {
-                            showSignInView = false
-                            isCherryPick = true
-                        }
-                    },
-                    onCompletion: { result in
-                        // 로그인 결과 처리할 코드
-                        switch result {
-                        case .success(let authResults):
-                            // 인증 결과 처리
-                            break
-                        case .failure(let error):
-                            // 인증 실패 처리
-                            break
-                        }
-                    }
-                )
-                .padding(.horizontal, 30)
-                .padding(.vertical)
-                .frame(height: 80)
-                .cornerRadius(10)
+        VStack {
+            HStack {
+                Text("로그인이 필요해요")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color"))
                 
                 Spacer()
-                
-                Text("혹시 회원이 아니신가요?")
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-text-color"))
-                    .padding()
-                
-                Button {
-                    showSignInView = false
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        showSignUpView = true
-                    }
-                } label: {
-                    Text("회원가입 하러 가기")
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color-weak"))
-                }
-                .padding()
-
             }
-            .background(Color("background-shape-color"))
+            .padding()
+            .padding(.top)
+            
+            SignInWithAppleButton(
+                onRequest: { request in
+                    // 로그인 요청 시 처리할 코드
+                    
+                    //서버 연결되면 삭제 예정
+                    withAnimation(.easeInOut) {
+                        showSignInView = false
+                        isCherryPick = true
+                    }
+                },
+                onCompletion: { result in
+                    // 로그인 결과 처리할 코드
+                    switch result {
+                    case .success(let authResults):
+                        // 인증 결과 처리
+                        break
+                    case .failure(let error):
+                        // 인증 실패 처리
+                        break
+                    }
+                }
+            )
+            .padding(.horizontal, 30)
+            .padding(.vertical)
+            .frame(height: 80)
+            .cornerRadius(10)
+            
+            Spacer()
+            
+            Text("혹시 회원이 아니신가요?")
+                .fontWeight(.bold)
+                .foregroundColor(Color("main-text-color"))
+                .padding()
+            
+            Button {
+                showSignInView = false
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    showSignUpView = true
+                }
+            } label: {
+                Text("회원가입 하러 가기")
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color-weak"))
+            }
+            .padding()
+            
+        }
+        .background(Color("background-shape-color"))
     }
     
     @ViewBuilder

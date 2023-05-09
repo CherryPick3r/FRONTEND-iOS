@@ -17,6 +17,7 @@ struct MenuView: View {
     @State private var userName = "체리체리1q2w3e"
     @State private var isUserNameEditing = false
     @State private var showDisplayStyleDialog = false
+    @State private var showWithdrawalView = false
     
     @FocusState private var isUserNameFocused: Bool
     
@@ -40,6 +41,9 @@ struct MenuView: View {
             isUserNameEditing = false
         }
         .tint(Color("main-point-color"))
+        .fullScreenCover(isPresented: $showWithdrawalView) {
+            WithdrawalView()
+        }
     }
     
     @ViewBuilder
@@ -246,8 +250,8 @@ struct MenuView: View {
     
     @ViewBuilder
     func withdrawalButton() -> some View {
-        NavigationLink {
-            
+        Button {
+            showWithdrawalView = true
         } label: {
             HStack {
                 Spacer()
