@@ -51,17 +51,23 @@ struct CherryPickView: View {
                     Spacer()
                     
                     if !isLoading {
-                        ZStack {
-                            likeAndHateButtons()
-                                .opacity(indicatorsOpacity)
+                        HStack {
+                            Spacer()
                             
-                            if showRestaurantCard {
-                                restaurantCard(width: width, height: height)
-                                    .frame(width: width)
-                                    .transition(.move(edge: .bottom))
+                            ZStack {
+                                likeAndHateIndicators()
+                                    .opacity(indicatorsOpacity)
+                                
+                                if showRestaurantCard {
+                                    restaurantCard(width: width, height: height)
+                                        .frame(width: width)
+                                        .transition(.move(edge: .bottom))
+                                }
                             }
+                            .frame(height: height)
+                            
+                            Spacer()
                         }
-                        .frame(height: height)
                         
                         Spacer()
                         
@@ -126,71 +132,68 @@ struct CherryPickView: View {
     }
     
     @ViewBuilder
-    func likeOrHateButton(thumb: String) -> some View {
+    func likeOrHateIndicator(thumb: String) -> some View {
         let isLikeButton = thumb == "hand.thumbsup.fill"
         
-        Button {
+        ZStack {
+            Circle()
+                .fill(LinearGradient(colors: [
+                    Color("main-point-color"),
+                    Color("main-point-color"),
+                    Color("main-point-color"),
+                    Color("main-point-color-weak"),
+                    Color("main-point-color-weak"),
+                    Color("main-point-color-weak")
+                ], startPoint: isLikeButton ? .top : .bottom, endPoint: isLikeButton ? .bottom : .top)
+                    .opacity(0.7))
+                .scaleEffect(likeAndHateButtonsSubScale)
+                .animation(Animation.spring(dampingFraction: 1.5).repeatForever(autoreverses: true), value: likeAndHateButtonsSubScale)
+                .onAppear {
+                    self.likeAndHateButtonsSubScale = 1.0
+                }
+                
             
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(LinearGradient(colors: [
-                        Color("main-point-color"),
-                        Color("main-point-color"),
-                        Color("main-point-color"),
-                        Color("main-point-color-weak"),
-                        Color("main-point-color-weak"),
-                        Color("main-point-color-weak")
-                    ], startPoint: isLikeButton ? .top : .bottom, endPoint: isLikeButton ? .bottom : .top)
-                        .opacity(0.7))
-                    .scaleEffect(likeAndHateButtonsSubScale)
-                    .animation(Animation.spring(dampingFraction: 1.5).repeatForever(autoreverses: true), value: likeAndHateButtonsSubScale)
-                    .onAppear {
-                        self.likeAndHateButtonsSubScale = 1.0
+            Circle()
+                .fill(Color("background-shape-color"))
+                .padding(7)
+                .scaleEffect(likeAndHateButtonsScale)
+                .animation(Animation.spring(dampingFraction: 1.5).repeatForever(autoreverses: true), value: likeAndHateButtonsScale)
+                .onAppear {
+                    self.likeAndHateButtonsScale = 1.0
+                }
+            
+            Image(systemName: thumb)
+                .padding(isLikeButton ? .leading : .trailing, 15)
+                .offset(x: isLikeButton ? likeThumbOffset : hateThumbOffset)
+                .animation(Animation.spring(dampingFraction: 0.991).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
+                .onAppear {
+                    if isLikeButton {
+                        likeThumbOffset = 0
                     }
                     
-                
-                Circle()
-                    .fill(Color("background-shape-color"))
-                    .padding(7)
-                    .scaleEffect(likeAndHateButtonsScale)
-                    .animation(Animation.spring(dampingFraction: 1.5).repeatForever(autoreverses: true), value: likeAndHateButtonsScale)
-                    .onAppear {
-                        self.likeAndHateButtonsScale = 1.0
+                    if !isLikeButton {
+                        hateThumbOffset = 0
                     }
-                
-                Image(systemName: thumb)
-                    .padding(isLikeButton ? .leading : .trailing, 15)
-                    .offset(x: isLikeButton ? likeThumbOffset : hateThumbOffset)
-                    .animation(Animation.spring(dampingFraction: 0.991).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
-                    .onAppear {
-                        if isLikeButton {
-                            likeThumbOffset = 0
-                        }
-                        
-                        if !isLikeButton {
-                            hateThumbOffset = 0
-                        }
-                    }
-            }
-            .frame(maxWidth: 80)
-            .padding(5)
+                }
         }
+        .foregroundColor(Color("main-point-color"))
+        .frame(maxWidth: 80)
     }
     
     @ViewBuilder
-    func likeAndHateButtons() -> some View {
+    func likeAndHateIndicators() -> some View {
         HStack {
             if showIndicators {
-                likeOrHateButton(thumb: "hand.thumbsdown.fill")
+                likeOrHateIndicator(thumb: "hand.thumbsdown.fill")
             }
             
             Spacer()
             
             if showIndicators {
-                likeOrHateButton(thumb: "hand.thumbsup.fill")
+                likeOrHateIndicator(thumb: "hand.thumbsup.fill")
             }
         }
+        .frame(maxWidth: 630)
     }
     
     @ViewBuilder
@@ -209,6 +212,7 @@ struct CherryPickView: View {
                         .scaledToFill()
                 }
                 .frame(width: width)
+                .frame(maxWidth: 500)
                 .frame(height: height / 3)
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 .shadow(color: .black.opacity(0.25), radius: 5)
@@ -288,6 +292,7 @@ struct CherryPickView: View {
                 .fill(Color("background-shape-color"))
                 .shadow(color: .black.opacity(0.15), radius: 5)
         }
+        .frame(maxWidth: 500)
         .padding(.horizontal, 45)
         .offset(x: cardOffsetX, y: cardOffsetY)
         .scaleEffect(cardSize)
@@ -318,9 +323,9 @@ struct CherryPickView: View {
                 .onEnded({ drag in
                     withAnimation(.spring()) {
                         if userSelection != .none {
-                            cardOffsetX = userSelection == .like ? 500 : -500
+                            cardOffsetX = userSelection == .like ? 1000 : -1000
                             
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 likeAndHateButtonsScale = 1.2
                                 likeAndHateButtonsSubScale = 1.1
                                 likeThumbOffset = 10.0

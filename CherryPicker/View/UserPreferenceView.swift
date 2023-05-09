@@ -201,7 +201,7 @@ struct UserPreferenceView: View {
                         Spacer()
                         
                         NavigationLink {
-                            
+                            RestaurantListView(listMode: .cherryPick)
                         } label: {
                             Text("더보기")
                                 .font(.footnote)
@@ -232,7 +232,7 @@ struct UserPreferenceView: View {
                         Spacer()
                         
                         NavigationLink {
-                            
+                            RestaurantListView(listMode: .bookmark)
                         } label: {
                             Text("더보기")
                                 .font(.footnote)
@@ -335,6 +335,7 @@ struct UserPreferenceView: View {
                     }
                 }
             }
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .background {
                 contentBackground()
             }

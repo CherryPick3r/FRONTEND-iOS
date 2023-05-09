@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct MenuView: View {
+    private let columns = [
+        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
+    ]
+    
     @EnvironmentObject var userViewModel: UserViewModel
     
     @State private var userName = "체리체리1q2w3e"
@@ -40,17 +44,21 @@ struct MenuView: View {
     
     @ViewBuilder
     func menu() -> some View {
-        VStack {
+        LazyVGrid(columns: columns) {
             userMenu()
             
             settingMenu()
             
             helpMenu()
             
+        }
+        
+        VStack {
             logoutButton()
             
             withdrawalButton()
         }
+        .frame(maxWidth: 500)
     }
     
     @ViewBuilder

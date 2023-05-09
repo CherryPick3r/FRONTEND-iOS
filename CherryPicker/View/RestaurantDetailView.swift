@@ -78,7 +78,7 @@ struct RestaurantDetailView: View {
                                 }
                             }
                         }
-                        .frame(width: reader.size.width)
+                        .frame(width: reader.size.width, height: height + reader.safeAreaInsets.top + reader.safeAreaInsets.bottom)
                 } else {
                     Color("background-color")
                 }
@@ -184,6 +184,7 @@ struct RestaurantDetailView: View {
             }
             .offset(y: -20)
         }
+        .frame(maxWidth: 500)
         .padding(.top)
         .offset(y: informationOffsetY)
         .gesture(
@@ -531,10 +532,13 @@ struct RestaurantDetailView: View {
         .padding(.vertical)
         .padding(.horizontal, 10)
         .background {
-            Color("main-point-color").opacity(0.3)
-                .shadow(color: .black.opacity(0.25), radius: 3)
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            ZStack {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color("main-point-color").opacity(0.3))
+            }
         }
         .padding()
     }

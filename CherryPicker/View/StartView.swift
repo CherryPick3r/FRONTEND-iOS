@@ -32,7 +32,13 @@ struct StartView: View {
                     .foregroundColor(Color("main-point-color"))
                     .padding(.horizontal)
                 
-                startButton()
+                HStack {
+                    Spacer()
+                    
+                    startButton()
+                    
+                    Spacer()
+                }
                 
                 Text("지겨운 메뉴 고민은 그만! 이제는 음식도 \n재미있게 Cherry Picker.")
                     .multilineTextAlignment(.center)
@@ -92,6 +98,7 @@ struct StartView: View {
                 }
             }
         }
+        .frame(maxWidth: 400)
         .padding(.horizontal, 70)
         .padding(.vertical, 40)
     }
