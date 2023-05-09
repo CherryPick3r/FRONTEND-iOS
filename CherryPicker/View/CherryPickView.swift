@@ -61,7 +61,7 @@ struct CherryPickView: View {
                                 if showRestaurantCard {
                                     restaurantCard(width: width, height: height)
                                         .frame(width: width)
-                                        .transition(.move(edge: .bottom))
+                                        .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: userSelection == .like ? .trailing : .leading).combined(with: .opacity)))
                                 }
                             }
                             .frame(height: height)
@@ -151,7 +151,7 @@ struct CherryPickView: View {
                 .onAppear {
                     self.likeAndHateButtonsSubScale = 1.0
                 }
-                
+            
             
             Circle()
                 .fill(Color("background-shape-color"))
@@ -199,6 +199,7 @@ struct CherryPickView: View {
     @ViewBuilder
     func restaurantCard(width: CGFloat, height: CGFloat) -> some View {
         let isTutorial = cherryPickMode == .tutorial
+        let maxOffset = CGFloat(150)
         
         ZStack {
             VStack(spacing: 0) {
@@ -310,11 +311,11 @@ struct CherryPickView: View {
                         cardSize = 0.9
                     }
                     
-                    indicatorsOpacity = moveX > 0 ? (200 - moveX) / 200 : (-200 - moveX) / -200
+                    indicatorsOpacity = moveX > 0 ? (maxOffset - moveX) / maxOffset : (maxOffset + moveX) / maxOffset
                     
-                    if drag.translation.width > 200 {
+                    if drag.translation.width > maxOffset {
                         userSelection = .like
-                    } else if drag.translation.width < -200 {
+                    } else if drag.translation.width < -maxOffset {
                         userSelection = .hate
                     } else {
                         userSelection = .none
@@ -323,25 +324,21 @@ struct CherryPickView: View {
                 .onEnded({ drag in
                     withAnimation(.spring()) {
                         if userSelection != .none {
-                            cardOffsetX = userSelection == .like ? 1000 : -1000
+                            likeAndHateButtonsScale = 1.2
+                            likeAndHateButtonsSubScale = 1.1
+                            likeThumbOffset = 10.0
+                            hateThumbOffset = -10.0
                             
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                likeAndHateButtonsScale = 1.2
-                                likeAndHateButtonsSubScale = 1.1
-                                likeThumbOffset = 10.0
-                                hateThumbOffset = -10.0
-                                
-                                withAnimation(.spring()) {
-                                    showRestaurantCard = false
-                                }
-                                
-                                withAnimation(.easeInOut) {
-                                    isLoading = true
-                                }
-                                
-                                cardOffsetX = .zero
-                                cardOffsetY = .zero
+                            withAnimation(.spring()) {
+                                showRestaurantCard = false
                             }
+                            
+                            withAnimation(.easeInOut) {
+                                isLoading = true
+                            }
+                            
+                            cardOffsetX = .zero
+                            cardOffsetY = .zero
                             
                             cardCount -= 1
                         } else {
