@@ -71,9 +71,7 @@
 				C5B579742A0A65A10034BA8E /* WithdrawalView.swift */,
 				C58F419929FFC17C00A98B2F /* CherryPickView.swift */,
 				C507595B2A029C6E00D7182E /* RestaurantDetailView.swift */,
-				C507595D2A02AC9800D7182E /* KeywordTagsView.swift */,
 				C5DF79772A0363780061DAD0 /* AppView.swift */,
-				C5FFC6612A07B53100933C9D /* RadarChartView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -113,6 +111,7 @@
 		C59D211929C9D83A00275DBA /* CherryPicker */ = {
 			isa = PBXGroup;
 			children = (
+				C5B579762A0B61BD0034BA8E /* ComponentView */,
 				C58F419129FDEA5300A98B2F /* Info.plist */,
 				C58F419629FFB51400A98B2F /* ViewModel */,
 				C58F418529FDD81400A98B2F /* Modifier */,
@@ -130,6 +129,15 @@
 				C59D212129C9D83B00275DBA /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		C5B579762A0B61BD0034BA8E /* ComponentView */ = {
+			isa = PBXGroup;
+			children = (
+				C5FFC6612A07B53100933C9D /* RadarChartView.swift */,
+				C507595D2A02AC9800D7182E /* KeywordTagsView.swift */,
+			);
+			path = ComponentView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

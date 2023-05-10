@@ -56,12 +56,9 @@ struct CherryPickView: View {
                             
                             ZStack {
                                 likeAndHateIndicators()
-                                    .opacity(indicatorsOpacity)
                                 
                                 if showRestaurantCard {
                                     restaurantCard(width: width, height: height)
-                                        .frame(width: width)
-                                        .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: userSelection == .like ? .trailing : .leading).combined(with: .opacity)))
                                 }
                             }
                             .frame(height: height)
@@ -95,30 +92,12 @@ struct CherryPickView: View {
                 .navigationTitle(cherryPickMode == .cherryPick ? "CherryPicker" : "초기취향 선택")
                 .toolbar {
                     ToolbarItem {
-                        Button {
-                            withAnimation(.easeInOut) {
-                                isCherryPick = false
-                            }
-                        } label: {
-                            Label("닫기", systemImage: "xmark.circle.fill")
-                                .font(.title2)
-                                .shadow(color: .black.opacity(0.15), radius: 5)
-                        }
-                        
+                        closeButton()
                     }
                 }
-                .onAppear() {
-                    withAnimation(.spring()) {
-                        showRestaurantCard = true
-                    }
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        withAnimation(.easeInOut) {
-                            showIndicators = true
-                        }
-                    }
-                }
+                .onAppear(perform: showContentActions)
                 .onChange(of: cardCount) { newValue in
+                    //임시
                     if newValue == 0 {
                         withAnimation(.easeInOut) {
                             isCherryPick = false
@@ -129,6 +108,19 @@ struct CherryPickView: View {
             }
         }
         .tint(Color("main-point-color"))
+    }
+    
+    @ViewBuilder
+    func closeButton() -> some View {
+        Button {
+            withAnimation(.easeInOut) {
+                isCherryPick = false
+            }
+        } label: {
+            Label("닫기", systemImage: "xmark.circle.fill")
+                .font(.title2)
+                .shadow(color: .black.opacity(0.15), radius: 5)
+        }
     }
     
     @ViewBuilder
@@ -193,6 +185,7 @@ struct CherryPickView: View {
                 likeOrHateIndicator(thumb: "hand.thumbsup.fill")
             }
         }
+        .opacity(indicatorsOpacity)
         .frame(maxWidth: 630)
     }
     
@@ -293,6 +286,7 @@ struct CherryPickView: View {
                 .fill(Color("background-shape-color"))
                 .shadow(color: .black.opacity(0.15), radius: 5)
         }
+        .frame(width: width)
         .frame(maxWidth: 500)
         .padding(.horizontal, 45)
         .offset(x: cardOffsetX, y: cardOffsetY)
@@ -302,58 +296,21 @@ struct CherryPickView: View {
                 .onChanged({ drag in
                     let moveX = drag.translation.width
                     
-                    print(moveX)
+                    swipingCard(moveX: moveX, moveY: drag.translation.height, maxOffset: maxOffset)
                     
-                    cardOffsetX = moveX
-                    cardOffsetY = drag.translation.height / 10
-                    
-                    withAnimation(.spring()) {
-                        cardSize = 0.9
-                    }
-                    
-                    indicatorsOpacity = moveX > 0 ? (maxOffset - moveX) / maxOffset : (maxOffset + moveX) / maxOffset
-                    
-                    if drag.translation.width > maxOffset {
-                        userSelection = .like
-                    } else if drag.translation.width < -maxOffset {
-                        userSelection = .hate
-                    } else {
-                        userSelection = .none
-                    }
+                    decisionUserSelection(moveX: moveX, maxOffset: maxOffset)
                 })
                 .onEnded({ drag in
-                    withAnimation(.spring()) {
-                        if userSelection != .none {
-                            likeAndHateButtonsScale = 1.2
-                            likeAndHateButtonsSubScale = 1.1
-                            likeThumbOffset = 10.0
-                            hateThumbOffset = -10.0
-                            
-                            withAnimation(.spring()) {
-                                showRestaurantCard = false
-                            }
-                            
-                            withAnimation(.easeInOut) {
-                                isLoading = true
-                            }
-                            
-                            cardOffsetX = .zero
-                            cardOffsetY = .zero
-                            
-                            cardCount -= 1
-                        } else {
-                            cardOffsetX = .zero
-                            cardOffsetY = .zero
-                            
-                            withAnimation(.easeInOut) {
-                                indicatorsOpacity = 1.0
-                            }
-                        }
-                        
-                        cardSize = 1.0
+                    if userSelection != .none {
+                        disappearingCard()
+                    } else {
+                        cancelDecisionUserSelection()
                     }
+                    
+                    cardSize = 1.0
                 })
         )
+        .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: userSelection == .like ? .trailing : .leading).combined(with: .opacity)))
         .onDisappear() {
             withAnimation(.easeInOut) {
                 indicatorsOpacity = 1.0
@@ -366,6 +323,72 @@ struct CherryPickView: View {
             withAnimation(.spring()) {
                 showRestaurantCard = true
             }
+        }
+    }
+    
+    func showContentActions() {
+        withAnimation(.spring()) {
+            showRestaurantCard = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.easeInOut) {
+                showIndicators = true
+            }
+        }
+    }
+    
+    func swipingCard(moveX: CGFloat, moveY: CGFloat, maxOffset: CGFloat) {
+        cardOffsetX = moveX
+        cardOffsetY = moveY / 10
+        
+        withAnimation(.spring()) {
+            cardSize = 0.9
+        }
+        
+        indicatorsOpacity = moveX > 0 ? (maxOffset - moveX) / maxOffset : (maxOffset + moveX) / maxOffset
+    }
+    
+    func decisionUserSelection(moveX: CGFloat, maxOffset: CGFloat) {
+        if moveX > maxOffset {
+            userSelection = .like
+        } else if moveX < -maxOffset {
+            userSelection = .hate
+        } else {
+            userSelection = .none
+        }
+    }
+    
+    func disappearingCard() {
+        withAnimation(.spring()) {
+            likeAndHateButtonsScale = 1.2
+            likeAndHateButtonsSubScale = 1.1
+            likeThumbOffset = 10.0
+            hateThumbOffset = -10.0
+            
+            showRestaurantCard = false
+        }
+        
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            cardOffsetX = .zero
+            cardOffsetY = .zero
+        }
+        
+        cardCount -= 1
+    }
+    
+    func cancelDecisionUserSelection() {
+        withAnimation(.spring()) {
+            cardOffsetX = .zero
+            cardOffsetY = .zero
+        }
+        
+        withAnimation(.easeInOut) {
+            indicatorsOpacity = 1.0
         }
     }
 }

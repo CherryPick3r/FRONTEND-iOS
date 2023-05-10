@@ -68,16 +68,11 @@ struct RestaurantListView: View {
         }
         .modifier(BackgroundModifier())
         .navigationTitle(listMode.rawValue)
+        .onTapGesture(perform: closeSearching)
         .toolbar {
             if !isSearching {
                 ToolbarItem {
-                    Button {
-                        withAnimation(.spring()) {
-                            isSearching = true
-                        }
-                        
-                        searchFocus = true
-                    } label: {
+                    Button(action: openSearching) {
                         Label("검색", systemImage: "magnifyingglass")
                             .foregroundColor(Color("main-point-color"))
                     }
@@ -283,20 +278,30 @@ struct RestaurantListView: View {
                 .padding(.horizontal)
                 .tint(Color("main-point-color"))
             
-            Button("취소") {
-                searchFocus = false
-                
-                withAnimation(.spring()) {
-                    isSearching = false
-                    searchText = ""
-                }
-            }
+            Button("취소", action: closeSearching)
             .font(.subheadline)
             .fontWeight(.bold)
             .foregroundColor(Color("main-point-color"))
             .padding(.trailing)
         }
         .transition(.move(edge: .top).combined(with: .opacity))
+    }
+    
+    func openSearching() {
+        withAnimation(.spring()) {
+            isSearching = true
+        }
+        
+        searchFocus = true
+    }
+    
+    func closeSearching() {
+        searchFocus = false
+        
+        withAnimation(.spring()) {
+            isSearching = false
+            searchText = ""
+        }
     }
 }
 
