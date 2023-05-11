@@ -58,9 +58,9 @@ struct RestaurantDetailView: View {
                         HStack {
                             Spacer()
                             
-                            if isResultView {
-                                restartButton()
-                            }
+                            restartButton()
+                                .opacity(isResultView ? 1 : 0)
+                                .disabled(!isResultView)
                             
                             Spacer()
                         }
@@ -70,13 +70,12 @@ struct RestaurantDetailView: View {
                                 
                                 closeButton()
                             }
-                            .padding(.top, isResultView ? 0 : nil)
                         }
                         .offset(y: topButtonsOffsetY)
                         .padding(.top, reader.safeAreaInsets.top)
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
-                        Spacer()
+                    Spacer()
                     
                     if showIndicators {
                         HStack {
@@ -222,9 +221,12 @@ struct RestaurantDetailView: View {
                     let moveY = drag.translation.height
                     
                     if showDetailInformation {
-                        informationOffsetY += moveY
-                        
-                        imageBlurByDragOffset(moveY: moveY)
+                        if isDetailInformation && moveY < 0 {
+                            informationOffsetY += moveY / 500
+                        } else {
+                            informationOffsetY += moveY
+                            imageBlurByDragOffset(moveY: moveY)
+                        }
                     } else {
                         showingDetailInformation(moveY: moveY)
                     }
@@ -274,15 +276,14 @@ struct RestaurantDetailView: View {
         VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
             Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
                 .font(.footnote)
-                .fontWeight(.semibold)
-                .foregroundColor(Color("main-point-color-weak"))
+                .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
             
             if !showDetailInformation {
                 HStack {
                     Label("11:50 ~ 22:00", systemImage: "clock")
                         .font(.footnote)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color("main-point-color-weak"))
+                        .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                     
                     Text("휴무 : 일요일")
                         .font(.footnote)
@@ -292,7 +293,7 @@ struct RestaurantDetailView: View {
                 .transition(.opacity)
             } else {
                 detailHours()
-                    .transition(.opacity.animation(.easeInOut))
+                    .transition(.opacity.animation(.easeInOut(duration: 0.5)))
             }
         }
         
@@ -307,7 +308,7 @@ struct RestaurantDetailView: View {
                     .frame(height: height / 3)
             }
             .padding(.bottom, 5)
-            .transition(.opacity.animation(.easeInOut))
+            .transition(.opacity.animation(.easeInOut(duration: 0.5)))
         }
         
         representativeMenu(detailMenuDisable: detailMenuDisable)
@@ -459,25 +460,28 @@ struct RestaurantDetailView: View {
     @ViewBuilder
     func toolButtons() -> some View {
         VStack(spacing: 10) {
-            Button {
+            Group {
+                Button {
+                    
+                } label: {
+                    Label("지도", systemImage: "location")
+                        .labelStyle(.iconOnly)
+                }
                 
-            } label: {
-                Label("지도", systemImage: "location")
-                    .labelStyle(.iconOnly)
-            }
-
-            Button {
+                Button {
+                    
+                } label: {
+                    Label("공유하기", systemImage: "square.and.arrow.up")
+                        .labelStyle(.iconOnly)
+                }
+                .padding(.bottom, 4)
                 
-            } label: {
-                Label("공유하기", systemImage: "square.and.arrow.up")
-                    .labelStyle(.iconOnly)
-            }
-
-            Button {
-                
-            } label: {
-                Label("즐겨찾기", systemImage: "bookmark")
-                    .labelStyle(.iconOnly)
+                Button {
+                    
+                } label: {
+                    Label("즐겨찾기", systemImage: "bookmark")
+                        .labelStyle(.iconOnly)
+                }
             }
         }
         .font(.title2)

@@ -32,7 +32,7 @@ struct KeywordTagsView: View {
                 
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(Color("main-point-color"))
-                    .frame(width: reader.size.width * (value / 1200))
+                    .frame(width: reader.size.width * (value / 1000))
                 
                 HStack {
                     Text(title)
@@ -45,7 +45,13 @@ struct KeywordTagsView: View {
                     Text("\(Int(round(value)))")
                         .font(.footnote)
                         .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color"))
+                        .foregroundColor(Color("shape-light-color"))
+//                        .padding(5)
+//                        .background {
+//                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+//                                .fill(Color("shape-light-color"))
+//                                .shadow(color: .black.opacity(0.1), radius: 1)
+//                        }
                 }
                 .padding(10)
             }

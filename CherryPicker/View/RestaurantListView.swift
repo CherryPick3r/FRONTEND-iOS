@@ -27,22 +27,20 @@ enum ListSortType: String {
 }
 
 struct RestaurantListView: View {
-    private let columns = [
-        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
-    ]
+    @Environment(\.colorScheme) var colorScheme
     
     @FocusState private var searchFocus: Bool
     
-    @State private var listMode: ListMode
+    @State var listMode: ListMode
     @State private var seletedFilterTypes = Set<FilterType>()
     @State private var selectedSortType = ListSortType.newest
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var showRestaurantDetailView = false
     
-    init(listMode: ListMode) {
-        self.listMode = listMode
-    }
+    private let columns = [
+        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
+    ]
     
     var body: some View {
         VStack {
@@ -197,13 +195,13 @@ struct RestaurantListView: View {
                     Label("서울 광진구 면목로 53 1층", systemImage: "map")
                         .font(.footnote)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color("main-point-color-weak"))
+                        .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                     
                     HStack(spacing: 15) {
                         Label("17:30 ~ 24:00", systemImage: "clock")
                             .font(.footnote)
                             .fontWeight(.semibold)
-                            .foregroundColor(Color("main-point-color-weak"))
+                            .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                         
                         Text("휴무 : 없음")
                             .font(.footnote)
