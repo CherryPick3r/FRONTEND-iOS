@@ -17,6 +17,7 @@ struct RestaurantDetailView: View {
     @Binding var isCherryPickDone: Bool
     
     private let isResultView: Bool
+    private let maxOffsetY = CGFloat(250)
     
     @State private var isDetailInformation = false
     @State private var showDetailInformation = false
@@ -33,6 +34,9 @@ struct RestaurantDetailView: View {
     
     //임시
     @State private var imagePage = 0
+    @State private var isBookmarked = false
+    @State private var isSharing = false
+    @State private var isFindingLocation = false
     
     init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true) {
         self._isCherryPick = isCherryPick
@@ -57,9 +61,9 @@ struct RestaurantDetailView: View {
                         HStack {
                             Spacer()
                             
-                            if isResultView {
-                                restartButton()
-                            }
+                            restartButton()
+                                .opacity(isResultView ? 1 : 0)
+                                .disabled(!isResultView)
                             
                             Spacer()
                         }
@@ -74,7 +78,6 @@ struct RestaurantDetailView: View {
                         .padding(.top, reader.safeAreaInsets.top)
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
-                    
                     Spacer()
                     
                     if showIndicators {
@@ -85,7 +88,6 @@ struct RestaurantDetailView: View {
                         }
                         .offset(x: toolButtonsOffsetX)
                         .padding(.bottom)
-                        .offset(y: informationOffsetY)
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                     
@@ -94,7 +96,7 @@ struct RestaurantDetailView: View {
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     
-                    if isDetailInformation {
+                    if showDetailInformation {
                         Spacer()
                     }
                 }
@@ -104,38 +106,13 @@ struct RestaurantDetailView: View {
             .gesture(
                 DragGesture()
                     .onChanged({ drag in
-                        let moveX = drag.translation.height
-                        
-                        opacity = (150 - moveX / 10) / 150
-                        
-                        topButtonsOffsetY = -moveX / 10
-                        
-                        toolButtonsOffsetX = moveX / 10
-                        
-                        informationOffsetY = moveX / 10
+                        closingAction(moveY: drag.translation.height)
                     })
                     .onEnded({ drag in
-                        if drag.translation.height > 150 {
-                            withAnimation(.easeInOut) {
-                                showInformation = false
-                                showIndicators = false
-                                if isResultView {
-                                    isCherryPick = false
-                                    isCherryPickDone = false
-                                } else {
-                                    dismiss()
-                                }
-                            }
+                        if drag.translation.height > maxOffsetY {
+                            closeAction()
                         } else {
-                            withAnimation(.easeInOut) {
-                                opacity = 1.0
-                            }
-                            
-                            withAnimation(.spring()) {
-                                topButtonsOffsetY = .zero
-                                toolButtonsOffsetX = .zero
-                                informationOffsetY = .zero
-                            }
+                            cancelClosing()
                         }
                     })
             )
@@ -196,21 +173,13 @@ struct RestaurantDetailView: View {
             }
             .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
             .blur(radius: 20 * imageBlur / 100)
-            .onTapGesture {
-                if !isDetailInformation {
-                    withAnimation(.spring()) {
-                        showInformation = false
-                        showIndicators = false
-                        showImages = true
-                    }
-                }
-            }
+            .onTapGesture(perform: showImagesAction)
     }
     
     @ViewBuilder
     func information(height: CGFloat) -> some View {
         let isNoneNotchiPhone = height == 597
-
+        
         VStack(alignment: .leading, spacing: isNoneNotchiPhone ? 10 : 15) {
             informationContent(height: height, detailMenuDisable: isNoneNotchiPhone)
         }
@@ -218,7 +187,7 @@ struct RestaurantDetailView: View {
             print(height)
         }
         .padding(isNoneNotchiPhone ? 15 : 20)
-        .padding(.bottom, isDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
+        .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
         .background {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color("background-shape-color"))
@@ -249,95 +218,32 @@ struct RestaurantDetailView: View {
         }
         .frame(maxWidth: 500)
         .padding(.top)
-        .offset(y: informationOffsetY)
         .gesture(
             DragGesture()
                 .onChanged({ drag in
                     let moveY = drag.translation.height
                     
+                    print(informationOffsetY)
+                    
                     if showDetailInformation {
-                        if moveY < 0 {
-                            informationOffsetY = moveY / 10
+                        if isDetailInformation && informationOffsetY < 0 {
+                            informationOffsetY += moveY / 1000
                         } else {
-                            informationOffsetY = moveY
-                            imageBlur -= imageBlur > 0 ? 1 : 0
+                            informationOffsetY += moveY
+                            imageBlurByDragOffset(moveY: moveY)
                         }
                     } else {
-                        if moveY > 0 {
-                            if isDetailInformation {
-                                informationOffsetY = moveY
-                                imageBlur += imageBlur < 100 ? 1 : 0
-                            } else {
-                                informationOffsetY = moveY / 10
-                            }
-                        } else {
-                            informationOffsetY = moveY
-                            
-                            if moveY < 0 {
-                                withAnimation(.spring()) {
-                                    showIndicators = false
-                                }
-                                
-                                isDetailInformation = true
-                            } else {
-                                if !isDetailInformation {
-                                    imageBlur = -moveY
-                                }
-                            }
-                        }
+                        showingDetailInformation(moveY: moveY)
                     }
                 })
                 .onEnded({ drag in
-                    if isDetailInformation {
-                        if showDetailInformation {
-                            if informationOffsetY > 100 {
-                                withAnimation(.spring()) {
-                                    showIndicators = true
-                                    showDetailInformation = false
-                                    informationOffsetY = .zero
-                                    isDetailInformation = false
-                                }
-                                
-                                withAnimation(.easeInOut) {
-                                    imageBlur = 0
-                                }
-                            } else {
-                                withAnimation(.spring()) {
-                                    informationOffsetY = .zero
-                                    showIndicators = false
-                                    showDetailInformation = true
-                                    isDetailInformation = true
-                                }
-                                
-                                withAnimation(.easeInOut) {
-                                    imageBlur = 150
-                                }
-                            }
+                    if showDetailInformation {
+                        if informationOffsetY < 300, !isDetailInformation {
+                            openDetailInformation()
+                        } else if informationOffsetY > 200 {
+                            closeDetailInformation()
                         } else {
-                            if informationOffsetY < 350 {
-                                withAnimation(.spring()) {
-                                    showDetailInformation = true
-                                }
-                                
-                                withAnimation(.easeInOut) {
-                                    isDetailInformation = true
-                                    imageBlur = 150
-                                }
-                                
-                                withAnimation(.spring()) {
-                                    informationOffsetY = .zero
-                                }
-                            } else {
-                                withAnimation(.spring()) {
-                                    showIndicators = true
-                                    informationOffsetY = .zero
-                                    isDetailInformation = false
-                                }
-                                
-                                withAnimation(.easeInOut) {
-                                    imageBlur = 0
-                                }
-                            }
+                            cancelClosingDetailInformation()
                         }
                     } else {
                         withAnimation(.spring()) {
@@ -346,6 +252,7 @@ struct RestaurantDetailView: View {
                     }
                 })
         )
+        .offset(y: informationOffsetY)
         .padding(.horizontal)
     }
     
@@ -371,30 +278,31 @@ struct RestaurantDetailView: View {
             .fontWeight(.bold)
             .foregroundColor(Color("secondary-text-color-strong"))
         
-        VStack(alignment: .leading, spacing: isDetailInformation ? 15 : 5) {
+        VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
             Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
                 .font(.footnote)
-                .fontWeight(.semibold)
-                .foregroundColor(Color("main-point-color-weak"))
+                .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
             
-            if !isDetailInformation {
+            if !showDetailInformation {
                 HStack {
                     Label("11:50 ~ 22:00", systemImage: "clock")
                         .font(.footnote)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color("main-point-color-weak"))
+                        .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                     
                     Text("휴무 : 일요일")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .foregroundColor(Color("main-point-color-strong"))
                 }
+                .transition(.opacity)
             } else {
                 detailHours()
+                    .transition(.opacity.animation(.easeInOut(duration: 0.5)))
             }
         }
         
-        if isDetailInformation {
+        if showDetailInformation {
             VStack(alignment: .leading) {
                 Text("키워드 태그")
                     .font(.headline)
@@ -402,9 +310,9 @@ struct RestaurantDetailView: View {
                     .foregroundColor(Color("main-point-color"))
                 
                 KeywordTagsView()
-                    .frame(height: height / 3)
             }
             .padding(.bottom, 5)
+            .transition(.opacity.animation(.easeInOut(duration: 0.5)))
         }
         
         representativeMenu(detailMenuDisable: detailMenuDisable)
@@ -414,7 +322,7 @@ struct RestaurantDetailView: View {
     func representativeMenu(detailMenuDisable: Bool) -> some View {
         VStack(spacing: 10) {
             HStack {
-                Text(isDetailInformation ? "메뉴" : "대표메뉴")
+                Text(showDetailInformation ? "메뉴" : "대표메뉴")
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color"))
@@ -429,7 +337,7 @@ struct RestaurantDetailView: View {
                 
                 menu(title: "이이요 스페셜 카이센동", price: 35000)
                 
-                if isDetailInformation && !detailMenuDisable {
+                if showDetailInformation && !detailMenuDisable {
                     menu(title: "야끼돈부리", price: 16000)
                     
                     menu(title: "도미연어덮밥", price: 16500)
@@ -519,14 +427,7 @@ struct RestaurantDetailView: View {
     
     @ViewBuilder
     func restartButton() -> some View {
-        Button {
-            withAnimation(.easeInOut) {
-                showInformation = false
-                showIndicators = false
-                isCherryPick = true
-                isCherryPickDone = false
-            }
-        } label: {
+        Button(action: restartAction) {
             HStack {
                 Image(systemName: "gobackward")
                     .padding(.trailing, 10)
@@ -549,18 +450,7 @@ struct RestaurantDetailView: View {
     
     @ViewBuilder
     func closeButton() -> some View {
-        Button {
-            withAnimation(.easeInOut) {
-                showInformation = false
-                showIndicators = false
-                if isResultView {
-                    isCherryPick = false
-                    isCherryPickDone = false
-                } else {
-                    dismiss()
-                }
-            }
-        } label: {
+        Button(action: closeAction) {
             Label("닫기", systemImage: "xmark.circle.fill")
                 .labelStyle(.iconOnly)
                 .font(.largeTitle)
@@ -574,25 +464,33 @@ struct RestaurantDetailView: View {
     @ViewBuilder
     func toolButtons() -> some View {
         VStack(spacing: 10) {
-            Button {
+            Group {
+                Button {
+                    isFindingLocation = true
+                } label: {
+                    Label("지도", systemImage: "location")
+                        .labelStyle(.iconOnly)
+                        .modifier(ParticleModifier(systemImage: "location", status: isFindingLocation))
+                }
                 
-            } label: {
-                Label("지도", systemImage: "location")
-                    .labelStyle(.iconOnly)
-            }
-
-            Button {
+                Button {
+                    isSharing = true
+                } label: {
+                    Label("공유하기", systemImage: "square.and.arrow.up")
+                        .labelStyle(.iconOnly)
+                        .modifier(ParticleModifier(systemImage: "square.and.arrow.up", status: isSharing))
+                }
+                .padding(.bottom, 4)
                 
-            } label: {
-                Label("공유하기", systemImage: "square.and.arrow.up")
-                    .labelStyle(.iconOnly)
-            }
-
-            Button {
-                
-            } label: {
-                Label("즐겨찾기", systemImage: "bookmark")
-                    .labelStyle(.iconOnly)
+                Button {
+                    withAnimation(.easeInOut) {
+                        isBookmarked.toggle()
+                    }
+                } label: {
+                    Label("즐겨찾기", systemImage: isBookmarked ? "bookmark.fill" : "bookmark")
+                        .labelStyle(.iconOnly)
+                        .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isBookmarked))
+                }
             }
         }
         .font(.title2)
@@ -613,29 +511,7 @@ struct RestaurantDetailView: View {
     
     @ViewBuilder
     func images() -> some View {
-        VStack {
-            HStack {
-                Spacer()
-                
-                Button {
-                    withAnimation(.spring()) {
-                        showImages = false
-                        showInformation = true
-                        showIndicators = true
-                    }
-                } label: {
-                    Label("닫기", systemImage: "xmark.circle.fill")
-                        .labelStyle(.iconOnly)
-                        .font(.largeTitle)
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.25), radius: 5)
-                }
-                .padding()
-                .opacity(detailImageBackgroundOpacity)
-
-            }
-            Spacer()
-            
+        ZStack {
             TabView(selection: $imagePage) {
                 Image("restaurant-sample1")
                     .resizable()
@@ -649,82 +525,230 @@ struct RestaurantDetailView: View {
                     .tag(1)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .overlay {
-                HStack {
-                    if imagePage == 1 {
-                        Button {
-                            withAnimation(.easeInOut) {
-                                imagePage -= 1
-                            }
-                        } label: {
-                            Label("이전", systemImage: "chevron.backward.circle.fill")
-                                .labelStyle(.iconOnly)
-                                .font(.largeTitle)
-                                .foregroundColor(.white)
-                                .shadow(color: .black.opacity(0.25), radius: 5)
-                        }
-                    }
-
-                    Spacer()
-                    
-                    if imagePage == 0 {
-                        Button {
-                            withAnimation(.easeInOut) {
-                                imagePage += 1
-                            }
-                        } label: {
-                            Label("다음", systemImage: "chevron.forward.circle.fill")
-                                .labelStyle(.iconOnly)
-                                .font(.largeTitle)
-                                .foregroundColor(.white)
-                                .shadow(color: .black.opacity(0.25), radius: 5)
-                        }
-                    }
-                }
-                .padding()
-            }
             .offset(y: detailImageOffsetY)
             .gesture(
                 DragGesture()
                     .onChanged({ drag in
-                        let moveY = drag.translation.height
-                        
-                        detailImageOffsetY = moveY
-                        
-                        if detailImageOffsetY != .zero {
-                            detailImageBackgroundOpacity = moveY > 0 ? (500 - moveY) / 500 : (500 + moveY) / 500
-                            
-                            withAnimation(.spring()) {
-                                showInformation = true
-                                showIndicators = true
-                            }
-                        }
+                        closingImages(moveY: drag.translation.height)
                     })
                     .onEnded({ drag in
                         if !(-150...150).contains(drag.translation.height) {
-                            withAnimation(.spring()) {
-                                showImages = false
-                            }
+                            closeImages()
                         } else {
-                            withAnimation(.spring()) {
-                                showInformation = false
-                                showIndicators = false
-                            }
+                            cancelClosingImages()
                         }
                         
-                        withAnimation(.spring()) {
-                            detailImageOffsetY = .zero
-                        }
-                        
-                        withAnimation(.easeInOut) {
-                            detailImageBackgroundOpacity = 1.0
-                        }
+                        resetImagesProperties()
                     })
             )
             
-            Spacer()
+            VStack {
+                HStack {
+                    Spacer()
+                    
+                    Button(action: closeImages) {
+                        Label("닫기", systemImage: "xmark.circle.fill")
+                            .labelStyle(.iconOnly)
+                            .font(.largeTitle)
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.25), radius: 5)
+                    }
+                    .padding()
+                    .opacity(detailImageBackgroundOpacity)
+                }
+                
+                Spacer()
+            }
+            
+            HStack {
+                if imagePage == 1 {
+                    Button {
+                        withAnimation(.easeInOut) {
+                            imagePage -= 1
+                        }
+                    } label: {
+                        Label("이전", systemImage: "chevron.backward.circle.fill")
+                            .labelStyle(.iconOnly)
+                            .font(.largeTitle)
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.25), radius: 5)
+                    }
+                }
+                
+                Spacer()
+                
+                if imagePage == 0 {
+                    Button {
+                        withAnimation(.easeInOut) {
+                            imagePage += 1
+                        }
+                    } label: {
+                        Label("다음", systemImage: "chevron.forward.circle.fill")
+                            .labelStyle(.iconOnly)
+                            .font(.largeTitle)
+                            .foregroundColor(.white)
+                            .shadow(color: .black.opacity(0.25), radius: 5)
+                    }
+                }
+            }
+            .padding()
         }
-        .background(.black.opacity(detailImageBackgroundOpacity))
+        .background(.black)
+        .opacity(detailImageBackgroundOpacity)
+    }
+    
+    func imageBlurByDragOffset(moveY: CGFloat) {
+        if moveY < 0 {
+            imageBlur -= (moveY / 5)
+        } else {
+            imageBlur -= (moveY / 5)
+        }
+    }
+    
+    func showingDetailInformation(moveY: CGFloat) {
+        if moveY <= 0 {
+            imageBlur += 100
+            withAnimation(.spring()) {
+                showIndicators = false
+            }
+            
+            showDetailInformation = true
+        } else {
+            informationOffsetY += moveY / 1000
+        }
+    }
+    
+    func openDetailInformation() {
+        withAnimation(.spring()) {
+            informationOffsetY = .zero
+            showIndicators = false
+            isDetailInformation = true
+        }
+        
+        withAnimation(.easeInOut) {
+            imageBlur = 100
+        }
+    }
+    
+    func closeDetailInformation() {
+        withAnimation(.spring()) {
+            showIndicators = true
+            isDetailInformation = false
+            informationOffsetY = .zero
+            showDetailInformation = false
+        }
+        
+        withAnimation(.easeInOut) {
+            imageBlur = 0
+        }
+    }
+    
+    func cancelClosingDetailInformation() {
+        withAnimation(.spring()) {
+            informationOffsetY = .zero
+        }
+        
+        withAnimation(.easeInOut) {
+            if isDetailInformation {
+                imageBlur = 100
+            } else {
+                imageBlur = 0
+            }
+        }
+    }
+    
+    func restartAction() {
+        withAnimation(.easeInOut) {
+            showInformation = false
+            showIndicators = false
+            isCherryPick = true
+            isCherryPickDone = false
+        }
+    }
+    
+    func closeAction() {
+        withAnimation(.easeInOut) {
+            showInformation = false
+            showIndicators = false
+            if isResultView {
+                isCherryPick = false
+                isCherryPickDone = false
+            } else {
+                dismiss()
+            }
+        }
+    }
+    
+    func closingAction(moveY: CGFloat) {
+        opacity = (maxOffsetY - moveY / 5) / maxOffsetY
+        
+        topButtonsOffsetY = -moveY / 5
+        
+        toolButtonsOffsetX = moveY / 5
+        
+        informationOffsetY = moveY / 5
+    }
+    
+    func cancelClosing() {
+        withAnimation(.easeInOut) {
+            opacity = 1.0
+        }
+        
+        withAnimation(.spring()) {
+            topButtonsOffsetY = .zero
+            toolButtonsOffsetX = .zero
+            informationOffsetY = .zero
+        }
+    }
+    
+    func showImagesAction() {
+        if !isDetailInformation {
+            withAnimation(.spring()) {
+                showInformation = false
+                showIndicators = false
+                showImages = true
+            }
+        }
+    }
+    
+    func closingImages(moveY: CGFloat) {
+        detailImageOffsetY = moveY
+        
+        if detailImageOffsetY != .zero {
+            detailImageBackgroundOpacity = moveY > 0 ? (500 - moveY) / 500 : (500 + moveY) / 500
+            
+            withAnimation(.spring()) {
+                showInformation = true
+                showIndicators = true
+            }
+        }
+    }
+    
+    func closeImages() {
+        withAnimation(.spring()) {
+            showImages = false
+            showInformation = true
+            showIndicators = true
+        }
+        
+        imagePage = 0
+    }
+    
+    func cancelClosingImages() {
+        withAnimation(.spring()) {
+            showInformation = false
+            showIndicators = false
+        }
+    }
+    
+    func resetImagesProperties() {
+        withAnimation(.spring()) {
+            detailImageOffsetY = .zero
+        }
+        
+        withAnimation(.easeInOut) {
+            detailImageBackgroundOpacity = 1.0
+        }
     }
 }
 

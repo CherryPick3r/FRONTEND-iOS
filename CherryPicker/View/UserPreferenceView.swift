@@ -23,8 +23,7 @@ struct UserPreferenceView: View {
         "solo-tag-color"
     ]
     @State private var userPreferenceLoad = false
-    
-    @State private var tagOffsetX = CGFloat.zero
+    @State private var tagsOffsetX = CGFloat.zero
     
     var body: some View {
         ViewThatFits(in: .vertical) {
@@ -313,42 +312,39 @@ struct UserPreferenceView: View {
                 .padding(.bottom, 5)
                 .padding(.leading, 5)
             
-            
             ScrollView(.horizontal, showsIndicators: false) {
                 VStack(alignment: .leading) {
-                    HStack {
-                        ForEach(["음식이 빨리 나와요", "신선해요", "술집", "이색맛집", "코스요리 맛집"], id: \.hashValue) { title in
-                            tag(title: title, type: tagColors.randomElement() ?? "")
-                        }
-                    }
+                    tags(tagList: ["음식이 빨리 나와요", "신선해요", "술집", "이색맛집", "코스요리 맛집"])
                     
-                    HStack {
-                        ForEach(["혼술 맛집", "감성사진", "로컬맛집", "특별한 날 가기 좋아요", "친절해요"], id: \.hashValue) { title in
-                            tag(title: title, type: tagColors.randomElement() ?? "")
-                        }
-                    }
+                    tags(tagList: ["혼술 맛집", "감성사진", "로컬맛집", "특별한 날 가기 좋아요", "친절해요"])
                     
-                    HStack {
-                        ForEach(["컨셉이 독특해요", "쾌적한 공간", "술집", "혼밥하기 좋아요", "아늑한 분위기"], id: \.hashValue) { title in
-                            tag(title: title, type: tagColors.randomElement() ?? "")
-                        }
-                    }
+                    tags(tagList: ["컨셉이 독특해요", "쾌적한 공간", "술집", "혼밥하기 좋아요", "아늑한 분위기"])
                 }
-                .offset(x: tagOffsetX)
                 .padding()
-                .animation(.easeInOut(duration: 15), value: tagOffsetX)
-                .onAppear() {
-                    tagOffsetX = -500
-                }
-                .onChange(of: tagOffsetX) { newValue in
-                    if newValue == -500 {
-                        tagOffsetX = .zero
-                    }
-                }
+                .offset(x: tagsOffsetX)
+                .animation(.easeInOut(duration: 30).repeatForever(), value: tagsOffsetX)
             }
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                GeometryReader { reader in
+                    Color.clear
+                        .onAppear {
+                            tagsOffsetX = -reader.size.width + reader.safeAreaInsets.top + reader.safeAreaInsets.bottom
+                        }
+                }
+            }
             .background {
                 contentBackground()
+            }
+            .scrollDisabled(true)
+        }
+    }
+    
+    @ViewBuilder
+    func tags(tagList: [String]) -> some View {
+        LazyHStack {
+            ForEach(tagList, id: \.self) { title in
+                tag(title: title, type: tagColors.randomElement() ?? "")
             }
         }
     }

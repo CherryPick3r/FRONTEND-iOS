@@ -22,6 +22,7 @@
 		C59D211F29C9D83B00275DBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C59D211E29C9D83B00275DBA /* Assets.xcassets */; };
 		C59D212229C9D83B00275DBA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C59D212129C9D83B00275DBA /* Preview Assets.xcassets */; };
 		C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B579742A0A65A10034BA8E /* WithdrawalView.swift */; };
+		C5B96CB12A1116CB00045C93 /* ParticleEffectModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */; };
 		C5DF79782A0363780061DAD0 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DF79772A0363780061DAD0 /* AppView.swift */; };
 		C5FFC65E2A076E9100933C9D /* UserPreferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFC65D2A076E9100933C9D /* UserPreferenceView.swift */; };
 		C5FFC6622A07B53100933C9D /* RadarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFC6612A07B53100933C9D /* RadarChartView.swift */; };
@@ -42,6 +43,7 @@
 		C59D211E29C9D83B00275DBA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C59D212129C9D83B00275DBA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C5B579742A0A65A10034BA8E /* WithdrawalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithdrawalView.swift; sourceTree = "<group>"; };
+		C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffectModifier.swift; sourceTree = "<group>"; };
 		C5DF79772A0363780061DAD0 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
 		C5FFC65D2A076E9100933C9D /* UserPreferenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceView.swift; sourceTree = "<group>"; };
 		C5FFC6612A07B53100933C9D /* RadarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarChartView.swift; sourceTree = "<group>"; };
@@ -71,9 +73,7 @@
 				C5B579742A0A65A10034BA8E /* WithdrawalView.swift */,
 				C58F419929FFC17C00A98B2F /* CherryPickView.swift */,
 				C507595B2A029C6E00D7182E /* RestaurantDetailView.swift */,
-				C507595D2A02AC9800D7182E /* KeywordTagsView.swift */,
 				C5DF79772A0363780061DAD0 /* AppView.swift */,
-				C5FFC6612A07B53100933C9D /* RadarChartView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -82,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				C58F418829FDD84100A98B2F /* BackgroundModifier.swift */,
+				C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */,
 			);
 			path = Modifier;
 			sourceTree = "<group>";
@@ -113,6 +114,7 @@
 		C59D211929C9D83A00275DBA /* CherryPicker */ = {
 			isa = PBXGroup;
 			children = (
+				C5B579762A0B61BD0034BA8E /* ComponentView */,
 				C58F419129FDEA5300A98B2F /* Info.plist */,
 				C58F419629FFB51400A98B2F /* ViewModel */,
 				C58F418529FDD81400A98B2F /* Modifier */,
@@ -130,6 +132,15 @@
 				C59D212129C9D83B00275DBA /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		C5B579762A0B61BD0034BA8E /* ComponentView */ = {
+			isa = PBXGroup;
+			children = (
+				C5FFC6612A07B53100933C9D /* RadarChartView.swift */,
+				C507595D2A02AC9800D7182E /* KeywordTagsView.swift */,
+			);
+			path = ComponentView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -213,6 +224,7 @@
 				C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */,
 				C5FFC65E2A076E9100933C9D /* UserPreferenceView.swift in Sources */,
 				C58F419A29FFC17C00A98B2F /* CherryPickView.swift in Sources */,
+				C5B96CB12A1116CB00045C93 /* ParticleEffectModifier.swift in Sources */,
 				C507595C2A029C6F00D7182E /* RestaurantDetailView.swift in Sources */,
 				C5550F4E2A09EF3B005F9335 /* RestaurantListView.swift in Sources */,
 				C5DF79782A0363780061DAD0 /* AppView.swift in Sources */,

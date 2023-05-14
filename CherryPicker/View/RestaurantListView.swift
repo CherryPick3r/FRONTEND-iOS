@@ -27,22 +27,20 @@ enum ListSortType: String {
 }
 
 struct RestaurantListView: View {
-    private let columns = [
-        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
-    ]
+    @Environment(\.colorScheme) var colorScheme
     
     @FocusState private var searchFocus: Bool
     
-    @State private var listMode: ListMode
+    @State var listMode: ListMode
     @State private var seletedFilterTypes = Set<FilterType>()
     @State private var selectedSortType = ListSortType.newest
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var showRestaurantDetailView = false
     
-    init(listMode: ListMode) {
-        self.listMode = listMode
-    }
+    private let columns = [
+        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
+    ]
     
     var body: some View {
         VStack {
@@ -68,16 +66,11 @@ struct RestaurantListView: View {
         }
         .modifier(BackgroundModifier())
         .navigationTitle(listMode.rawValue)
+        .onTapGesture(perform: closeSearching)
         .toolbar {
             if !isSearching {
                 ToolbarItem {
-                    Button {
-                        withAnimation(.spring()) {
-                            isSearching = true
-                        }
-                        
-                        searchFocus = true
-                    } label: {
+                    Button(action: openSearching) {
                         Label("검색", systemImage: "magnifyingglass")
                             .foregroundColor(Color("main-point-color"))
                     }
@@ -202,13 +195,13 @@ struct RestaurantListView: View {
                     Label("서울 광진구 면목로 53 1층", systemImage: "map")
                         .font(.footnote)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color("main-point-color-weak"))
+                        .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                     
                     HStack(spacing: 15) {
                         Label("17:30 ~ 24:00", systemImage: "clock")
                             .font(.footnote)
                             .fontWeight(.semibold)
-                            .foregroundColor(Color("main-point-color-weak"))
+                            .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                         
                         Text("휴무 : 없음")
                             .font(.footnote)
@@ -283,20 +276,30 @@ struct RestaurantListView: View {
                 .padding(.horizontal)
                 .tint(Color("main-point-color"))
             
-            Button("취소") {
-                searchFocus = false
-                
-                withAnimation(.spring()) {
-                    isSearching = false
-                    searchText = ""
-                }
-            }
+            Button("취소", action: closeSearching)
             .font(.subheadline)
             .fontWeight(.bold)
             .foregroundColor(Color("main-point-color"))
             .padding(.trailing)
         }
         .transition(.move(edge: .top).combined(with: .opacity))
+    }
+    
+    func openSearching() {
+        withAnimation(.spring()) {
+            isSearching = true
+        }
+        
+        searchFocus = true
+    }
+    
+    func closeSearching() {
+        searchFocus = false
+        
+        withAnimation(.spring()) {
+            isSearching = false
+            searchText = ""
+        }
     }
 }
 

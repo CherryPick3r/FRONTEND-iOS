@@ -12,20 +12,24 @@ struct RadarChartGrid: Shape {
     let divisions: Int
     
     func path(in rect: CGRect) -> Path {
-        let radius = min(rect.maxX - rect.midX, rect.maxY - rect.midY)
+        let midX = rect.midX
+        let midY = rect.midY
+        let radius = min(rect.maxX - midX, rect.maxY - midY)
         let stride = radius / CGFloat(divisions)
         var path = Path()
         
         for category in 1...categories {
-            path.addLine(to: CGPoint(x: rect.midX + cos(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * radius, y: rect.midY + sin(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * radius))
+            path.move(to: CGPoint(x: midX, y: midY))
+            path.addLine(to: CGPoint(x: midX + cos(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * radius, y: midY + sin(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * radius))
         }
         
         for step in 1...divisions {
             let rad = CGFloat(step) * stride
-            path.move(to: CGPoint(x: rect.midX + cos(-.pi / 2) * rad, y: rect.midY + sin(-.pi / 2) * rad))
+            
+            path.move(to: CGPoint(x: midX + cos(-.pi / 2) * rad, y: midY + sin(-.pi / 2) * rad))
             
             for category in 1...categories {
-                path.addLine(to: CGPoint(x: rect.midX + cos(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * rad, y: rect.midY + sin(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * rad))
+                path.addLine(to: CGPoint(x: midX + cos(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * rad, y: midY + sin(CGFloat(category) * 2 * .pi / CGFloat(categories) - .pi / 2) * rad))
             }
         }
         
@@ -38,19 +42,23 @@ struct RadarChartPath: Shape {
     let maximum = 1.0
     
     func path(in rect: CGRect) -> Path {
-        guard 3 <= data.count, let minimum = data.min(), 0 <= minimum else {
+        let dataCount = data.count
+        let midX = rect.midX
+        let midY = rect.midY
+        
+        guard 3 <= dataCount, let minimum = data.min(), 0 <= minimum else {
             return Path()
         }
         
-        let radius = min(rect.maxX - rect.midX, rect.maxY - rect.midY)
+        let radius = min(rect.maxX - midX, rect.maxY - midY)
         var path = Path()
         
         for (index, entry) in data.enumerated() {
             switch index {
             case 0:
-                path.move(to: CGPoint(x: rect.midX + CGFloat(entry / maximum) * cos(CGFloat(index) * 2 * .pi / CGFloat(data.count) - .pi / 2) * radius, y: rect.midY + CGFloat(entry / maximum) * sin(CGFloat(index) * 2 * .pi / CGFloat(data.count) - .pi / 2) * radius))
+                path.move(to: CGPoint(x: midX + CGFloat(entry / maximum) * cos(CGFloat(index) * 2 * .pi / CGFloat(dataCount) - .pi / 2) * radius, y: midY + CGFloat(entry / maximum) * sin(CGFloat(index) * 2 * .pi / CGFloat(dataCount) - .pi / 2) * radius))
             default:
-                path.addLine(to: CGPoint(x: rect.midX + CGFloat(entry / maximum) * cos(CGFloat(index) * 2 * .pi / CGFloat(data.count) - .pi / 2) * radius, y: rect.midY + CGFloat(entry / maximum) * sin(CGFloat(index) * 2 * .pi / CGFloat(data.count) - .pi / 2) * radius))
+                path.addLine(to: CGPoint(x: midX + CGFloat(entry / maximum) * cos(CGFloat(index) * 2 * .pi / CGFloat(dataCount) - .pi / 2) * radius, y: midY + CGFloat(entry / maximum) * sin(CGFloat(index) * 2 * .pi / CGFloat(dataCount) - .pi / 2) * radius))
             }
         }
         
