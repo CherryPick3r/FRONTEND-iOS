@@ -8,17 +8,46 @@
 import SwiftUI
 
 struct KeywordTagsView: View {
+    //임시
+    @State private var value1 = CGFloat(0)
+    @State private var value2 = CGFloat(0)
+    @State private var value3 = CGFloat(0)
+    @State private var value4 = CGFloat(0)
+    @State private var value5 = CGFloat(0)
+    
     var body: some View {
         VStack(spacing: 10) {
-            keywordTagGauge(title: "음식이 맛있어요", value: 935)
+            keywordTagGauge(title: "음식이 맛있어요", value: value1)
             
-            keywordTagGauge(title: "특별한 메뉴가 있어요", value: 409)
+            keywordTagGauge(title: "특별한 메뉴가 있어요", value: value2)
             
-            keywordTagGauge(title: "재료가 신선해요", value: 376)
+            keywordTagGauge(title: "재료가 신선해요", value: value3)
             
-            keywordTagGauge(title: "친절해요", value: 348)
+            keywordTagGauge(title: "친절해요", value: value4)
             
-            keywordTagGauge(title: "혼밥하기 좋아요", value: 121)
+            keywordTagGauge(title: "혼밥하기 좋아요", value: value5)
+        }
+        .frame(maxHeight: 240)
+        .onAppear() {
+            withAnimation(.spring(response: 1.2)) {
+                value1 = 935
+            }
+            
+            withAnimation(.spring(response: 1.2).delay(0.1)) {
+                value2 = 409
+            }
+            
+            withAnimation(.spring(response: 1.2).delay(0.2)) {
+                value3 = 376
+            }
+            
+            withAnimation(.spring(response: 1.2).delay(0.3)) {
+                value4 = 348
+            }
+            
+            withAnimation(.spring(response: 1.2).delay(0.4)) {
+                value5 = 121
+            }
         }
     }
     
@@ -46,12 +75,6 @@ struct KeywordTagsView: View {
                         .font(.footnote)
                         .fontWeight(.bold)
                         .foregroundColor(Color("shape-light-color"))
-//                        .padding(5)
-//                        .background {
-//                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-//                                .fill(Color("shape-light-color"))
-//                                .shadow(color: .black.opacity(0.1), radius: 1)
-//                        }
                 }
                 .padding(10)
             }
