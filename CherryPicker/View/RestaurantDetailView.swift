@@ -34,6 +34,9 @@ struct RestaurantDetailView: View {
     
     //임시
     @State private var imagePage = 0
+    @State private var isBookmarked = false
+    @State private var isSharing = false
+    @State private var isFindingLocation = false
     
     init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true) {
         self._isCherryPick = isCherryPick
@@ -220,9 +223,11 @@ struct RestaurantDetailView: View {
                 .onChanged({ drag in
                     let moveY = drag.translation.height
                     
+                    print(informationOffsetY)
+                    
                     if showDetailInformation {
-                        if isDetailInformation && moveY < 0 {
-                            informationOffsetY += moveY / 500
+                        if isDetailInformation && informationOffsetY < 0 {
+                            informationOffsetY += moveY / 1000
                         } else {
                             informationOffsetY += moveY
                             imageBlurByDragOffset(moveY: moveY)
@@ -305,7 +310,6 @@ struct RestaurantDetailView: View {
                     .foregroundColor(Color("main-point-color"))
                 
                 KeywordTagsView()
-                    .frame(height: height / 3)
             }
             .padding(.bottom, 5)
             .transition(.opacity.animation(.easeInOut(duration: 0.5)))
@@ -462,25 +466,30 @@ struct RestaurantDetailView: View {
         VStack(spacing: 10) {
             Group {
                 Button {
-                    
+                    isFindingLocation = true
                 } label: {
                     Label("지도", systemImage: "location")
                         .labelStyle(.iconOnly)
+                        .modifier(ParticleModifier(systemImage: "location", status: isFindingLocation))
                 }
                 
                 Button {
-                    
+                    isSharing = true
                 } label: {
                     Label("공유하기", systemImage: "square.and.arrow.up")
                         .labelStyle(.iconOnly)
+                        .modifier(ParticleModifier(systemImage: "square.and.arrow.up", status: isSharing))
                 }
                 .padding(.bottom, 4)
                 
                 Button {
-                    
+                    withAnimation(.easeInOut) {
+                        isBookmarked.toggle()
+                    }
                 } label: {
-                    Label("즐겨찾기", systemImage: "bookmark")
+                    Label("즐겨찾기", systemImage: isBookmarked ? "bookmark.fill" : "bookmark")
                         .labelStyle(.iconOnly)
+                        .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isBookmarked))
                 }
             }
         }
@@ -605,7 +614,7 @@ struct RestaurantDetailView: View {
             
             showDetailInformation = true
         } else {
-            informationOffsetY += moveY / 500
+            informationOffsetY += moveY / 1000
         }
     }
     

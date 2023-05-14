@@ -237,6 +237,7 @@ struct CherryPickView: View {
                         Label("즐겨찾기", systemImage: isBookmarked ? "bookmark.fill" : "bookmark")
                             .labelStyle(.iconOnly)
                             .font(.title2)
+                            .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isBookmarked))
                     }
                 }
                 
@@ -341,9 +342,7 @@ struct CherryPickView: View {
         cardOffsetX = moveX
         cardOffsetY = moveY / 10
         
-        withAnimation(.spring()) {
-            cardSize = 0.9
-        }
+        cardSize = 1 - (moveX > 0 ? moveX : -moveX) / 1000
         
         indicatorsOpacity = moveX > 0 ? (maxOffset - moveX) / maxOffset : (maxOffset + moveX) / maxOffset
     }
