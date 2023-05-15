@@ -31,12 +31,14 @@ struct RestaurantDetailView: View {
     @State private var opacity = 1.0
     @State private var topButtonsOffsetY = CGFloat.zero
     @State private var toolButtonsOffsetX = CGFloat.zero
+    @State private var showSelectMapDialog = false
     
     //임시
     @State private var imagePage = 0
     @State private var isBookmarked = false
     @State private var isSharing = false
-    @State private var isFindingLocation = false
+    @State private var restuarantNaverID = 38738686
+    @State private var restuarantKakaoID = 861945610
     
     init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true) {
         self._isCherryPick = isCherryPick
@@ -183,9 +185,6 @@ struct RestaurantDetailView: View {
         VStack(alignment: .leading, spacing: isNoneNotchiPhone ? 10 : 15) {
             informationContent(height: height, detailMenuDisable: isNoneNotchiPhone)
         }
-        .onAppear() {
-            print(height)
-        }
         .padding(isNoneNotchiPhone ? 15 : 20)
         .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
         .background {
@@ -223,11 +222,9 @@ struct RestaurantDetailView: View {
                 .onChanged({ drag in
                     let moveY = drag.translation.height
                     
-                    print(informationOffsetY)
-                    
                     if showDetailInformation {
-                        if isDetailInformation && informationOffsetY < 0 {
-                            informationOffsetY += moveY / 1000
+                        if isDetailInformation && informationOffsetY <= 0 && moveY < 0 {
+                            informationOffsetY += moveY / 600
                         } else {
                             informationOffsetY += moveY
                             imageBlurByDragOffset(moveY: moveY)
@@ -466,12 +463,22 @@ struct RestaurantDetailView: View {
         VStack(spacing: 10) {
             Group {
                 Button {
-                    isFindingLocation = true
+                    showSelectMapDialog = true
                 } label: {
                     Label("지도", systemImage: "location")
                         .labelStyle(.iconOnly)
-                        .modifier(ParticleModifier(systemImage: "location", status: isFindingLocation))
+                        .modifier(ParticleModifier(systemImage: "location", status: showSelectMapDialog))
                 }
+                .confirmationDialog("지도 선택", isPresented: $showSelectMapDialog) {
+                    Button("네이버 지도") {
+                        openMapApplication(urlScheme: "nmap://place?id=\(restuarantNaverID)", websiteURL: "https://m.place.naver.com/restaurant/\(restuarantNaverID)/home")
+                    }
+                    
+                    Button("카카오 지도") {
+                        openMapApplication(urlScheme: "kakaomap://place?id=\(restuarantKakaoID)", websiteURL: "https://place.map.kakao.com/\(restuarantKakaoID)")
+                    }
+                }
+
                 
                 Button {
                     isSharing = true
@@ -614,7 +621,7 @@ struct RestaurantDetailView: View {
             
             showDetailInformation = true
         } else {
-            informationOffsetY += moveY / 1000
+            informationOffsetY += moveY / 6 00
         }
     }
     
@@ -748,6 +755,22 @@ struct RestaurantDetailView: View {
         
         withAnimation(.easeInOut) {
             detailImageBackgroundOpacity = 1.0
+        }
+    }
+    
+    func openMapApplication(urlScheme: String, websiteURL: String) {
+        guard let url = URL(string: urlScheme) else {
+            return
+        }
+
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        } else {
+            guard let websiteURL = URL(string: websiteURL) else {
+                return
+            }
+            
+            UIApplication.shared.open(websiteURL, options: [:], completionHandler: nil)
         }
     }
 }
