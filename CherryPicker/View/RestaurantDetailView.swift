@@ -621,7 +621,7 @@ struct RestaurantDetailView: View {
             
             showDetailInformation = true
         } else {
-            informationOffsetY += moveY / 6 00
+            informationOffsetY += moveY / 600
         }
     }
     
