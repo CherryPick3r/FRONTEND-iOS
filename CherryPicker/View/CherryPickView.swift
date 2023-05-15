@@ -58,7 +58,6 @@ struct CherryPickView: View {
                             ZStack {
                                 likeAndHateIndicators()
                                     .frame(maxWidth: 630)
-                                    .frame(width: width - 10)
                                 
                                 if showRestaurantCard {
                                     restaurantCard(width: cardImageWidth, height: height)

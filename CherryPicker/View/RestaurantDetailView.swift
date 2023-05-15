@@ -31,12 +31,16 @@ struct RestaurantDetailView: View {
     @State private var opacity = 1.0
     @State private var topButtonsOffsetY = CGFloat.zero
     @State private var toolButtonsOffsetX = CGFloat.zero
+    @State private var showSelectMapDialog = false
+    @State private var showDetailMenu = false
+    @State private var cardSize = CGSize.zero
     
     //임시
     @State private var imagePage = 0
     @State private var isBookmarked = false
     @State private var isSharing = false
-    @State private var isFindingLocation = false
+    @State private var restuarantNaverID = 38738686
+    @State private var restuarantKakaoID = 861945610
     
     init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true) {
         self._isCherryPick = isCherryPick
@@ -183,38 +187,29 @@ struct RestaurantDetailView: View {
         VStack(alignment: .leading, spacing: isNoneNotchiPhone ? 10 : 15) {
             informationContent(height: height, detailMenuDisable: isNoneNotchiPhone)
         }
-        .onAppear() {
-            print(height)
-        }
         .padding(isNoneNotchiPhone ? 15 : 20)
         .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
         .background {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color("background-shape-color"))
                 .shadow(color: .black.opacity(0.25), radius: 5)
+                .background {
+                    if showDetailMenu {
+                        cherryPickCountInformation()
+                    }
+                }
         }
         .overlay {
-            VStack {
-                HStack {
-                    Spacer()
-                    
-                    Text("총 1093명이 체리픽 받았어요!")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("shape-light-color"))
-                        .padding(.horizontal)
-                        .padding(.vertical, 10)
-                        .background {
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(Color("main-point-color"))
-                                .shadow(color: .black.opacity(0.25), radius: 5)
-                        }
-                        .padding(.trailing)
-                }
-                
-                Spacer()
+            if !showDetailMenu {
+                cherryPickCountInformation()
             }
-            .offset(y: -20)
+        }
+        .overlay(alignment: .top) {
+            detailMenu()
+                .rotation3DEffect(Angle(degrees: 180), axis: (x: 0, y: 1, z: 0))
+                .opacity(showDetailMenu ? 1 : 0)
+                .padding(isNoneNotchiPhone ? 15 : 20)
+                .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
         }
         .frame(maxWidth: 500)
         .padding(.top)
@@ -223,99 +218,138 @@ struct RestaurantDetailView: View {
                 .onChanged({ drag in
                     let moveY = drag.translation.height
                     
-                    print(informationOffsetY)
-                    
-                    if showDetailInformation {
-                        if isDetailInformation && informationOffsetY < 0 {
-                            informationOffsetY += moveY / 1000
-                        } else {
-                            informationOffsetY += moveY
-                            imageBlurByDragOffset(moveY: moveY)
-                        }
+                    if showDetailMenu {
+                        informationOffsetY += moveY / 600
                     } else {
-                        showingDetailInformation(moveY: moveY)
+                        if showDetailInformation {
+                            if isDetailInformation && informationOffsetY <= 0 && moveY < 0 {
+                                informationOffsetY += moveY / 600
+                            } else {
+                                informationOffsetY += moveY
+                                imageBlurByDragOffset(moveY: moveY)
+                            }
+                        } else {
+                            showingDetailInformation(moveY: moveY)
+                        }
                     }
                 })
                 .onEnded({ drag in
-                    if showDetailInformation {
-                        if informationOffsetY < 300, !isDetailInformation {
-                            openDetailInformation()
-                        } else if informationOffsetY > 200 {
-                            closeDetailInformation()
-                        } else {
-                            cancelClosingDetailInformation()
-                        }
-                    } else {
+                    if showDetailMenu {
                         withAnimation(.spring()) {
                             informationOffsetY = .zero
+                        }
+                    } else {
+                        if showDetailInformation {
+                            if informationOffsetY < 300, !isDetailInformation {
+                                openDetailInformation()
+                            } else if informationOffsetY > 200 {
+                                closeDetailInformation()
+                            } else {
+                                cancelClosingDetailInformation()
+                            }
+                        } else {
+                            withAnimation(.spring()) {
+                                informationOffsetY = .zero
+                            }
                         }
                     }
                 })
         )
         .offset(y: informationOffsetY)
         .padding(.horizontal)
+        .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+        
+    }
+    
+    @ViewBuilder
+    func cherryPickCountInformation() -> some View {
+        VStack {
+            HStack {
+                Spacer()
+                
+                Text("총 1093명이 체리픽 받았어요!")
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("shape-light-color"))
+                    .opacity(showDetailMenu ? 0 : 1)
+                    .padding(.horizontal)
+                    .padding(.vertical, 10)
+                    .background {
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(Color("main-point-color"))
+                            .shadow(color: .black.opacity(0.25), radius: 5)
+                    }
+                    .padding(.trailing)
+            }
+            
+            Spacer()
+        }
+        .offset(y: -20)
     }
     
     @ViewBuilder
     func informationContent(height: CGFloat, detailMenuDisable: Bool) -> some View {
-        HStack(alignment: .bottom) {
-            Text("이이요")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(Color("main-text-color"))
-            
-            Text("일식당")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(Color("main-point-color-weak"))
-                .padding(.bottom, 5)
-            
-            Spacer()
-        }
-        
-        Text("식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"")
-            .font(.subheadline)
-            .fontWeight(.bold)
-            .foregroundColor(Color("secondary-text-color-strong"))
-        
-        VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
-            Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
-                .font(.footnote)
-                .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
-            
-            if !showDetailInformation {
-                HStack {
-                    Label("11:50 ~ 22:00", systemImage: "clock")
-                        .font(.footnote)
-                        .fontWeight(.semibold)
-                        .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
-                    
-                    Text("휴무 : 일요일")
-                        .font(.footnote)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("main-point-color-strong"))
-                }
-                .transition(.opacity)
-            } else {
-                detailHours()
-                    .transition(.opacity.animation(.easeInOut(duration: 0.5)))
-            }
-        }
-        
-        if showDetailInformation {
-            VStack(alignment: .leading) {
-                Text("키워드 태그")
-                    .font(.headline)
+        Group {
+            HStack(alignment: .bottom) {
+                Text("이이요")
+                    .font(.title)
                     .fontWeight(.bold)
-                    .foregroundColor(Color("main-point-color"))
+                    .foregroundColor(Color("main-text-color"))
                 
-                KeywordTagsView()
+                Text("일식당")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color("main-point-color-weak"))
+                    .padding(.bottom, 5)
+                
+                Spacer()
             }
-            .padding(.bottom, 5)
-            .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+            
+            Text("식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"")
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .foregroundColor(Color("secondary-text-color-strong"))
+            
+            VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
+                Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
+                    .font(.footnote)
+                    .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                
+                if !showDetailInformation {
+                    HStack {
+                        Label("11:50 ~ 22:00", systemImage: "clock")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                            .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                        
+                        Text("휴무 : 일요일")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("main-point-color-strong"))
+                    }
+                    .transition(.opacity)
+                } else {
+                    detailHours()
+                        .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+                }
+            }
+            
+            if showDetailInformation {
+                VStack(alignment: .leading) {
+                    Text("키워드 태그")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-point-color"))
+                    
+                    KeywordTagsView()
+                }
+                .padding(.bottom, 5)
+                .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+            }
+            
+            representativeMenu(detailMenuDisable: detailMenuDisable)
         }
-        
-        representativeMenu(detailMenuDisable: detailMenuDisable)
+        .opacity(showDetailMenu ? 0 : 1)
     }
     
     @ViewBuilder
@@ -328,6 +362,16 @@ struct RestaurantDetailView: View {
                     .foregroundColor(Color("main-point-color"))
                 
                 Spacer()
+                
+                if showDetailInformation {
+                    Button("더보기") {
+                        withAnimation(.spring()) {
+                            showDetailMenu = true
+                        }
+                    }
+                    .font(.footnote)
+                    .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                }
             }
             
             VStack(spacing: 10) {
@@ -341,6 +385,137 @@ struct RestaurantDetailView: View {
                     menu(title: "야끼돈부리", price: 16000)
                     
                     menu(title: "도미연어덮밥", price: 16500)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func detailMenu() -> some View {
+        VStack {
+            HStack {
+                Text("메뉴")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color"))
+                
+                Spacer()
+                
+                Button {
+                    withAnimation(.spring()) {
+                        showDetailMenu = false
+                    }
+                } label: {
+                    Label("닫기", systemImage: "xmark.circle.fill")
+                        .labelStyle(.iconOnly)
+                        .font(.largeTitle)
+                        .foregroundColor(Color("main-point-color"))
+                        .shadow(color: .black.opacity(0.25), radius: 5)
+                }
+
+            }
+            
+            ViewThatFits(in: .vertical) {
+                LazyVStack(spacing: 10) {
+                    Group {
+                        menu(title: "초밥(11P)", price: 20000)
+                        
+                        menu(title: "회덮밥(점심)", price: 13500)
+                        
+                        menu(title: "이이요 스페셜 카이센동", price: 35000)
+                        
+                        menu(title: "야끼돈부리", price: 16000)
+                        
+                        menu(title: "도미연어덮밥", price: 16500)
+                    }
+                    
+                    Group {
+                        menu(title: "초밥(11P)", price: 20000)
+                        
+                        menu(title: "회덮밥(점심)", price: 13500)
+                        
+                        menu(title: "이이요 스페셜 카이센동", price: 35000)
+                        
+                        menu(title: "야끼돈부리", price: 16000)
+                        
+                        menu(title: "도미연어덮밥", price: 16500)
+                    }
+                    
+                    Group {
+                        menu(title: "초밥(11P)", price: 20000)
+                        
+                        menu(title: "회덮밥(점심)", price: 13500)
+                        
+                        menu(title: "이이요 스페셜 카이센동", price: 35000)
+                        
+                        menu(title: "야끼돈부리", price: 16000)
+                        
+                        menu(title: "도미연어덮밥", price: 16500)
+                    }
+                    
+                    Group {
+                        menu(title: "초밥(11P)", price: 20000)
+                        
+                        menu(title: "회덮밥(점심)", price: 13500)
+                        
+                        menu(title: "이이요 스페셜 카이센동", price: 35000)
+                        
+                        menu(title: "야끼돈부리", price: 16000)
+                        
+                        menu(title: "도미연어덮밥", price: 16500)
+                    }
+                }
+                
+                ScrollView {
+                    LazyVStack(spacing: 10) {
+                        Group {
+                            menu(title: "초밥(11P)", price: 20000)
+                            
+                            menu(title: "회덮밥(점심)", price: 13500)
+                            
+                            menu(title: "이이요 스페셜 카이센동", price: 35000)
+                            
+                            menu(title: "야끼돈부리", price: 16000)
+                            
+                            menu(title: "도미연어덮밥", price: 16500)
+                        }
+                        
+                        Group {
+                            menu(title: "초밥(11P)", price: 20000)
+                            
+                            menu(title: "회덮밥(점심)", price: 13500)
+                            
+                            menu(title: "이이요 스페셜 카이센동", price: 35000)
+                            
+                            menu(title: "야끼돈부리", price: 16000)
+                            
+                            menu(title: "도미연어덮밥", price: 16500)
+                        }
+                        
+                        Group {
+                            menu(title: "초밥(11P)", price: 20000)
+                            
+                            menu(title: "회덮밥(점심)", price: 13500)
+                            
+                            menu(title: "이이요 스페셜 카이센동", price: 35000)
+                            
+                            menu(title: "야끼돈부리", price: 16000)
+                            
+                            menu(title: "도미연어덮밥", price: 16500)
+                        }
+                        
+                        Group {
+                            menu(title: "초밥(11P)", price: 20000)
+                            
+                            menu(title: "회덮밥(점심)", price: 13500)
+                            
+                            menu(title: "이이요 스페셜 카이센동", price: 35000)
+                            
+                            menu(title: "야끼돈부리", price: 16000)
+                            
+                            menu(title: "도미연어덮밥", price: 16500)
+                        }
+                    }
                 }
             }
         }
@@ -466,12 +641,22 @@ struct RestaurantDetailView: View {
         VStack(spacing: 10) {
             Group {
                 Button {
-                    isFindingLocation = true
+                    showSelectMapDialog = true
                 } label: {
                     Label("지도", systemImage: "location")
                         .labelStyle(.iconOnly)
-                        .modifier(ParticleModifier(systemImage: "location", status: isFindingLocation))
+                        .modifier(ParticleModifier(systemImage: "location", status: showSelectMapDialog))
                 }
+                .confirmationDialog("지도 선택", isPresented: $showSelectMapDialog) {
+                    Button("네이버 지도") {
+                        openMapApplication(urlScheme: "nmap://place?id=\(restuarantNaverID)", websiteURL: "https://m.place.naver.com/restaurant/\(restuarantNaverID)/home")
+                    }
+                    
+                    Button("카카오 지도") {
+                        openMapApplication(urlScheme: "kakaomap://place?id=\(restuarantKakaoID)", websiteURL: "https://place.map.kakao.com/\(restuarantKakaoID)")
+                    }
+                }
+
                 
                 Button {
                     isSharing = true
@@ -614,7 +799,7 @@ struct RestaurantDetailView: View {
             
             showDetailInformation = true
         } else {
-            informationOffsetY += moveY / 1000
+            informationOffsetY += moveY / 600
         }
     }
     
@@ -748,6 +933,22 @@ struct RestaurantDetailView: View {
         
         withAnimation(.easeInOut) {
             detailImageBackgroundOpacity = 1.0
+        }
+    }
+    
+    func openMapApplication(urlScheme: String, websiteURL: String) {
+        guard let url = URL(string: urlScheme) else {
+            return
+        }
+
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        } else {
+            guard let websiteURL = URL(string: websiteURL) else {
+                return
+            }
+            
+            UIApplication.shared.open(websiteURL, options: [:], completionHandler: nil)
         }
     }
 }
