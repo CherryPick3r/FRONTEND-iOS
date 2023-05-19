@@ -15,6 +15,7 @@ struct StartView: View {
     
     @State private var showSignInView = false
     @State private var showSignUpView = false
+    @State private var categoryIndicatorOffsetY = CGFloat(0)
     
     var body: some View {
         NavigationStack {
@@ -46,6 +47,8 @@ struct StartView: View {
                     .fontWeight(.bold)
                     .foregroundColor(Color("secondary-text-color-strong"))
                     .padding(.bottom, 50)
+                
+                categoryIndicator()
             }
             .navigationTitle("")
             .modifier(BackgroundModifier())
@@ -94,7 +97,7 @@ struct StartView: View {
                     
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .strokeBorder(Color("main-point-color"), lineWidth: 2)
-                    .shadow(radius: 10)
+                        .shadow(radius: 10)
                 }
             }
         }
@@ -229,9 +232,34 @@ struct StartView: View {
                         .foregroundColor(Color("main-point-color-weak"))
                 }
                 .padding()
-
+                
             }
             .background(Color("background-shape-color"))
+        }
+    }
+    
+    @ViewBuilder
+    func categoryIndicator() -> some View {
+        Button {
+            
+        } label: {
+            VStack(alignment: .center) {
+                Text("내려서 카테고리 보기")
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color-weak"))
+                    .padding(.bottom)
+                
+                Label("내리기", systemImage: "chevron.compact.down")
+                    .labelStyle(.iconOnly)
+                    .font(.title)
+                    .foregroundColor(Color("main-point-color-weak"))
+            }
+            .offset(y: categoryIndicatorOffsetY)
+            .animation(Animation.easeOut(duration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
+            .onAppear {
+                categoryIndicatorOffsetY = 5
+            }
         }
     }
 }

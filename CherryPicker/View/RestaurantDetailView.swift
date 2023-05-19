@@ -185,7 +185,7 @@ struct RestaurantDetailView: View {
         let isNoneNotchiPhone = height == 597
         
         VStack(alignment: .leading, spacing: isNoneNotchiPhone ? 10 : 15) {
-            informationContent(height: height, detailMenuDisable: isNoneNotchiPhone)
+            informationContent(detailMenuDisable: isNoneNotchiPhone)
         }
         .padding(isNoneNotchiPhone ? 15 : 20)
         .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
@@ -205,11 +205,13 @@ struct RestaurantDetailView: View {
             }
         }
         .overlay(alignment: .top) {
-            detailMenu()
-                .rotation3DEffect(Angle(degrees: 180), axis: (x: 0, y: 1, z: 0))
-                .opacity(showDetailMenu ? 1 : 0)
-                .padding(isNoneNotchiPhone ? 15 : 20)
-                .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
+            if showDetailMenu {
+                detailMenu()
+                    .rotation3DEffect(Angle(degrees: 180), axis: (x: 0, y: 1, z: 0))
+                    .opacity(showDetailMenu ? 1 : 0)
+                    .padding(isNoneNotchiPhone ? 15 : 20)
+                    .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
+            }
         }
         .frame(maxWidth: 500)
         .padding(.top)
@@ -257,8 +259,7 @@ struct RestaurantDetailView: View {
         )
         .offset(y: informationOffsetY)
         .padding(.horizontal)
-        .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-        
+        .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
     }
     
     @ViewBuilder
@@ -288,7 +289,7 @@ struct RestaurantDetailView: View {
     }
     
     @ViewBuilder
-    func informationContent(height: CGFloat, detailMenuDisable: Bool) -> some View {
+    func informationContent(detailMenuDisable: Bool) -> some View {
         Group {
             HStack(alignment: .bottom) {
                 Text("이이요")

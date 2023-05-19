@@ -26,14 +26,14 @@ struct CherryPickView: View {
     
     @State private var showRestaurantCard = false
     @State private var showIndicators = false
-    @State private var likeAndHateButtonsScale: CGFloat = 1.2
-    @State private var likeAndHateButtonsSubScale: CGFloat = 1.1
-    @State private var likeThumbOffset: CGFloat = 10
-    @State private var hateThumbOffset: CGFloat = -10
-    @State private var cardOffsetX: CGFloat = .zero
-    @State private var cardOffsetY: CGFloat = .zero
+    @State private var likeAndHateButtonsScale = CGFloat(1.2)
+    @State private var likeAndHateButtonsSubScale = CGFloat(1.1)
+    @State private var likeThumbOffset = CGFloat(10)
+    @State private var hateThumbOffset = CGFloat(-10)
+    @State private var cardOffsetX = CGFloat.zero
+    @State private var cardOffsetY = CGFloat.zero
     @State private var cardSize = 1.0
-    @State private var userSelection: UserSelection = .none
+    @State private var userSelection = UserSelection.none
     @State private var indicatorsOpacity = 1.0
     
     //임시용
