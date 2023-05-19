@@ -16,59 +16,71 @@ struct StartView: View {
     @State private var showSignInView = false
     @State private var showSignUpView = false
     @State private var categoryIndicatorOffsetY = CGFloat(0)
+    @State private var contentID = 0
+    @State private var contentOffsetY = CGFloat(0)
+    @State private var safeArea = CGFloat(0)
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Text("🍒")
-                    .font(.system(size: 100))
-                    .padding(.top, 50)
+            GeometryReader { reader in
+                let height = reader.size.height
+                let width = reader.size.width
                 
-                Spacer()
-                
-                Text("맛있는 음식점을 찾고\n 싶으신가요?")
-                    .multilineTextAlignment(.center)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-point-color"))
-                    .padding(.horizontal)
-                
-                HStack {
-                    Spacer()
+                VStack {
+                    startContent(height: height - safeArea)
+                        .frame(width: reader.size.width, height: reader.size.height)
+                        .gesture(
+                            DragGesture()
+                                .onChanged({ drag in
+                                    showingCategoryContent(moveY: drag.translation.height)
+                                })
+                                .onEnded({ drag in
+                                    showCategoryContent(height: height - safeArea)
+                                })
+                        )
+                        .offset(y: contentOffsetY)
+                        .onAppear() {
+                            print(height == 551)
+                            print(safeArea)
+                        }
                     
-                    startButton()
-                    
-                    Spacer()
+                    categoryContent()
+                        .frame(width: width, height: height)
+                        .gesture(
+                            DragGesture()
+                                .onChanged({ drag in
+                                    showingStartContent(moveY: drag.translation.height)
+                                })
+                                .onEnded({ drag in
+                                    showStartContent(height: height)
+                                })
+                        )
+                        .offset(y: contentOffsetY)
                 }
-                
-                Text("지겨운 메뉴 고민은 그만! 이제는 음식도 \n재미있게 Cherry Picker.")
-                    .multilineTextAlignment(.center)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("secondary-text-color-strong"))
-                    .padding(.bottom, 50)
-                
-                categoryIndicator()
-            }
-            .navigationTitle("")
-            .modifier(BackgroundModifier())
-            .toolbar {
-                ToolbarItem {
-                    NavigationLink {
-                        MenuView()
-                    } label: {
-                        Label("메뉴", systemImage: "line.3.horizontal")
-                            .foregroundColor(Color("main-point-color"))
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
+                .modifier(BackgroundModifier())
+                .toolbar {
+                    ToolbarItem {
+                        NavigationLink {
+                            MenuView()
+                        } label: {
+                            Label("메뉴", systemImage: "line.3.horizontal")
+                                .foregroundColor(Color("main-point-color"))
+                        }
                     }
                 }
-            }
-            .sheet(isPresented: $showSignInView) {
-                signIn()
-                    .presentationDetents([.medium])
-            }
-            .sheet(isPresented: $showSignUpView) {
-                signUp()
-                    .presentationDetents([.medium])
+                .sheet(isPresented: $showSignInView) {
+                    signIn()
+                        .presentationDetents([.medium])
+                }
+                .sheet(isPresented: $showSignUpView) {
+                    signUp()
+                        .presentationDetents([.medium])
+                }
+                .onAppear() {
+                    safeArea = height == 551 ? 20 : 44
+                }
             }
         }
         .tint(Color("main-point-color"))
@@ -239,28 +251,135 @@ struct StartView: View {
     }
     
     @ViewBuilder
-    func categoryIndicator() -> some View {
-        Button {
-            
-        } label: {
+    func categoryIndicator(isCategoryContent: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             VStack(alignment: .center) {
-                Text("내려서 카테고리 보기")
+                Text("카테고리 보기")
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color-weak"))
                     .padding(.bottom)
                 
-                Label("내리기", systemImage: "chevron.compact.down")
+                Label("내리기", systemImage: "chevron.compact.up")
                     .labelStyle(.iconOnly)
                     .font(.title)
                     .foregroundColor(Color("main-point-color-weak"))
+                    .rotationEffect(.degrees(isCategoryContent ? 180 : 0))
             }
             .offset(y: categoryIndicatorOffsetY)
-            .animation(Animation.easeOut(duration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
+            .animation(Animation.interactiveSpring(response: 1.2, dampingFraction: 1.2, blendDuration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
             .onAppear {
-                categoryIndicatorOffsetY = 5
+                categoryIndicatorOffsetY = 20
             }
         }
+        .padding(.bottom)
+    }
+    
+    @ViewBuilder
+    func startContent(height: CGFloat) -> some View {
+        let isCategoryContent = contentOffsetY == -height
+        
+        VStack {
+            Text("🍒")
+                .font(.system(size: 100))
+                .padding(.top, 50)
+            
+            Spacer()
+            
+            Text("맛있는 음식점을 찾고\n 싶으신가요?")
+                .multilineTextAlignment(.center)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(Color("main-point-color"))
+                .padding(.horizontal)
+            
+            HStack {
+                Spacer()
+                
+                startButton()
+                
+                Spacer()
+            }
+            
+            Text("지겨운 메뉴 고민은 그만! 이제는 음식도 \n재미있게 Cherry Picker.")
+                .multilineTextAlignment(.center)
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(Color("secondary-text-color-strong"))
+                .padding(.bottom, isCategoryContent ? 200 : 30)
+            
+            categoryIndicator(isCategoryContent: isCategoryContent) {
+                if isCategoryContent {
+                    withAnimation(.easeInOut) {
+                        contentOffsetY = 0
+                    }
+                    
+                    categoryIndicatorOffsetY = 20
+                } else {
+                    withAnimation(.easeInOut) {
+                        contentOffsetY = -height
+                    }
+                    
+                    categoryIndicatorOffsetY = 0
+                }
+                
+                
+            }
+        }
+        .onAppear() {
+            print(height)
+        }
+    }
+    
+    @ViewBuilder
+    func categoryContent() -> some View {
+        VStack {
+            Spacer()
+        }
+    }
+    
+    func showingStartContent(moveY: CGFloat) {
+        if moveY > 0 {
+            contentOffsetY += moveY
+        } else {
+            contentOffsetY += moveY / 500
+        }
+    }
+    
+    func showingCategoryContent(moveY: CGFloat) {
+        if moveY < 0 {
+            contentOffsetY += moveY
+        } else {
+            contentOffsetY += moveY / 500
+        }
+    }
+    
+    func showCategoryContent(height: CGFloat) {
+        if contentOffsetY < -150 {
+            withAnimation(.easeInOut) {
+                contentOffsetY = -height
+            }
+        } else {
+            withAnimation(.easeInOut) {
+                contentOffsetY = 0
+            }
+        }
+        
+        categoryIndicatorOffsetY = 0
+    }
+    
+    func showStartContent(height: CGFloat) {
+        if contentOffsetY > -550 {
+            withAnimation(.easeInOut) {
+                contentOffsetY = 0
+            }
+        } else {
+            withAnimation(.easeInOut) {
+                contentOffsetY = -height
+            }
+        }
+        
+        categoryIndicatorOffsetY = 20
     }
 }
 
