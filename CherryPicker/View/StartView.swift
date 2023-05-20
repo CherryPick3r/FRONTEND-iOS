@@ -254,7 +254,7 @@ struct StartView: View {
     func categoryIndicator(isCategoryContent: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(alignment: .center) {
-                Text("카테고리 보기")
+                Text(isCategoryContent ? "아래로 내려서\n무작정 시작하기" : "위로 올려서\n카테고리로 시작하기")
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color-weak"))
@@ -269,7 +269,7 @@ struct StartView: View {
             .offset(y: categoryIndicatorOffsetY)
             .animation(Animation.interactiveSpring(response: 1.2, dampingFraction: 1.2, blendDuration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
             .onAppear {
-                categoryIndicatorOffsetY = 20
+                categoryIndicatorOffsetY = 15
             }
         }
         .padding(.bottom)
@@ -314,7 +314,7 @@ struct StartView: View {
                         contentOffsetY = 0
                     }
                     
-                    categoryIndicatorOffsetY = 20
+                    categoryIndicatorOffsetY = 15
                 } else {
                     withAnimation(.easeInOut) {
                         contentOffsetY = -height
@@ -325,9 +325,6 @@ struct StartView: View {
                 
                 
             }
-        }
-        .onAppear() {
-            print(height)
         }
     }
     
@@ -347,7 +344,7 @@ struct StartView: View {
     }
     
     func showingCategoryContent(moveY: CGFloat) {
-        if moveY < 0 {
+        if contentOffsetY < 0 {
             contentOffsetY += moveY
         } else {
             contentOffsetY += moveY / 500
@@ -379,7 +376,7 @@ struct StartView: View {
             }
         }
         
-        categoryIndicatorOffsetY = 20
+        categoryIndicatorOffsetY = 15
     }
 }
 
