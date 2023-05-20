@@ -122,6 +122,7 @@ struct StartView: View {
             Spacer()
         }
         .background(Color("background-color").opacity(0.1))
+        .offset(y: categoryIndicatorOffsetY)
         .gesture(
             DragGesture()
                 .onChanged({ drag in
@@ -132,7 +133,6 @@ struct StartView: View {
                 })
         )
         .matchedGeometryEffect(id: "indicator", in: heroEffect)
-        .offset(y: categoryIndicatorOffsetY)
         .animation(Animation.interactiveSpring(response: 1.2, dampingFraction: 1.2, blendDuration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
         .onAppear {
             categoryIndicatorOffsetY = isCategoryContent ? 0 : 15
@@ -181,7 +181,7 @@ struct StartView: View {
     
     @ViewBuilder
     func categoryContents(height: CGFloat) -> some View {
-        LazyVStack(spacing: 30) {
+        VStack(spacing: 30) {
             Text("따로 원하시는 카테고리가 있으신가요?")
                 .multilineTextAlignment(.center)
                 .font(.title3)
