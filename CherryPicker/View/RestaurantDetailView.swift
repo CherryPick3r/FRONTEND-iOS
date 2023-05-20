@@ -224,7 +224,7 @@ struct RestaurantDetailView: View {
                         informationOffsetY += moveY / 600
                     } else {
                         if showDetailInformation {
-                            if isDetailInformation && informationOffsetY <= 0 && moveY < 0 {
+                            if isDetailInformation && informationOffsetY <= 0 && moveY <= 0 {
                                 informationOffsetY += moveY / 600
                             } else {
                                 informationOffsetY += moveY
@@ -242,7 +242,7 @@ struct RestaurantDetailView: View {
                         }
                     } else {
                         if showDetailInformation {
-                            if informationOffsetY < 300, !isDetailInformation {
+                            if informationOffsetY < 300 && !isDetailInformation {
                                 openDetailInformation()
                             } else if informationOffsetY > 200 {
                                 closeDetailInformation()
@@ -784,11 +784,7 @@ struct RestaurantDetailView: View {
     }
     
     func imageBlurByDragOffset(moveY: CGFloat) {
-        if moveY < 0 {
-            imageBlur -= (moveY / 5)
-        } else {
-            imageBlur -= (moveY / 5)
-        }
+        imageBlur -= moveY / 5
     }
     
     func showingDetailInformation(moveY: CGFloat) {
@@ -835,11 +831,7 @@ struct RestaurantDetailView: View {
         }
         
         withAnimation(.easeInOut) {
-            if isDetailInformation {
-                imageBlur = 100
-            } else {
-                imageBlur = 0
-            }
+            imageBlur = isDetailInformation ? 100 : 0
         }
     }
     
@@ -866,13 +858,15 @@ struct RestaurantDetailView: View {
     }
     
     func closingAction(moveY: CGFloat) {
-        opacity = (maxOffsetY - moveY / 5) / maxOffsetY
+        let reduceMoveY = moveY / 5
         
-        topButtonsOffsetY = -moveY / 5
+        opacity = (maxOffsetY - reduceMoveY) / maxOffsetY
         
-        toolButtonsOffsetX = moveY / 5
+        topButtonsOffsetY = -reduceMoveY
         
-        informationOffsetY = moveY / 5
+        toolButtonsOffsetX = reduceMoveY
+        
+        informationOffsetY = reduceMoveY
     }
     
     func cancelClosing() {
