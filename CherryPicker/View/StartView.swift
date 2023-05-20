@@ -28,15 +28,14 @@ struct StartView: View {
                 let height = reader.size.height
                 let width = reader.size.width
                 
-                VStack {
+                LazyVStack {
                     startContents(height: height)
                         .frame(width: reader.size.width, height: reader.size.height)
-                        .offset(y: contentOffsetY)
                     
                     categoryContents(height: height)
                         .frame(width: width, height: height)
-                        .offset(y: contentOffsetY)
                 }
+                .offset(y: contentOffsetY)
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(BackgroundModifier())
@@ -182,7 +181,7 @@ struct StartView: View {
     
     @ViewBuilder
     func categoryContents(height: CGFloat) -> some View {
-        VStack(spacing: 30) {
+        LazyVStack(spacing: 30) {
             Text("따로 원하시는 카테고리가 있으신가요?")
                 .multilineTextAlignment(.center)
                 .font(.title3)
@@ -220,14 +219,14 @@ struct StartView: View {
     
     @ViewBuilder
     func categoryList() -> some View {
-        VStack(spacing: 40) {
-            categoryButton(title: "\"\("단체모임")\"으로 시작하기", tags: ["쾌적한 공간", "푸짐해요", "단체모임", "가성비 맛집"])
+        LazyVStack(spacing: 40) {
+            categoryButton(title: "\"\("단체모임")\"", tags: ["쾌적한 공간", "푸짐해요", "단체모임", "가성비 맛집"])
             
-            categoryButton(title: "\"\("카페/공부")\"로 시작하기", tags: ["카페", "커피맛집", "오래 있기 좋아요", "맛있는 음료"])
+            categoryButton(title: "\"\("카페/공부")\"", tags: ["카페", "커피맛집", "오래 있기 좋아요", "맛있는 음료"])
             
-            categoryButton(title: "\"\("사진맛집")\"으로 시작하기", tags: ["컨셉이 독특해요", "감성사진"])
+            categoryButton(title: "\"\("사진맛집")\"", tags: ["컨셉이 독특해요", "감성사진"])
             
-            categoryButton(title: "\"\("혼밥")\"으로 시작하기", tags: ["가성비 맛집", "혼밥하기 좋아요"])
+            categoryButton(title: "\"\("혼밥")\"", tags: ["가성비 맛집", "혼밥하기 좋아요"])
         }
     }
     
@@ -269,7 +268,7 @@ struct StartView: View {
                         .fill(Color("background-shape-color"))
                     
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(Color("main-point-color"), lineWidth: 2)
+                        .strokeBorder(Color("main-point-color-weak"), lineWidth: 2)
                         .shadow(color: .black.opacity(0.1), radius: 5)
                 }
             }
