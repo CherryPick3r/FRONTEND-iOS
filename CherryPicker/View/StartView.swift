@@ -31,28 +31,10 @@ struct StartView: View {
                 VStack {
                     startContents(height: height)
                         .frame(width: reader.size.width, height: reader.size.height)
-                        .gesture(
-                            DragGesture()
-                                .onChanged({ drag in
-                                    showingCategoryContent(moveY: drag.translation.height)
-                                })
-                                .onEnded({ drag in
-                                    showCategoryContent(height: height)
-                                })
-                        )
                         .offset(y: contentOffsetY)
                     
                     categoryContents(height: height)
                         .frame(width: width, height: height)
-                        .gesture(
-                            DragGesture()
-                                .onChanged({ drag in
-                                    showingStartContent(moveY: drag.translation.height, height: height)
-                                })
-                                .onEnded({ drag in
-                                    showStartContent(height: height)
-                                })
-                        )
                         .offset(y: contentOffsetY)
                 }
                 .navigationTitle("")
@@ -115,25 +97,41 @@ struct StartView: View {
     
     @ViewBuilder
     func categoryIndicator(height: CGFloat) -> some View {
-        VStack(alignment: .center) {
-            ZStack {
-                Text("카테고리로 시작하기")
-                    .opacity(isCategoryContent ? 0 : 1)
-                
-                Text("카테고리 없이 시작하기")
-                    .opacity(isCategoryContent ? 1 : 0)
-            }
-            .font(.subheadline)
-            .fontWeight(.bold)
-            .foregroundColor(Color("main-point-color-weak"))
-            .padding(.bottom)
+        HStack {
+            Spacer()
             
-            Label("내리기", systemImage: "chevron.compact.up")
-                .labelStyle(.iconOnly)
-                .font(.title)
+            VStack(alignment: .center) {
+                ZStack {
+                    Text("카테고리로 시작하기")
+                        .opacity(isCategoryContent ? 0 : 1)
+                    
+                    Text("카테고리 없이 시작하기")
+                        .opacity(isCategoryContent ? 1 : 0)
+                }
+                .font(.subheadline)
+                .fontWeight(.bold)
                 .foregroundColor(Color("main-point-color-weak"))
-                .rotationEffect(.degrees(isCategoryContent ? 180 : 0))
+                .padding(.bottom)
+                
+                Label("내리기", systemImage: "chevron.compact.up")
+                    .labelStyle(.iconOnly)
+                    .font(.title)
+                    .foregroundColor(Color("main-point-color-weak"))
+                    .rotationEffect(.degrees(isCategoryContent ? 180 : 0))
+            }
+            
+            Spacer()
         }
+        .background(Color("background-color").opacity(0.1))
+        .gesture(
+            DragGesture()
+                .onChanged({ drag in
+                    isCategoryContent ? showingStartContent(moveY: drag.translation.height, height: height) : showingCategoryContent(moveY: drag.translation.height)
+                })
+                .onEnded({ drag in
+                    isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
+                })
+        )
         .matchedGeometryEffect(id: "indicator", in: heroEffect)
         .offset(y: categoryIndicatorOffsetY)
         .animation(Animation.interactiveSpring(response: 1.2, dampingFraction: 1.2, blendDuration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
@@ -141,6 +139,7 @@ struct StartView: View {
             categoryIndicatorOffsetY = isCategoryContent ? 0 : 15
         }
         .padding(.bottom, isCategoryContent ? 0 : nil)
+        
     }
     
     @ViewBuilder
@@ -413,8 +412,6 @@ struct StartView: View {
     
     func showingStartContent(moveY: CGFloat, height: CGFloat) {
         contentOffsetY += (contentOffsetY < -height && moveY < 0) ? (moveY / 500) : moveY
-        print(contentOffsetY)
-        print(height)
     }
     
     func showingCategoryContent(moveY: CGFloat) {
