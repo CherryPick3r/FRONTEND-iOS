@@ -10,6 +10,7 @@
 		C507595C2A029C6F00D7182E /* RestaurantDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C507595B2A029C6E00D7182E /* RestaurantDetailView.swift */; };
 		C507595E2A02AC9800D7182E /* KeywordTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C507595D2A02AC9800D7182E /* KeywordTagsView.swift */; };
 		C5550F4E2A09EF3B005F9335 /* RestaurantListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5550F4D2A09EF3B005F9335 /* RestaurantListView.swift */; };
+		C57FFDF62A175D80008FB923 /* VerticalPageTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C57FFDF52A175D80008FB923 /* VerticalPageTabView.swift */; };
 		C58F418429FDD7F900A98B2F /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58F418329FDD7F900A98B2F /* StartView.swift */; };
 		C58F418929FDD84100A98B2F /* BackgroundModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58F418829FDD84100A98B2F /* BackgroundModifier.swift */; };
 		C58F418C29FDE8C600A98B2F /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C58F418B29FDE8C600A98B2F /* KakaoSDKAuth */; };
@@ -24,6 +25,7 @@
 		C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B579742A0A65A10034BA8E /* WithdrawalView.swift */; };
 		C5B96CB12A1116CB00045C93 /* ParticleEffectModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */; };
 		C5DF79782A0363780061DAD0 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DF79772A0363780061DAD0 /* AppView.swift */; };
+		C5F792622A17059C0081F63A /* RollingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F792612A17059C0081F63A /* RollingTextView.swift */; };
 		C5FFC65E2A076E9100933C9D /* UserPreferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFC65D2A076E9100933C9D /* UserPreferenceView.swift */; };
 		C5FFC6622A07B53100933C9D /* RadarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFC6612A07B53100933C9D /* RadarChartView.swift */; };
 /* End PBXBuildFile section */
@@ -32,6 +34,7 @@
 		C507595B2A029C6E00D7182E /* RestaurantDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantDetailView.swift; sourceTree = "<group>"; };
 		C507595D2A02AC9800D7182E /* KeywordTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordTagsView.swift; sourceTree = "<group>"; };
 		C5550F4D2A09EF3B005F9335 /* RestaurantListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantListView.swift; sourceTree = "<group>"; };
+		C57FFDF52A175D80008FB923 /* VerticalPageTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalPageTabView.swift; sourceTree = "<group>"; };
 		C58F418329FDD7F900A98B2F /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
 		C58F418829FDD84100A98B2F /* BackgroundModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModifier.swift; sourceTree = "<group>"; };
 		C58F419129FDEA5300A98B2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -45,6 +48,7 @@
 		C5B579742A0A65A10034BA8E /* WithdrawalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithdrawalView.swift; sourceTree = "<group>"; };
 		C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffectModifier.swift; sourceTree = "<group>"; };
 		C5DF79772A0363780061DAD0 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
+		C5F792612A17059C0081F63A /* RollingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingTextView.swift; sourceTree = "<group>"; };
 		C5FFC65D2A076E9100933C9D /* UserPreferenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceView.swift; sourceTree = "<group>"; };
 		C5FFC6612A07B53100933C9D /* RadarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarChartView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -139,6 +143,8 @@
 			children = (
 				C5FFC6612A07B53100933C9D /* RadarChartView.swift */,
 				C507595D2A02AC9800D7182E /* KeywordTagsView.swift */,
+				C5F792612A17059C0081F63A /* RollingTextView.swift */,
+				C57FFDF52A175D80008FB923 /* VerticalPageTabView.swift */,
 			);
 			path = ComponentView;
 			sourceTree = "<group>";
@@ -223,6 +229,7 @@
 			files = (
 				C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */,
 				C5FFC65E2A076E9100933C9D /* UserPreferenceView.swift in Sources */,
+				C5F792622A17059C0081F63A /* RollingTextView.swift in Sources */,
 				C58F419A29FFC17C00A98B2F /* CherryPickView.swift in Sources */,
 				C5B96CB12A1116CB00045C93 /* ParticleEffectModifier.swift in Sources */,
 				C507595C2A029C6F00D7182E /* RestaurantDetailView.swift in Sources */,
@@ -233,6 +240,7 @@
 				C58F418929FDD84100A98B2F /* BackgroundModifier.swift in Sources */,
 				C58F419829FFB52D00A98B2F /* UserViewModel.swift in Sources */,
 				C59D211B29C9D83A00275DBA /* CherryPickerApp.swift in Sources */,
+				C57FFDF62A175D80008FB923 /* VerticalPageTabView.swift in Sources */,
 				C507595E2A02AC9800D7182E /* KeywordTagsView.swift in Sources */,
 				C5FFC6622A07B53100933C9D /* RadarChartView.swift in Sources */,
 			);
