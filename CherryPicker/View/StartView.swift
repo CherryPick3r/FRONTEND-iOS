@@ -30,15 +30,26 @@ struct StartView: View {
                 
                 LazyVStack {
                     startContents(height: height)
-                        .frame(width: reader.size.width, height: reader.size.height)
+                        .frame(width: width, height: height)
                     
                     categoryContents(height: height)
                         .frame(width: width, height: height)
                 }
-                .offset(y: contentOffsetY)
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(BackgroundModifier())
+                .gesture(
+                    DragGesture()
+                        .onChanged({ drag in
+                            let moveY = drag.translation.height
+                            
+                            isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
+                        })
+                        .onEnded({ drag in
+                            isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
+                        })
+                )
+                .offset(y: contentOffsetY)
                 .toolbar {
                     ToolbarItem {
                         NavigationLink {
@@ -121,17 +132,7 @@ struct StartView: View {
             
             Spacer()
         }
-        .background(Color("background-color").opacity(0.1))
         .offset(y: categoryIndicatorOffsetY)
-        .gesture(
-            DragGesture()
-                .onChanged({ drag in
-                    isCategoryContent ? showingStartContent(moveY: drag.translation.height, height: height) : showingCategoryContent(moveY: drag.translation.height)
-                })
-                .onEnded({ drag in
-                    isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
-                })
-        )
         .matchedGeometryEffect(id: "indicator", in: heroEffect)
         .animation(Animation.interactiveSpring(response: 1.2, dampingFraction: 1.2, blendDuration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
         .onAppear {
@@ -418,7 +419,7 @@ struct StartView: View {
     }
     
     func showCategoryContent(height: CGFloat) {
-        withAnimation(.easeInOut) {
+        withAnimation(.spring()) {
             isCategoryContent = contentOffsetY < -150
             
             contentOffsetY = isCategoryContent ? -height : 0
@@ -428,7 +429,7 @@ struct StartView: View {
     }
     
     func showStartContent(height: CGFloat) {
-        withAnimation(.easeInOut) {
+        withAnimation(.spring()) {
             isCategoryContent = contentOffsetY < -550
             
             contentOffsetY = isCategoryContent ? -height : 0
