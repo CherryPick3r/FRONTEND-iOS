@@ -218,40 +218,44 @@ struct RestaurantDetailView: View {
         .gesture(
             DragGesture()
                 .onChanged({ drag in
-                    let moveY = drag.translation.height
-                    
-                    if showDetailMenu {
-                        informationOffsetY += moveY / 600
-                    } else {
-                        if showDetailInformation {
-                            if isDetailInformation && informationOffsetY <= 0 && moveY <= 0 {
-                                informationOffsetY += moveY / 600
-                            } else {
-                                informationOffsetY += moveY
-                                imageBlurByDragOffset(moveY: moveY)
-                            }
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        let moveY = drag.translation.height
+                        
+                        if showDetailMenu {
+                            informationOffsetY += moveY / 600
                         } else {
-                            showingDetailInformation(moveY: moveY)
+                            if showDetailInformation {
+                                if isDetailInformation && informationOffsetY <= 0 && moveY <= 0 {
+                                    informationOffsetY += moveY / 600
+                                } else {
+                                    informationOffsetY += moveY
+                                    imageBlurByDragOffset(moveY: moveY)
+                                }
+                            } else {
+                                showingDetailInformation(moveY: moveY)
+                            }
                         }
                     }
                 })
                 .onEnded({ drag in
-                    if showDetailMenu {
-                        withAnimation(.spring()) {
-                            informationOffsetY = .zero
-                        }
-                    } else {
-                        if showDetailInformation {
-                            if informationOffsetY < 300 && !isDetailInformation {
-                                openDetailInformation()
-                            } else if informationOffsetY > 200 {
-                                closeDetailInformation()
-                            } else {
-                                cancelClosingDetailInformation()
-                            }
-                        } else {
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        if showDetailMenu {
                             withAnimation(.spring()) {
                                 informationOffsetY = .zero
+                            }
+                        } else {
+                            if showDetailInformation {
+                                if informationOffsetY < 300 && !isDetailInformation {
+                                    openDetailInformation()
+                                } else if informationOffsetY > 200 {
+                                    closeDetailInformation()
+                                } else {
+                                    cancelClosingDetailInformation()
+                                }
+                            } else {
+                                withAnimation(.spring()) {
+                                    informationOffsetY = .zero
+                                }
                             }
                         }
                     }

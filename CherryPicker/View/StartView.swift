@@ -41,15 +41,20 @@ struct StartView: View {
                 .gesture(
                     DragGesture()
                         .onChanged({ drag in
-                            let moveY = drag.translation.height
-                            
-                            isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
+                            DispatchQueue.global(qos: .userInteractive).async {
+                                let moveY = drag.translation.height
+                                
+                                isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
+                            }
                         })
                         .onEnded({ drag in
-                            isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
+                            DispatchQueue.global(qos: .userInteractive).async {
+                                isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
+                            }
                         })
                 )
                 .offset(y: contentOffsetY)
+                .modifier(BackgroundModifier())
                 .toolbar {
                     ToolbarItem {
                         NavigationLink {

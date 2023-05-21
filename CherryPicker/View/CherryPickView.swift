@@ -32,7 +32,7 @@ struct CherryPickView: View {
     @State private var hateThumbOffset = CGFloat(-10)
     @State private var cardOffsetX = CGFloat.zero
     @State private var cardOffsetY = CGFloat.zero
-    @State private var cardSize = 1.0
+    @State private var cardDgree = 0.0
     @State private var userSelection = UserSelection.none
     @State private var indicatorsOpacity = 1.0
     
@@ -56,8 +56,10 @@ struct CherryPickView: View {
                             Spacer()
                             
                             ZStack {
-                                likeAndHateIndicators()
-                                    .frame(maxWidth: 630)
+                                if showIndicators {
+                                    likeAndHateIndicators()
+                                        .frame(maxWidth: 630)
+                                }
                                 
                                 if showRestaurantCard {
                                     restaurantCard(width: cardImageWidth, height: height)
@@ -147,7 +149,6 @@ struct CherryPickView: View {
                 .onAppear {
                     self.likeAndHateButtonsSubScale = 1.0
                 }
-            
             
             Circle()
                 .fill(Color("background-shape-color"))
@@ -289,24 +290,26 @@ struct CherryPickView: View {
         .frame(maxWidth: 500)
         .frame(width: width)
         .offset(x: cardOffsetX, y: cardOffsetY)
-        .scaleEffect(cardSize)
+        .rotationEffect(.degrees(cardDgree))
         .gesture(
             DragGesture()
                 .onChanged({ drag in
-                    let moveX = drag.translation.width
-                    
-                    swipingCard(moveX: moveX, moveY: drag.translation.height, maxOffset: maxOffset)
-                    
-                    decisionUserSelection(moveX: moveX, maxOffset: maxOffset)
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        let moveX = drag.translation.width
+                        
+                        swipingCard(moveX: moveX, moveY: drag.translation.height, maxOffset: maxOffset)
+                        
+                        decisionUserSelection(moveX: moveX, maxOffset: maxOffset)
+                    }
                 })
                 .onEnded({ drag in
-                    if userSelection != .none {
-                        disappearingCard()
-                    } else {
-                        cancelDecisionUserSelection()
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        userSelection != .none ? disappearingCard() : cancelDecisionUserSelection()
+                        
+                        withAnimation(.spring()) {
+                            cardDgree = 0
+                        }
                     }
-                    
-                    cardSize = 1.0
                 })
         )
         .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: userSelection == .like ? .trailing : .leading).combined(with: .opacity)))
@@ -322,6 +325,8 @@ struct CherryPickView: View {
             withAnimation(.spring()) {
                 showRestaurantCard = true
             }
+            
+            cardDgree = 0
         }
     }
     
@@ -341,7 +346,7 @@ struct CherryPickView: View {
         cardOffsetX = moveX
         cardOffsetY = moveY / 10
         
-        cardSize = 1 - (moveX > 0 ? moveX : -moveX) / 1000
+        cardDgree = moveX / 50
         
         indicatorsOpacity = moveX > 0 ? (maxOffset - moveX) / maxOffset : (maxOffset + moveX) / maxOffset
     }
