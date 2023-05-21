@@ -20,6 +20,7 @@ struct StartView: View {
     @State private var categoryIndicatorOffsetY = CGFloat.zero
     @State private var contentID = 0
     @State private var contentOffsetY = CGFloat.zero
+    @State private var dragOffsetY = CGFloat.zero
     @State private var isCategoryContent = false
     
     var body: some View {
@@ -38,6 +39,7 @@ struct StartView: View {
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(BackgroundModifier())
+                .offset(y: contentOffsetY)
                 .gesture(
                     DragGesture()
                         .onChanged({ drag in
@@ -53,7 +55,6 @@ struct StartView: View {
                             }
                         })
                 )
-                .offset(y: contentOffsetY)
                 .modifier(BackgroundModifier())
                 .toolbar {
                     ToolbarItem {
@@ -416,11 +417,11 @@ struct StartView: View {
     }
     
     func showingStartContent(moveY: CGFloat, height: CGFloat) {
-        contentOffsetY += (contentOffsetY < -height && moveY < 0) ? (moveY / 500) : moveY
+        contentOffsetY = ((contentOffsetY < -height && moveY < 0) ? (moveY / 3) : moveY) + dragOffsetY
     }
     
     func showingCategoryContent(moveY: CGFloat) {
-        contentOffsetY += (contentOffsetY < 0) ? moveY : (moveY / 500)
+        contentOffsetY = ((contentOffsetY < 0) ? moveY : (moveY / 3)) + dragOffsetY
     }
     
     func showCategoryContent(height: CGFloat) {
@@ -429,6 +430,8 @@ struct StartView: View {
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
+        
+        dragOffsetY += contentOffsetY
         
         categoryIndicatorOffsetY = 0
     }
@@ -439,6 +442,7 @@ struct StartView: View {
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
+        dragOffsetY = contentOffsetY
         
         categoryIndicatorOffsetY = 15
     }
