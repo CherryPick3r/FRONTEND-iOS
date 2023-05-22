@@ -33,7 +33,8 @@ struct RestaurantDetailView: View {
     @State private var showSelectMapDialog = false
     @State private var showDetailMenu = false
     @State private var cardSize = CGSize.zero
-    @State private var isDraggingUp = false
+    @State private var isDraggingUp = true
+    @State private var isFastDragging = false
     
     //임시
     @State private var imagePage = 0
@@ -221,10 +222,17 @@ struct RestaurantDetailView: View {
                 .onChanged({ drag in
                     DispatchQueue.global(qos: .userInteractive).async {
                         let moveY = drag.translation.height
+                        let velocity = (informationOffsetY - moveY)
                         
-                        print(imageBlur)
+                        if !isFastDragging && velocity > -100 && showDetailInformation {
+                            isFastDragging = (velocity < 0 ? -velocity : velocity) >= 30
+                        }
                         
-                        isDraggingUp = informationOffsetY > moveY
+                        if showDetailInformation {
+                            isDraggingUp = informationOffsetY > moveY
+                        }
+                        
+                        print(isDraggingUp)
                         
                         imageBlurByDragOffset()
                         
@@ -247,10 +255,10 @@ struct RestaurantDetailView: View {
                             }
                         } else {
                             if showDetailInformation {
-                                if informationOffsetY < 300 {
-                                    openDetailInformation()
-                                } else if informationOffsetY > 200 {
+                                if (informationOffsetY > 150 || isFastDragging) && !isDraggingUp {
                                     closeDetailInformation()
+                                } else if (informationOffsetY < 400 || isFastDragging) && isDraggingUp {
+                                    openDetailInformation()
                                 } else {
                                     cancelClosingDetailInformation()
                                 }
@@ -260,6 +268,9 @@ struct RestaurantDetailView: View {
                                 }
                             }
                         }
+                        
+                        isFastDragging = false
+                        isDraggingUp = true
                     }
                 })
         )
