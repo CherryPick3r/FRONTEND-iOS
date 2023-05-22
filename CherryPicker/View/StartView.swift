@@ -36,8 +36,6 @@ struct StartView: View {
                     categoryContents(height: height)
                         .frame(width: width, height: height)
                 }
-                .navigationTitle("")
-                .navigationBarTitleDisplayMode(.inline)
                 .modifier(BackgroundModifier())
                 .offset(y: contentOffsetY)
                 .gesture(
@@ -56,6 +54,8 @@ struct StartView: View {
                         })
                 )
                 .modifier(BackgroundModifier())
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem {
                         NavigationLink {

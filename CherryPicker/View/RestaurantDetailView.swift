@@ -537,6 +537,7 @@ struct RestaurantDetailView: View {
         }
         .font(.footnote)
         .fontWeight(.semibold)
+        .foregroundColor(Color("main-text-color"))
     }
     
     @ViewBuilder
