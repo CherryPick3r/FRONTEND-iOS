@@ -19,7 +19,6 @@ struct RestaurantDetailView: View {
     private let isResultView: Bool
     private let maxOffsetY = CGFloat(250)
     
-    @State private var isDetailInformation = false
     @State private var showDetailInformation = false
     @State private var showInformation = false
     @State private var showIndicators = false
@@ -34,6 +33,7 @@ struct RestaurantDetailView: View {
     @State private var showSelectMapDialog = false
     @State private var showDetailMenu = false
     @State private var cardSize = CGSize.zero
+    @State private var isDraggingUp = false
     
     //임시
     @State private var imagePage = 0
@@ -139,7 +139,7 @@ struct RestaurantDetailView: View {
     @ViewBuilder
     func imageShadowOverlay() -> some View {
         ZStack {
-            if !isDetailInformation {
+            if !showDetailInformation {
                 LinearGradient(colors: [
                     Color("main-point-color").opacity(0),
                     Color("main-point-color").opacity(0.1),
@@ -213,6 +213,7 @@ struct RestaurantDetailView: View {
                     .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
             }
         }
+        .offset(y: informationOffsetY)
         .frame(maxWidth: 500)
         .padding(.top)
         .gesture(
@@ -221,16 +222,17 @@ struct RestaurantDetailView: View {
                     DispatchQueue.global(qos: .userInteractive).async {
                         let moveY = drag.translation.height
                         
+                        print(imageBlur)
+                        
+                        isDraggingUp = informationOffsetY > moveY
+                        
+                        imageBlurByDragOffset()
+                        
                         if showDetailMenu {
-                            informationOffsetY += moveY / 600
+                            informationOffsetY = moveY / 3
                         } else {
                             if showDetailInformation {
-                                if isDetailInformation && informationOffsetY <= 0 && moveY <= 0 {
-                                    informationOffsetY += moveY / 600
-                                } else {
-                                    informationOffsetY += moveY
-                                    imageBlurByDragOffset(moveY: moveY)
-                                }
+                                informationOffsetY = (informationOffsetY <= 0 && isDraggingUp) ? moveY / 3 : moveY
                             } else {
                                 showingDetailInformation(moveY: moveY)
                             }
@@ -245,7 +247,7 @@ struct RestaurantDetailView: View {
                             }
                         } else {
                             if showDetailInformation {
-                                if informationOffsetY < 300 && !isDetailInformation {
+                                if informationOffsetY < 300 {
                                     openDetailInformation()
                                 } else if informationOffsetY > 200 {
                                     closeDetailInformation()
@@ -261,7 +263,6 @@ struct RestaurantDetailView: View {
                     }
                 })
         )
-        .offset(y: informationOffsetY)
         .padding(.horizontal)
         .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
     }
@@ -320,7 +321,21 @@ struct RestaurantDetailView: View {
                     .font(.footnote)
                     .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                 
-                if !showDetailInformation {
+                if showDetailInformation {
+                    detailHours()
+                        .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+                    
+                    VStack(alignment: .leading) {
+                        Text("키워드 태그")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color("main-point-color"))
+                        
+                        KeywordTagsView()
+                    }
+                    .padding(.bottom, 5)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+                } else {
                     HStack {
                         Label("11:50 ~ 22:00", systemImage: "clock")
                             .font(.footnote)
@@ -333,23 +348,7 @@ struct RestaurantDetailView: View {
                             .foregroundColor(Color("main-point-color-strong"))
                     }
                     .transition(.opacity)
-                } else {
-                    detailHours()
-                        .transition(.opacity.animation(.easeInOut(duration: 0.5)))
                 }
-            }
-            
-            if showDetailInformation {
-                VStack(alignment: .leading) {
-                    Text("키워드 태그")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color"))
-                    
-                    KeywordTagsView()
-                }
-                .padding(.bottom, 5)
-                .transition(.opacity.animation(.easeInOut(duration: 0.5)))
             }
             
             representativeMenu(detailMenuDisable: detailMenuDisable)
@@ -788,20 +787,23 @@ struct RestaurantDetailView: View {
         .opacity(detailImageBackgroundOpacity)
     }
     
-    func imageBlurByDragOffset(moveY: CGFloat) {
-        imageBlur -= moveY / 5
+    func imageBlurByDragOffset() {
+        if isDraggingUp {
+            imageBlur += imageBlur < 100 ? 1 : 0
+        } else {
+            imageBlur -= imageBlur > 0 ? 1 : 0
+        }
     }
     
     func showingDetailInformation(moveY: CGFloat) {
-        if moveY <= 0 {
-            imageBlur += 100
+        if isDraggingUp {
             withAnimation(.spring()) {
                 showIndicators = false
             }
             
             showDetailInformation = true
         } else {
-            informationOffsetY += moveY / 600
+            informationOffsetY = moveY / 3
         }
     }
     
@@ -809,7 +811,6 @@ struct RestaurantDetailView: View {
         withAnimation(.spring()) {
             informationOffsetY = .zero
             showIndicators = false
-            isDetailInformation = true
         }
         
         withAnimation(.easeInOut) {
@@ -818,15 +819,13 @@ struct RestaurantDetailView: View {
     }
     
     func closeDetailInformation() {
-        withAnimation(.spring()) {
-            showIndicators = true
-            isDetailInformation = false
-            informationOffsetY = .zero
-            showDetailInformation = false
-        }
-        
         withAnimation(.easeInOut) {
             imageBlur = 0
+        }
+        withAnimation(.spring()) {
+            showIndicators = true
+            informationOffsetY = .zero
+            showDetailInformation = false
         }
     }
     
@@ -836,7 +835,7 @@ struct RestaurantDetailView: View {
         }
         
         withAnimation(.easeInOut) {
-            imageBlur = isDetailInformation ? 100 : 0
+            imageBlur = showDetailInformation ? 100 : 0
         }
     }
     
@@ -887,7 +886,7 @@ struct RestaurantDetailView: View {
     }
     
     func showImagesAction() {
-        if !isDetailInformation {
+        if !showDetailInformation {
             withAnimation(.spring()) {
                 showInformation = false
                 showIndicators = false
