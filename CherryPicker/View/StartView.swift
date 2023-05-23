@@ -20,7 +20,9 @@ struct StartView: View {
     @State private var categoryIndicatorOffsetY = CGFloat.zero
     @State private var contentID = 0
     @State private var contentOffsetY = CGFloat.zero
+    @State private var dragOffsetY = CGFloat.zero
     @State private var isCategoryContent = false
+    @State private var isFastDragging = false
     
     var body: some View {
         NavigationStack {
@@ -28,36 +30,40 @@ struct StartView: View {
                 let height = reader.size.height
                 let width = reader.size.width
                 
-                VStack {
+                LazyVStack {
                     startContents(height: height)
-                        .frame(width: reader.size.width, height: reader.size.height)
-                        .gesture(
-                            DragGesture()
-                                .onChanged({ drag in
-                                    showingCategoryContent(moveY: drag.translation.height)
-                                })
-                                .onEnded({ drag in
-                                    showCategoryContent(height: height)
-                                })
-                        )
-                        .offset(y: contentOffsetY)
+                        .frame(width: width, height: height)
                     
                     categoryContents(height: height)
                         .frame(width: width, height: height)
-                        .gesture(
-                            DragGesture()
-                                .onChanged({ drag in
-                                    showingStartContent(moveY: drag.translation.height, height: height)
-                                })
-                                .onEnded({ drag in
-                                    showStartContent(height: height)
-                                })
-                        )
-                        .offset(y: contentOffsetY)
                 }
+                .modifier(BackgroundModifier())
+                .offset(y: contentOffsetY)
+                .gesture(
+                    DragGesture()
+                        .onChanged({ drag in
+                            DispatchQueue.global(qos: .userInteractive).async {
+                                let moveY = drag.translation.height
+                                let velocity = contentOffsetY - moveY
+                                
+                                if !isFastDragging {
+                                    isFastDragging = ((velocity < 0) ? -velocity : velocity) >= 30
+                                }
+                                
+                                isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
+                            }
+                        })
+                        .onEnded({ drag in
+                            DispatchQueue.global(qos: .userInteractive).async {
+                                isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
+                                
+                                isFastDragging = false
+                            }
+                        })
+                )
+                .modifier(BackgroundModifier())
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
-                .modifier(BackgroundModifier())
                 .toolbar {
                     ToolbarItem {
                         NavigationLink {
@@ -115,32 +121,39 @@ struct StartView: View {
     
     @ViewBuilder
     func categoryIndicator(height: CGFloat) -> some View {
-        VStack(alignment: .center) {
-            ZStack {
-                Text("카테고리로 시작하기")
-                    .opacity(isCategoryContent ? 0 : 1)
-                
-                Text("카테고리 없이 시작하기")
-                    .opacity(isCategoryContent ? 1 : 0)
-            }
-            .font(.subheadline)
-            .fontWeight(.bold)
-            .foregroundColor(Color("main-point-color-weak"))
-            .padding(.bottom)
+        HStack {
+            Spacer()
             
-            Label("내리기", systemImage: "chevron.compact.up")
-                .labelStyle(.iconOnly)
-                .font(.title)
+            VStack(alignment: .center) {
+                ZStack {
+                    Text("카테고리로 시작하기")
+                        .opacity(isCategoryContent ? 0 : 1)
+                    
+                    Text("카테고리 없이 시작하기")
+                        .opacity(isCategoryContent ? 1 : 0)
+                }
+                .font(.subheadline)
+                .fontWeight(.bold)
                 .foregroundColor(Color("main-point-color-weak"))
-                .rotationEffect(.degrees(isCategoryContent ? 180 : 0))
+                .padding(.bottom)
+                
+                Label("내리기", systemImage: "chevron.compact.up")
+                    .labelStyle(.iconOnly)
+                    .font(.title)
+                    .foregroundColor(Color("main-point-color-weak"))
+                    .rotationEffect(.degrees(isCategoryContent ? 180 : 0))
+            }
+            
+            Spacer()
         }
-        .matchedGeometryEffect(id: "indicator", in: heroEffect)
         .offset(y: categoryIndicatorOffsetY)
+        .matchedGeometryEffect(id: "indicator", in: heroEffect)
         .animation(Animation.interactiveSpring(response: 1.2, dampingFraction: 1.2, blendDuration: 1.2).repeatForever(autoreverses: true), value: categoryIndicatorOffsetY)
         .onAppear {
             categoryIndicatorOffsetY = isCategoryContent ? 0 : 15
         }
         .padding(.bottom, isCategoryContent ? 0 : nil)
+        
     }
     
     @ViewBuilder
@@ -221,14 +234,14 @@ struct StartView: View {
     
     @ViewBuilder
     func categoryList() -> some View {
-        VStack(spacing: 40) {
-            categoryButton(title: "\"\("단체모임")\"으로 시작하기", tags: ["쾌적한 공간", "푸짐해요", "단체모임", "가성비 맛집"])
+        LazyVStack(spacing: 40) {
+            categoryButton(title: "\"\("단체모임")\"", tags: ["쾌적한 공간", "푸짐해요", "단체모임", "가성비 맛집"])
             
-            categoryButton(title: "\"\("카페/공부")\"로 시작하기", tags: ["카페", "커피맛집", "오래 있기 좋아요", "맛있는 음료"])
+            categoryButton(title: "\"\("카페/공부")\"", tags: ["카페", "커피맛집", "오래 있기 좋아요", "맛있는 음료"])
             
-            categoryButton(title: "\"\("사진맛집")\"으로 시작하기", tags: ["컨셉이 독특해요", "감성사진"])
+            categoryButton(title: "\"\("사진맛집")\"", tags: ["컨셉이 독특해요", "감성사진"])
             
-            categoryButton(title: "\"\("혼밥")\"으로 시작하기", tags: ["가성비 맛집", "혼밥하기 좋아요"])
+            categoryButton(title: "\"\("혼밥")\"", tags: ["가성비 맛집", "혼밥하기 좋아요"])
         }
     }
     
@@ -270,7 +283,7 @@ struct StartView: View {
                         .fill(Color("background-shape-color"))
                     
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(Color("main-point-color"), lineWidth: 2)
+                        .strokeBorder(Color("main-point-color-weak"), lineWidth: 2)
                         .shadow(color: .black.opacity(0.1), radius: 5)
                 }
             }
@@ -412,31 +425,32 @@ struct StartView: View {
     }
     
     func showingStartContent(moveY: CGFloat, height: CGFloat) {
-        contentOffsetY += (contentOffsetY < -height && moveY < 0) ? (moveY / 500) : moveY
-        print(contentOffsetY)
-        print(height)
+        contentOffsetY = ((contentOffsetY < -height && moveY < 0) ? (moveY / 3) : moveY) + dragOffsetY
     }
     
     func showingCategoryContent(moveY: CGFloat) {
-        contentOffsetY += (contentOffsetY < 0) ? moveY : (moveY / 500)
+        contentOffsetY = ((contentOffsetY < 0) ? moveY : (moveY / 3)) + dragOffsetY
     }
     
     func showCategoryContent(height: CGFloat) {
-        withAnimation(.easeInOut) {
-            isCategoryContent = contentOffsetY < -150
+        withAnimation(.spring()) {
+            isCategoryContent = contentOffsetY < -150 || isFastDragging
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
+        
+        dragOffsetY += contentOffsetY
         
         categoryIndicatorOffsetY = 0
     }
     
     func showStartContent(height: CGFloat) {
-        withAnimation(.easeInOut) {
-            isCategoryContent = contentOffsetY < -550
+        withAnimation(.spring()) {
+            isCategoryContent = contentOffsetY < -550 || !isFastDragging
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
+        dragOffsetY = contentOffsetY
         
         categoryIndicatorOffsetY = 15
     }

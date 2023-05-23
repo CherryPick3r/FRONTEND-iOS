@@ -27,7 +27,7 @@ struct KeywordTagsView: View {
             
             keywordTagGauge(title: "혼밥하기 좋아요", value: $value5)
         }
-        .frame(maxHeight: 230)
+        .frame(height: 200)
         .onAppear() {
             withAnimation(.spring(response: 1.2)) {
                 value1 = 93

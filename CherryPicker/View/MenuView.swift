@@ -8,10 +8,6 @@
 import SwiftUI
 
 struct MenuView: View {
-    private let columns = [
-        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
-    ]
-    
     @EnvironmentObject var userViewModel: UserViewModel
     
     @State private var userName = "체리체리1q2w3e"
@@ -48,21 +44,24 @@ struct MenuView: View {
     
     @ViewBuilder
     func menu() -> some View {
-        LazyVGrid(columns: columns) {
-            userMenu()
+        HStack {
+            Spacer()
             
-            settingMenu()
+            VStack {
+                userMenu()
+                
+                settingMenu()
+                
+                helpMenu()
+                
+                logoutButton()
+                
+                withdrawalButton()
+            }
+            .frame(maxWidth: 500)
             
-            helpMenu()
-            
+            Spacer()
         }
-        
-        VStack {
-            logoutButton()
-            
-            withdrawalButton()
-        }
-        .frame(maxWidth: 500)
     }
     
     @ViewBuilder
@@ -229,6 +228,7 @@ struct MenuView: View {
                 Spacer()
                 
                 Text("로그아웃")
+                    .font(.subheadline)
                     .fontWeight(.bold)
                 
                 Spacer()
@@ -240,7 +240,7 @@ struct MenuView: View {
                         .fill(Color("background-shape-color"))
                     
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(Color("main-point-color"), lineWidth: 2)
+                        .strokeBorder(Color("main-point-color-weak"), lineWidth: 2)
                 }
                 .shadow(color: .black.opacity(0.1), radius: 2)
             }
@@ -257,8 +257,9 @@ struct MenuView: View {
                 Spacer()
                 
                 Text("회원탈퇴")
-                    .foregroundColor(Color("background-shape-color"))
+                    .font(.subheadline)
                     .fontWeight(.bold)
+                    .foregroundColor(Color("background-shape-color"))
                 
                 Spacer()
             }

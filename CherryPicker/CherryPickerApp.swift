@@ -22,11 +22,11 @@ struct CherryPickerApp: App {
         WindowGroup {
             AppView()
                 .environmentObject(userViewModel)
-                .preferredColorScheme(colorScheme())
+                .preferredColorScheme(colorScheme)
         }
     }
     
-    func colorScheme() -> ColorScheme? {
+    var colorScheme: ColorScheme? {
         switch userViewModel.userColorScheme {
         case .system:
             return nil
