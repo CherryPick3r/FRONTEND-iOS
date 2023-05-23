@@ -50,8 +50,6 @@ struct StartView: View {
                                     isFastDragging = ((velocity < 0) ? -velocity : velocity) >= 30
                                 }
                                 
-                                print(isFastDragging)
-                                
                                 isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
                             }
                         })
