@@ -22,6 +22,7 @@ struct StartView: View {
     @State private var contentOffsetY = CGFloat.zero
     @State private var dragOffsetY = CGFloat.zero
     @State private var isCategoryContent = false
+    @State private var isFastDragging = false
     
     var body: some View {
         NavigationStack {
@@ -43,6 +44,13 @@ struct StartView: View {
                         .onChanged({ drag in
                             DispatchQueue.global(qos: .userInteractive).async {
                                 let moveY = drag.translation.height
+                                let velocity = contentOffsetY - moveY
+                                
+                                if !isFastDragging {
+                                    isFastDragging = ((velocity < 0) ? -velocity : velocity) >= 30
+                                }
+                                
+                                print(isFastDragging)
                                 
                                 isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
                             }
@@ -50,6 +58,8 @@ struct StartView: View {
                         .onEnded({ drag in
                             DispatchQueue.global(qos: .userInteractive).async {
                                 isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
+                                
+                                isFastDragging = false
                             }
                         })
                 )
@@ -426,7 +436,7 @@ struct StartView: View {
     
     func showCategoryContent(height: CGFloat) {
         withAnimation(.spring()) {
-            isCategoryContent = contentOffsetY < -150
+            isCategoryContent = contentOffsetY < -150 || isFastDragging
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
@@ -438,7 +448,7 @@ struct StartView: View {
     
     func showStartContent(height: CGFloat) {
         withAnimation(.spring()) {
-            isCategoryContent = contentOffsetY < -550
+            isCategoryContent = contentOffsetY < -550 || !isFastDragging
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
