@@ -52,11 +52,13 @@ struct RestaurantDetailView: View {
     var body: some View {
         GeometryReader { reader in
             let height = reader.size.height
+            let topSafeArea = reader.safeAreaInsets.top
+            let bottomSafeArea = reader.safeAreaInsets.bottom
             
             ZStack {
                 if !showImages {
                     backgroundImage()
-                        .frame(width: reader.size.width, height: height + reader.safeAreaInsets.top + reader.safeAreaInsets.bottom)
+                        .frame(width: reader.size.width, height: height + topSafeArea + bottomSafeArea)
                 } else {
                     Color("background-color")
                 }
@@ -80,7 +82,7 @@ struct RestaurantDetailView: View {
                             }
                         }
                         .offset(y: topButtonsOffsetY)
-                        .padding(.top, reader.safeAreaInsets.top)
+                        .padding(.top, topSafeArea)
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
                     Spacer()
@@ -97,7 +99,7 @@ struct RestaurantDetailView: View {
                     }
                     
                     if showInformation {
-                        information(height: height - (reader.safeAreaInsets.top + reader.safeAreaInsets.bottom + 30))
+                        information(height: height - (topSafeArea + bottomSafeArea + 30))
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     
