@@ -32,7 +32,6 @@ struct RestaurantDetailView: View {
     @State private var toolButtonsOffsetX = CGFloat.zero
     @State private var showSelectMapDialog = false
     @State private var showDetailMenu = false
-    @State private var cardSize = CGSize.zero
     @State private var maxVelocity = CGFloat.zero
     
     //임시

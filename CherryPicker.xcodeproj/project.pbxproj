@@ -11,6 +11,23 @@
 		C507595E2A02AC9800D7182E /* KeywordTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C507595D2A02AC9800D7182E /* KeywordTagsView.swift */; };
 		C5550F4E2A09EF3B005F9335 /* RestaurantListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5550F4D2A09EF3B005F9335 /* RestaurantListView.swift */; };
 		C57FFDF62A175D80008FB923 /* VerticalPageTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C57FFDF52A175D80008FB923 /* VerticalPageTabView.swift */; };
+		C58C0DE62A1DEB7200167C8E /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DE52A1DEB7200167C8E /* LoginResponse.swift */; };
+		C58C0DEA2A1DEC6500167C8E /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DE92A1DEC6500167C8E /* APIService.swift */; };
+		C58C0DEC2A1DEC6E00167C8E /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DEB2A1DEC6E00167C8E /* APIError.swift */; };
+		C58C0DEE2A1E328400167C8E /* UserPreferenceStartRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DED2A1E328400167C8E /* UserPreferenceStartRequest.swift */; };
+		C58C0DF02A1E33F100167C8E /* UserPreferenceStartResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DEF2A1E33F100167C8E /* UserPreferenceStartResponse.swift */; };
+		C58C0DF22A1E389700167C8E /* UserPreferenceRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF12A1E389700167C8E /* UserPreferenceRequest.swift */; };
+		C58C0DF42A1E38E300167C8E /* UserPrefereceResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF32A1E38E300167C8E /* UserPrefereceResponse.swift */; };
+		C58C0DF62A1E3BC700167C8E /* GameStartRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF52A1E3BC700167C8E /* GameStartRequest.swift */; };
+		C58C0DF82A1E3C2400167C8E /* TagPair.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF72A1E3C2400167C8E /* TagPair.swift */; };
+		C58C0DFA2A1E3CDA00167C8E /* GameResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF92A1E3CDA00167C8E /* GameResponse.swift */; };
+		C58C0DFC2A1E3E8B00167C8E /* GameRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DFB2A1E3E8B00167C8E /* GameRequest.swift */; };
+		C58C0DFE2A1E3F2100167C8E /* ShopCardResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */; };
+		C58C0E002A1E3F6300167C8E /* ShopDetailResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */; };
+		C58C0E022A1E413C00167C8E /* GameEndResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E012A1E413C00167C8E /* GameEndResponse.swift */; };
+		C58C0E042A1E46CC00167C8E /* ShopRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E032A1E46CC00167C8E /* ShopRequest.swift */; };
+		C58C0E062A1E48DB00167C8E /* SimpleShopRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E052A1E48DB00167C8E /* SimpleShopRequest.swift */; };
+		C58C0E082A1E49BE00167C8E /* SimpleShopResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */; };
 		C58F418429FDD7F900A98B2F /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58F418329FDD7F900A98B2F /* StartView.swift */; };
 		C58F418929FDD84100A98B2F /* BackgroundModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58F418829FDD84100A98B2F /* BackgroundModifier.swift */; };
 		C58F418C29FDE8C600A98B2F /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C58F418B29FDE8C600A98B2F /* KakaoSDKAuth */; };
@@ -24,6 +41,7 @@
 		C59D212229C9D83B00275DBA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C59D212129C9D83B00275DBA /* Preview Assets.xcassets */; };
 		C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B579742A0A65A10034BA8E /* WithdrawalView.swift */; };
 		C5B96CB12A1116CB00045C93 /* ParticleEffectModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */; };
+		C5C867BB2A1DE46C00BC486E /* APIURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C867BA2A1DE46C00BC486E /* APIURL.swift */; };
 		C5DF79782A0363780061DAD0 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DF79772A0363780061DAD0 /* AppView.swift */; };
 		C5F792622A17059C0081F63A /* RollingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F792612A17059C0081F63A /* RollingTextView.swift */; };
 		C5FFC65E2A076E9100933C9D /* UserPreferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFC65D2A076E9100933C9D /* UserPreferenceView.swift */; };
@@ -35,6 +53,23 @@
 		C507595D2A02AC9800D7182E /* KeywordTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordTagsView.swift; sourceTree = "<group>"; };
 		C5550F4D2A09EF3B005F9335 /* RestaurantListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantListView.swift; sourceTree = "<group>"; };
 		C57FFDF52A175D80008FB923 /* VerticalPageTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalPageTabView.swift; sourceTree = "<group>"; };
+		C58C0DE52A1DEB7200167C8E /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
+		C58C0DE92A1DEC6500167C8E /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		C58C0DEB2A1DEC6E00167C8E /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+		C58C0DED2A1E328400167C8E /* UserPreferenceStartRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceStartRequest.swift; sourceTree = "<group>"; };
+		C58C0DEF2A1E33F100167C8E /* UserPreferenceStartResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceStartResponse.swift; sourceTree = "<group>"; };
+		C58C0DF12A1E389700167C8E /* UserPreferenceRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceRequest.swift; sourceTree = "<group>"; };
+		C58C0DF32A1E38E300167C8E /* UserPrefereceResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPrefereceResponse.swift; sourceTree = "<group>"; };
+		C58C0DF52A1E3BC700167C8E /* GameStartRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStartRequest.swift; sourceTree = "<group>"; };
+		C58C0DF72A1E3C2400167C8E /* TagPair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagPair.swift; sourceTree = "<group>"; };
+		C58C0DF92A1E3CDA00167C8E /* GameResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameResponse.swift; sourceTree = "<group>"; };
+		C58C0DFB2A1E3E8B00167C8E /* GameRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRequest.swift; sourceTree = "<group>"; };
+		C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopCardResponse.swift; sourceTree = "<group>"; };
+		C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopDetailResponse.swift; sourceTree = "<group>"; };
+		C58C0E012A1E413C00167C8E /* GameEndResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEndResponse.swift; sourceTree = "<group>"; };
+		C58C0E032A1E46CC00167C8E /* ShopRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopRequest.swift; sourceTree = "<group>"; };
+		C58C0E052A1E48DB00167C8E /* SimpleShopRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleShopRequest.swift; sourceTree = "<group>"; };
+		C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleShopResponse.swift; sourceTree = "<group>"; };
 		C58F418329FDD7F900A98B2F /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
 		C58F418829FDD84100A98B2F /* BackgroundModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModifier.swift; sourceTree = "<group>"; };
 		C58F419129FDEA5300A98B2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -47,6 +82,7 @@
 		C59D212129C9D83B00275DBA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C5B579742A0A65A10034BA8E /* WithdrawalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithdrawalView.swift; sourceTree = "<group>"; };
 		C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffectModifier.swift; sourceTree = "<group>"; };
+		C5C867BA2A1DE46C00BC486E /* APIURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIURL.swift; sourceTree = "<group>"; };
 		C5DF79772A0363780061DAD0 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
 		C5F792612A17059C0081F63A /* RollingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingTextView.swift; sourceTree = "<group>"; };
 		C5FFC65D2A076E9100933C9D /* UserPreferenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceView.swift; sourceTree = "<group>"; };
@@ -67,6 +103,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C58C0DE42A1DEB5E00167C8E /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				C58C0DE52A1DEB7200167C8E /* LoginResponse.swift */,
+				C58C0DED2A1E328400167C8E /* UserPreferenceStartRequest.swift */,
+				C58C0DEF2A1E33F100167C8E /* UserPreferenceStartResponse.swift */,
+				C58C0DF12A1E389700167C8E /* UserPreferenceRequest.swift */,
+				C58C0DF32A1E38E300167C8E /* UserPrefereceResponse.swift */,
+				C58C0DF52A1E3BC700167C8E /* GameStartRequest.swift */,
+				C58C0DF92A1E3CDA00167C8E /* GameResponse.swift */,
+				C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */,
+				C58C0E012A1E413C00167C8E /* GameEndResponse.swift */,
+				C58C0DF72A1E3C2400167C8E /* TagPair.swift */,
+				C58C0DFB2A1E3E8B00167C8E /* GameRequest.swift */,
+				C58C0E032A1E46CC00167C8E /* ShopRequest.swift */,
+				C58C0E052A1E48DB00167C8E /* SimpleShopRequest.swift */,
+				C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */,
+				C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		C58F418229FDD7DF00A98B2F /* View */ = {
 			isa = PBXGroup;
 			children = (
@@ -118,6 +176,8 @@
 		C59D211929C9D83A00275DBA /* CherryPicker */ = {
 			isa = PBXGroup;
 			children = (
+				C58C0DE42A1DEB5E00167C8E /* Model */,
+				C5C867B92A1DE45A00BC486E /* API */,
 				C5B579762A0B61BD0034BA8E /* ComponentView */,
 				C58F419129FDEA5300A98B2F /* Info.plist */,
 				C58F419629FFB51400A98B2F /* ViewModel */,
@@ -147,6 +207,16 @@
 				C57FFDF52A175D80008FB923 /* VerticalPageTabView.swift */,
 			);
 			path = ComponentView;
+			sourceTree = "<group>";
+		};
+		C5C867B92A1DE45A00BC486E /* API */ = {
+			isa = PBXGroup;
+			children = (
+				C5C867BA2A1DE46C00BC486E /* APIURL.swift */,
+				C58C0DE92A1DEC6500167C8E /* APIService.swift */,
+				C58C0DEB2A1DEC6E00167C8E /* APIError.swift */,
+			);
+			path = API;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -228,19 +298,37 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */,
+				C58C0DF62A1E3BC700167C8E /* GameStartRequest.swift in Sources */,
+				C58C0DEA2A1DEC6500167C8E /* APIService.swift in Sources */,
 				C5FFC65E2A076E9100933C9D /* UserPreferenceView.swift in Sources */,
+				C58C0DE62A1DEB7200167C8E /* LoginResponse.swift in Sources */,
 				C5F792622A17059C0081F63A /* RollingTextView.swift in Sources */,
 				C58F419A29FFC17C00A98B2F /* CherryPickView.swift in Sources */,
+				C58C0DFC2A1E3E8B00167C8E /* GameRequest.swift in Sources */,
+				C58C0DF02A1E33F100167C8E /* UserPreferenceStartResponse.swift in Sources */,
 				C5B96CB12A1116CB00045C93 /* ParticleEffectModifier.swift in Sources */,
 				C507595C2A029C6F00D7182E /* RestaurantDetailView.swift in Sources */,
+				C58C0E082A1E49BE00167C8E /* SimpleShopResponse.swift in Sources */,
 				C5550F4E2A09EF3B005F9335 /* RestaurantListView.swift in Sources */,
 				C5DF79782A0363780061DAD0 /* AppView.swift in Sources */,
+				C58C0E042A1E46CC00167C8E /* ShopRequest.swift in Sources */,
 				C58F418429FDD7F900A98B2F /* StartView.swift in Sources */,
+				C58C0DFE2A1E3F2100167C8E /* ShopCardResponse.swift in Sources */,
+				C58C0E022A1E413C00167C8E /* GameEndResponse.swift in Sources */,
+				C58C0E002A1E3F6300167C8E /* ShopDetailResponse.swift in Sources */,
+				C58C0DFA2A1E3CDA00167C8E /* GameResponse.swift in Sources */,
+				C58C0DF22A1E389700167C8E /* UserPreferenceRequest.swift in Sources */,
 				C58F419329FF9E5400A98B2F /* MenuView.swift in Sources */,
+				C58C0DEE2A1E328400167C8E /* UserPreferenceStartRequest.swift in Sources */,
+				C58C0DF82A1E3C2400167C8E /* TagPair.swift in Sources */,
+				C5C867BB2A1DE46C00BC486E /* APIURL.swift in Sources */,
+				C58C0DEC2A1DEC6E00167C8E /* APIError.swift in Sources */,
 				C58F418929FDD84100A98B2F /* BackgroundModifier.swift in Sources */,
 				C58F419829FFB52D00A98B2F /* UserViewModel.swift in Sources */,
+				C58C0E062A1E48DB00167C8E /* SimpleShopRequest.swift in Sources */,
 				C59D211B29C9D83A00275DBA /* CherryPickerApp.swift in Sources */,
 				C57FFDF62A175D80008FB923 /* VerticalPageTabView.swift in Sources */,
+				C58C0DF42A1E38E300167C8E /* UserPrefereceResponse.swift in Sources */,
 				C507595E2A02AC9800D7182E /* KeywordTagsView.swift in Sources */,
 				C5FFC6622A07B53100933C9D /* RadarChartView.swift in Sources */,
 			);
