@@ -33,8 +33,7 @@ struct RestaurantDetailView: View {
     @State private var showSelectMapDialog = false
     @State private var showDetailMenu = false
     @State private var cardSize = CGSize.zero
-    @State private var isDraggingUp = true
-    @State private var isFastDragging = false
+    @State private var maxVelocity = CGFloat.zero
     
     //임시
     @State private var imagePage = 0
@@ -225,25 +224,17 @@ struct RestaurantDetailView: View {
                 .onChanged({ drag in
                     DispatchQueue.global(qos: .userInteractive).async {
                         let moveY = drag.translation.height
-                        let velocity = (informationOffsetY - moveY)
-                        
-                        if !isFastDragging && velocity > -100 && showDetailInformation {
-                            isFastDragging = (velocity < 0 ? -velocity : velocity) >= 30
-                        }
-                        
-                        if showDetailInformation {
-                            isDraggingUp = informationOffsetY > moveY
-                        }
-                        
-                        print(isDraggingUp)
-                        
-                        imageBlurByDragOffset()
+                        let velocity = informationOffsetY - moveY
                         
                         if showDetailMenu {
                             informationOffsetY = moveY / 3
                         } else {
+                            calculateMaxVelocity(velocity: velocity)
+                            
+                            imageBlurByDragOffset(velocity: velocity)
+                            
                             if showDetailInformation {
-                                informationOffsetY = (informationOffsetY <= 0 && isDraggingUp) ? moveY / 3 : moveY
+                                informationOffsetY = (informationOffsetY <= 0 && velocity >= 0) ? moveY / 3 : moveY
                             } else {
                                 showingDetailInformation(moveY: moveY)
                             }
@@ -258,10 +249,10 @@ struct RestaurantDetailView: View {
                             }
                         } else {
                             if showDetailInformation {
-                                if (informationOffsetY > 150 || isFastDragging) && !isDraggingUp {
-                                    closeDetailInformation()
-                                } else if (informationOffsetY < 400 || isFastDragging) && isDraggingUp {
+                                if (informationOffsetY < 400 && maxVelocity >= 0) || maxVelocity >= 30 {
                                     openDetailInformation()
+                                } else if (informationOffsetY > 150 && maxVelocity <= 0) || maxVelocity <= -30 {
+                                    closeDetailInformation()
                                 } else {
                                     cancelClosingDetailInformation()
                                 }
@@ -272,8 +263,7 @@ struct RestaurantDetailView: View {
                             }
                         }
                         
-                        isFastDragging = false
-                        isDraggingUp = true
+                        maxVelocity = CGFloat.zero
                     }
                 })
         )
@@ -336,7 +326,7 @@ struct RestaurantDetailView: View {
                 
                 if showDetailInformation {
                     detailHours()
-                        .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+                        .transition(.opacity.animation(.easeInOut(duration: 0.3)))
                     
                     VStack(alignment: .leading) {
                         Text("키워드 태그")
@@ -347,7 +337,7 @@ struct RestaurantDetailView: View {
                         KeywordTagsView()
                     }
                     .padding(.bottom, 5)
-                    .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
                 } else {
                     HStack {
                         Label("11:50 ~ 22:00", systemImage: "clock")
@@ -360,7 +350,7 @@ struct RestaurantDetailView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(Color("main-point-color-strong"))
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
                 }
             }
             
@@ -800,16 +790,28 @@ struct RestaurantDetailView: View {
         .opacity(detailImageBackgroundOpacity)
     }
     
-    func imageBlurByDragOffset() {
-        if isDraggingUp {
-            imageBlur += imageBlur < 100 ? 1 : 0
+    func calculateMaxVelocity(velocity: CGFloat) {
+        if velocity < 0 {
+            maxVelocity = velocity < maxVelocity ? velocity : maxVelocity
         } else {
-            imageBlur -= imageBlur > 0 ? 1 : 0
+            maxVelocity = velocity > maxVelocity ? velocity : maxVelocity
+        }
+    }
+    
+    func imageBlurByDragOffset(velocity: CGFloat) {
+        if showDetailInformation {
+            if velocity >= 0 {
+                imageBlur += imageBlur < 100 ? velocity / 5 : 0
+            } else {
+                imageBlur += imageBlur > 0 ? velocity / 5 : 0
+            }
+        } else {
+            imageBlur = 0
         }
     }
     
     func showingDetailInformation(moveY: CGFloat) {
-        if isDraggingUp {
+        if maxVelocity >= 0 {
             withAnimation(.spring()) {
                 showIndicators = false
             }
