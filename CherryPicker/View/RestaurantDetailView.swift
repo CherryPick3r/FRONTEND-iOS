@@ -52,13 +52,11 @@ struct RestaurantDetailView: View {
     var body: some View {
         GeometryReader { reader in
             let height = reader.size.height
-            let topSafeArea = reader.safeAreaInsets.top
-            let bottomSafeArea = reader.safeAreaInsets.bottom
             
-            ZStack(alignment: .top) {
+            ZStack {
                 if !showImages {
                     backgroundImage()
-                        .frame(width: reader.size.width, height: height + topSafeArea + bottomSafeArea)
+                        .frame(width: reader.size.width, height: height + reader.safeAreaInsets.top + reader.safeAreaInsets.bottom)
                 } else {
                     Color("background-color")
                 }
@@ -67,36 +65,30 @@ struct RestaurantDetailView: View {
                     if showIndicators {
                         HStack {
                             Spacer()
-
+                            
                             restartButton()
                                 .opacity(isResultView ? 1 : 0)
                                 .disabled(!isResultView)
-
+                            
                             Spacer()
                         }
                         .overlay {
                             HStack {
                                 Spacer()
-
+                                
                                 closeButton()
                             }
                         }
                         .offset(y: topButtonsOffsetY)
-                        .padding(.top, topSafeArea)
+                        .padding(.top, reader.safeAreaInsets.top)
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
-                    
-                    if showDetailInformation {
-                        Spacer()
-                    } else {
-                        Spacer()
-                            .frame(height: height - 500)
-                    }
+                    Spacer()
                     
                     if showIndicators {
                         HStack {
                             Spacer()
-
+                            
                             toolButtons()
                         }
                         .offset(x: toolButtonsOffsetX)
@@ -105,7 +97,7 @@ struct RestaurantDetailView: View {
                     }
                     
                     if showInformation {
-                        information(height: height - (topSafeArea + bottomSafeArea + 30))
+                        information(height: height - (reader.safeAreaInsets.top + reader.safeAreaInsets.bottom + 30))
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     
@@ -113,6 +105,7 @@ struct RestaurantDetailView: View {
                         Spacer()
                     }
                 }
+                .offset(y: height == 647 || height == 716 ? 15 : 0)
             }
             .modifier(BackgroundModifier())
             .gesture(
@@ -191,12 +184,12 @@ struct RestaurantDetailView: View {
     @ViewBuilder
     func information(height: CGFloat) -> some View {
         let isNoneNotchiPhone = height == 597
-        let spacing = CGFloat(isNoneNotchiPhone ? 10 : 15)
         
-        VStack(alignment: .leading, spacing: spacing) {
-            informationContent(detailMenuDisable: isNoneNotchiPhone, spacing: spacing)
+        VStack(alignment: .leading, spacing: isNoneNotchiPhone ? 10 : 15) {
+            informationContent(detailMenuDisable: isNoneNotchiPhone)
         }
         .padding(isNoneNotchiPhone ? 15 : 20)
+        .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
         .background {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color("background-shape-color"))
@@ -218,9 +211,10 @@ struct RestaurantDetailView: View {
                     .rotation3DEffect(Angle(degrees: 180), axis: (x: 0, y: 1, z: 0))
                     .opacity(showDetailMenu ? 1 : 0)
                     .padding(isNoneNotchiPhone ? 15 : 20)
-                    .padding(.bottom, showDetailInformation ? 0 : spacing)
+                    .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
             }
         }
+        .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
         .offset(y: informationOffsetY)
         .frame(maxWidth: 500)
         .padding(.top)
@@ -229,8 +223,17 @@ struct RestaurantDetailView: View {
                 .onChanged({ drag in
                     DispatchQueue.global(qos: .userInteractive).async {
                         let moveY = drag.translation.height
+                        let velocity = (informationOffsetY - moveY)
                         
-                        calculateDragInformation(moveY: moveY, velocity: informationOffsetY - moveY)
+                        if !isFastDragging && velocity > -100 && showDetailInformation {
+                            isFastDragging = (velocity < 0 ? -velocity : velocity) >= 30
+                        }
+                        
+                        if showDetailInformation {
+                            isDraggingUp = informationOffsetY > moveY
+                        }
+                        
+                        print(isDraggingUp)
                         
                         imageBlurByDragOffset()
                         
@@ -273,7 +276,6 @@ struct RestaurantDetailView: View {
                 })
         )
         .padding(.horizontal)
-        .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
     }
     
     @ViewBuilder
@@ -303,7 +305,7 @@ struct RestaurantDetailView: View {
     }
     
     @ViewBuilder
-    func informationContent(detailMenuDisable: Bool, spacing: CGFloat) -> some View {
+    func informationContent(detailMenuDisable: Bool) -> some View {
         Group {
             HStack(alignment: .bottom) {
                 Text("이이요")
@@ -325,14 +327,14 @@ struct RestaurantDetailView: View {
                 .fontWeight(.bold)
                 .foregroundColor(Color("secondary-text-color-strong"))
             
-            Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
-                .font(.footnote)
-                .fontWeight(.semibold)
-                .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
-            
-            ZStack(alignment: .topLeading) {
-                VStack(alignment: .leading, spacing: spacing) {
+            VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
+                Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
+                    .font(.footnote)
+                    .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                
+                if showDetailInformation {
                     detailHours()
+                        .transition(.opacity.animation(.easeInOut(duration: 0.5)))
                     
                     VStack(alignment: .leading) {
                         Text("키워드 태그")
@@ -342,12 +344,9 @@ struct RestaurantDetailView: View {
                         
                         KeywordTagsView()
                     }
-                    
-                    representativeMenu(detailMenuDisable: detailMenuDisable)
-                }
-                .opacity(showDetailInformation ? 1 : 0)
-                
-                VStack(alignment: .leading, spacing: spacing) {
+                    .padding(.bottom, 5)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.5)))
+                } else {
                     HStack {
                         Label("11:50 ~ 22:00", systemImage: "clock")
                             .font(.footnote)
@@ -359,11 +358,11 @@ struct RestaurantDetailView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(Color("main-point-color-strong"))
                     }
-                    
-                    representativeMenu(detailMenuDisable: detailMenuDisable)
+                    .transition(.opacity)
                 }
-                .opacity(showDetailInformation ? 0 : 1)
             }
+            
+            representativeMenu(detailMenuDisable: detailMenuDisable)
         }
         .opacity(showDetailMenu ? 0 : 1)
     }
@@ -372,27 +371,22 @@ struct RestaurantDetailView: View {
     func representativeMenu(detailMenuDisable: Bool) -> some View {
         VStack(spacing: 10) {
             HStack {
-                ZStack(alignment: .leading) {
-                    Text("메뉴")
-                        .opacity(showDetailInformation ? 1 : 0)
-                    
-                    Text("대표메뉴")
-                        .opacity(showDetailInformation ? 0 : 1)
-                }
-                .font(.headline)
-                .fontWeight(.bold)
-                .foregroundColor(Color("main-point-color"))
+                Text(showDetailInformation ? "메뉴" : "대표메뉴")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color"))
                 
                 Spacer()
                 
-                Button("더보기") {
-                    withAnimation(.spring()) {
-                        showDetailMenu = true
+                if showDetailInformation {
+                    Button("더보기") {
+                        withAnimation(.spring()) {
+                            showDetailMenu = true
+                        }
                     }
+                    .font(.footnote)
+                    .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                 }
-                .font(.footnote)
-                .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
-                .opacity(showDetailInformation ? 1 : 0)
             }
             
             VStack(spacing: 10) {
@@ -402,13 +396,10 @@ struct RestaurantDetailView: View {
                 
                 menu(title: "이이요 스페셜 카이센동", price: 35000)
                 
-                if !detailMenuDisable {
-                    Group {
-                        menu(title: "야끼돈부리", price: 16000)
-                        
-                        menu(title: "도미연어덮밥", price: 16500)
-                    }
-                    .opacity(showDetailInformation && !detailMenuDisable ? 1 : 0)
+                if showDetailInformation && !detailMenuDisable {
+                    menu(title: "야끼돈부리", price: 16000)
+                    
+                    menu(title: "도미연어덮밥", price: 16500)
                 }
             }
         }
@@ -436,9 +427,10 @@ struct RestaurantDetailView: View {
                         .foregroundColor(Color("main-point-color"))
                         .shadow(color: .black.opacity(0.25), radius: 5)
                 }
+
             }
             
-            ViewThatFits {
+            ViewThatFits(in: .vertical) {
                 LazyVStack(spacing: 10) {
                     Group {
                         menu(title: "초밥(11P)", price: 20000)
@@ -806,14 +798,6 @@ struct RestaurantDetailView: View {
         .opacity(detailImageBackgroundOpacity)
     }
     
-    func calculateDragInformation(moveY: CGFloat, velocity: CGFloat) {
-        if !isFastDragging && velocity > -100 {
-            isFastDragging = (velocity < 0 ? -velocity : velocity) >= 30
-        }
-        
-        isDraggingUp = informationOffsetY > moveY
-    }
-    
     func imageBlurByDragOffset() {
         if isDraggingUp {
             imageBlur += imageBlur < 100 ? 1 : 0
@@ -828,9 +812,7 @@ struct RestaurantDetailView: View {
                 showIndicators = false
             }
             
-            withAnimation(.easeInOut) {
-                showDetailInformation = true
-            }
+            showDetailInformation = true
         } else {
             informationOffsetY = moveY / 3
         }
@@ -852,9 +834,9 @@ struct RestaurantDetailView: View {
             imageBlur = 0
         }
         withAnimation(.spring()) {
-            showDetailInformation = false
             showIndicators = true
             informationOffsetY = .zero
+            showDetailInformation = false
         }
     }
     
@@ -881,7 +863,6 @@ struct RestaurantDetailView: View {
         withAnimation(.easeInOut) {
             showInformation = false
             showIndicators = false
-            
             if isResultView {
                 isCherryPick = false
                 isCherryPickDone = false
@@ -930,6 +911,11 @@ struct RestaurantDetailView: View {
         
         if detailImageOffsetY != .zero {
             detailImageBackgroundOpacity = moveY > 0 ? (500 - moveY) / 500 : (500 + moveY) / 500
+            
+            withAnimation(.spring()) {
+                showInformation = true
+                showIndicators = true
+            }
         }
     }
     
