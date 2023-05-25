@@ -14,7 +14,7 @@
 		C58C0DE62A1DEB7200167C8E /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DE52A1DEB7200167C8E /* LoginResponse.swift */; };
 		C58C0DEA2A1DEC6500167C8E /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DE92A1DEC6500167C8E /* APIService.swift */; };
 		C58C0DEC2A1DEC6E00167C8E /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DEB2A1DEC6E00167C8E /* APIError.swift */; };
-		C58C0DEE2A1E328400167C8E /* UserPreferenceStartRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DED2A1E328400167C8E /* UserPreferenceStartRequest.swift */; };
+		C58C0DEE2A1E328400167C8E /* UserRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DED2A1E328400167C8E /* UserRequest.swift */; };
 		C58C0DF02A1E33F100167C8E /* UserPreferenceStartResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DEF2A1E33F100167C8E /* UserPreferenceStartResponse.swift */; };
 		C58C0DF22A1E389700167C8E /* UserPreferenceRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF12A1E389700167C8E /* UserPreferenceRequest.swift */; };
 		C58C0DF42A1E38E300167C8E /* UserPrefereceResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF32A1E38E300167C8E /* UserPrefereceResponse.swift */; };
@@ -25,9 +25,16 @@
 		C58C0DFE2A1E3F2100167C8E /* ShopCardResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */; };
 		C58C0E002A1E3F6300167C8E /* ShopDetailResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */; };
 		C58C0E022A1E413C00167C8E /* GameEndResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E012A1E413C00167C8E /* GameEndResponse.swift */; };
-		C58C0E042A1E46CC00167C8E /* ShopRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E032A1E46CC00167C8E /* ShopRequest.swift */; };
+		C58C0E042A1E46CC00167C8E /* ShopOrClippingRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E032A1E46CC00167C8E /* ShopOrClippingRequest.swift */; };
 		C58C0E062A1E48DB00167C8E /* SimpleShopRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E052A1E48DB00167C8E /* SimpleShopRequest.swift */; };
 		C58C0E082A1E49BE00167C8E /* SimpleShopResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */; };
+		C58C0E0A2A1F06B200167C8E /* UserAnalyzeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E092A1F06B200167C8E /* UserAnalyzeResponse.swift */; };
+		C58C0E0C2A1F06C700167C8E /* ShopSimple.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E0B2A1F06C700167C8E /* ShopSimple.swift */; };
+		C58C0E0E2A1F094000167C8E /* UserNicknameResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E0D2A1F094000167C8E /* UserNicknameResponse.swift */; };
+		C58C0E102A1F0A3200167C8E /* UserNicknameChangeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E0F2A1F0A3200167C8E /* UserNicknameChangeRequest.swift */; };
+		C58C0E122A1F0AA900167C8E /* UserNicknameChangeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E112A1F0AA900167C8E /* UserNicknameChangeResponse.swift */; };
+		C58C0E182A1F107400167C8E /* CilppingDoResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E172A1F107400167C8E /* CilppingDoResponse.swift */; };
+		C58C0E1A2A1F167200167C8E /* APIFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E192A1F167200167C8E /* APIFunction.swift */; };
 		C58F418429FDD7F900A98B2F /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58F418329FDD7F900A98B2F /* StartView.swift */; };
 		C58F418929FDD84100A98B2F /* BackgroundModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58F418829FDD84100A98B2F /* BackgroundModifier.swift */; };
 		C58F418C29FDE8C600A98B2F /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C58F418B29FDE8C600A98B2F /* KakaoSDKAuth */; };
@@ -56,7 +63,7 @@
 		C58C0DE52A1DEB7200167C8E /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
 		C58C0DE92A1DEC6500167C8E /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 		C58C0DEB2A1DEC6E00167C8E /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
-		C58C0DED2A1E328400167C8E /* UserPreferenceStartRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceStartRequest.swift; sourceTree = "<group>"; };
+		C58C0DED2A1E328400167C8E /* UserRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRequest.swift; sourceTree = "<group>"; };
 		C58C0DEF2A1E33F100167C8E /* UserPreferenceStartResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceStartResponse.swift; sourceTree = "<group>"; };
 		C58C0DF12A1E389700167C8E /* UserPreferenceRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceRequest.swift; sourceTree = "<group>"; };
 		C58C0DF32A1E38E300167C8E /* UserPrefereceResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPrefereceResponse.swift; sourceTree = "<group>"; };
@@ -67,9 +74,16 @@
 		C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopCardResponse.swift; sourceTree = "<group>"; };
 		C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopDetailResponse.swift; sourceTree = "<group>"; };
 		C58C0E012A1E413C00167C8E /* GameEndResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEndResponse.swift; sourceTree = "<group>"; };
-		C58C0E032A1E46CC00167C8E /* ShopRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopRequest.swift; sourceTree = "<group>"; };
+		C58C0E032A1E46CC00167C8E /* ShopOrClippingRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopOrClippingRequest.swift; sourceTree = "<group>"; };
 		C58C0E052A1E48DB00167C8E /* SimpleShopRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleShopRequest.swift; sourceTree = "<group>"; };
 		C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleShopResponse.swift; sourceTree = "<group>"; };
+		C58C0E092A1F06B200167C8E /* UserAnalyzeResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAnalyzeResponse.swift; sourceTree = "<group>"; };
+		C58C0E0B2A1F06C700167C8E /* ShopSimple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopSimple.swift; sourceTree = "<group>"; };
+		C58C0E0D2A1F094000167C8E /* UserNicknameResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNicknameResponse.swift; sourceTree = "<group>"; };
+		C58C0E0F2A1F0A3200167C8E /* UserNicknameChangeRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNicknameChangeRequest.swift; sourceTree = "<group>"; };
+		C58C0E112A1F0AA900167C8E /* UserNicknameChangeResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNicknameChangeResponse.swift; sourceTree = "<group>"; };
+		C58C0E172A1F107400167C8E /* CilppingDoResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CilppingDoResponse.swift; sourceTree = "<group>"; };
+		C58C0E192A1F167200167C8E /* APIFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIFunction.swift; sourceTree = "<group>"; };
 		C58F418329FDD7F900A98B2F /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
 		C58F418829FDD84100A98B2F /* BackgroundModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModifier.swift; sourceTree = "<group>"; };
 		C58F419129FDEA5300A98B2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -107,7 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				C58C0DE52A1DEB7200167C8E /* LoginResponse.swift */,
-				C58C0DED2A1E328400167C8E /* UserPreferenceStartRequest.swift */,
+				C58C0DED2A1E328400167C8E /* UserRequest.swift */,
 				C58C0DEF2A1E33F100167C8E /* UserPreferenceStartResponse.swift */,
 				C58C0DF12A1E389700167C8E /* UserPreferenceRequest.swift */,
 				C58C0DF32A1E38E300167C8E /* UserPrefereceResponse.swift */,
@@ -117,10 +131,16 @@
 				C58C0E012A1E413C00167C8E /* GameEndResponse.swift */,
 				C58C0DF72A1E3C2400167C8E /* TagPair.swift */,
 				C58C0DFB2A1E3E8B00167C8E /* GameRequest.swift */,
-				C58C0E032A1E46CC00167C8E /* ShopRequest.swift */,
+				C58C0E032A1E46CC00167C8E /* ShopOrClippingRequest.swift */,
 				C58C0E052A1E48DB00167C8E /* SimpleShopRequest.swift */,
 				C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */,
+				C58C0E0B2A1F06C700167C8E /* ShopSimple.swift */,
 				C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */,
+				C58C0E092A1F06B200167C8E /* UserAnalyzeResponse.swift */,
+				C58C0E0D2A1F094000167C8E /* UserNicknameResponse.swift */,
+				C58C0E112A1F0AA900167C8E /* UserNicknameChangeResponse.swift */,
+				C58C0E0F2A1F0A3200167C8E /* UserNicknameChangeRequest.swift */,
+				C58C0E172A1F107400167C8E /* CilppingDoResponse.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -214,6 +234,7 @@
 			children = (
 				C5C867BA2A1DE46C00BC486E /* APIURL.swift */,
 				C58C0DE92A1DEC6500167C8E /* APIService.swift */,
+				C58C0E192A1F167200167C8E /* APIFunction.swift */,
 				C58C0DEB2A1DEC6E00167C8E /* APIError.swift */,
 			);
 			path = API;
@@ -300,9 +321,12 @@
 				C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */,
 				C58C0DF62A1E3BC700167C8E /* GameStartRequest.swift in Sources */,
 				C58C0DEA2A1DEC6500167C8E /* APIService.swift in Sources */,
+				C58C0E0C2A1F06C700167C8E /* ShopSimple.swift in Sources */,
+				C58C0E102A1F0A3200167C8E /* UserNicknameChangeRequest.swift in Sources */,
 				C5FFC65E2A076E9100933C9D /* UserPreferenceView.swift in Sources */,
 				C58C0DE62A1DEB7200167C8E /* LoginResponse.swift in Sources */,
 				C5F792622A17059C0081F63A /* RollingTextView.swift in Sources */,
+				C58C0E0E2A1F094000167C8E /* UserNicknameResponse.swift in Sources */,
 				C58F419A29FFC17C00A98B2F /* CherryPickView.swift in Sources */,
 				C58C0DFC2A1E3E8B00167C8E /* GameRequest.swift in Sources */,
 				C58C0DF02A1E33F100167C8E /* UserPreferenceStartResponse.swift in Sources */,
@@ -311,22 +335,26 @@
 				C58C0E082A1E49BE00167C8E /* SimpleShopResponse.swift in Sources */,
 				C5550F4E2A09EF3B005F9335 /* RestaurantListView.swift in Sources */,
 				C5DF79782A0363780061DAD0 /* AppView.swift in Sources */,
-				C58C0E042A1E46CC00167C8E /* ShopRequest.swift in Sources */,
+				C58C0E042A1E46CC00167C8E /* ShopOrClippingRequest.swift in Sources */,
 				C58F418429FDD7F900A98B2F /* StartView.swift in Sources */,
 				C58C0DFE2A1E3F2100167C8E /* ShopCardResponse.swift in Sources */,
 				C58C0E022A1E413C00167C8E /* GameEndResponse.swift in Sources */,
 				C58C0E002A1E3F6300167C8E /* ShopDetailResponse.swift in Sources */,
 				C58C0DFA2A1E3CDA00167C8E /* GameResponse.swift in Sources */,
+				C58C0E122A1F0AA900167C8E /* UserNicknameChangeResponse.swift in Sources */,
 				C58C0DF22A1E389700167C8E /* UserPreferenceRequest.swift in Sources */,
 				C58F419329FF9E5400A98B2F /* MenuView.swift in Sources */,
-				C58C0DEE2A1E328400167C8E /* UserPreferenceStartRequest.swift in Sources */,
+				C58C0E1A2A1F167200167C8E /* APIFunction.swift in Sources */,
+				C58C0DEE2A1E328400167C8E /* UserRequest.swift in Sources */,
 				C58C0DF82A1E3C2400167C8E /* TagPair.swift in Sources */,
 				C5C867BB2A1DE46C00BC486E /* APIURL.swift in Sources */,
 				C58C0DEC2A1DEC6E00167C8E /* APIError.swift in Sources */,
 				C58F418929FDD84100A98B2F /* BackgroundModifier.swift in Sources */,
 				C58F419829FFB52D00A98B2F /* UserViewModel.swift in Sources */,
 				C58C0E062A1E48DB00167C8E /* SimpleShopRequest.swift in Sources */,
+				C58C0E0A2A1F06B200167C8E /* UserAnalyzeResponse.swift in Sources */,
 				C59D211B29C9D83A00275DBA /* CherryPickerApp.swift in Sources */,
+				C58C0E182A1F107400167C8E /* CilppingDoResponse.swift in Sources */,
 				C57FFDF62A175D80008FB923 /* VerticalPageTabView.swift in Sources */,
 				C58C0DF42A1E38E300167C8E /* UserPrefereceResponse.swift in Sources */,
 				C507595E2A02AC9800D7182E /* KeywordTagsView.swift in Sources */,

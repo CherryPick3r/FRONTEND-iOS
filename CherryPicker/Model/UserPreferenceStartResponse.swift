@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UserPreferenceCard: Codable {
+struct UserPreferenceStartResponse: Codable {
     let preferenceGameId: Int
     let totalRound: Int
     let curRound: Int

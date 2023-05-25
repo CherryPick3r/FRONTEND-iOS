@@ -11,13 +11,3 @@ struct SimpleShopResponse: Codable {
     let shopSimples: ShopSimples
 }
 
-struct ShopSimple: Codable {
-    let shopId: Int
-    let shopName: String
-    let shopCategory: String
-    let shopAddress: String
-    let operatingHours: String
-    let mainPhotoUrl: String
-}
-
-typealias ShopSimples = [ShopSimple]

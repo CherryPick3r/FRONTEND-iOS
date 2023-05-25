@@ -26,7 +26,9 @@ enum APIURL {
     case shopClippingSimple
     case userAnalyze
     case userNickname
-    case userDelete
+    case userUnregister
+    case clippingDo
+    case clippingUndo
     
     var url: URL {
         var serverURL = URLComponents(string: "https://www.cherrypick3r.shop")!
@@ -86,8 +88,14 @@ enum APIURL {
         case .userNickname:
             serverURL.path = "/api/v1/user/nickname"
             break
-        case .userDelete:
-            serverURL.path = "/api/v1/user/delete-user"
+        case .userUnregister:
+            serverURL.path = "/api/v1/user/unregister"
+            break
+        case .clippingDo:
+            serverURL.path = "api/v1/clipping/do"
+            break
+        case .clippingUndo:
+            serverURL.path = "api/v1/clipping/undo"
             break
         }
         
