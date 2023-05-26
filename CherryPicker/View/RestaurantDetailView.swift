@@ -606,7 +606,6 @@ struct RestaurantDetailView: View {
                 } label: {
                     Label("공유하기", systemImage: "square.and.arrow.up")
                         .labelStyle(.iconOnly)
-                        .modifier(ParticleModifier(systemImage: "square.and.arrow.up", status: isSharing))
                 }
                 .padding(.bottom, 4)
                 
