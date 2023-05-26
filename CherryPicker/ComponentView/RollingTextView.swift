@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RollingTextView: View {
-    @Binding var value: Int
+    @Binding var integerPart: Int
     
     @State var animationRange: [Int] = []
     
@@ -34,14 +34,14 @@ struct RollingTextView: View {
             }
         }
         .onAppear() {
-            animationRange = Array(repeating: 0, count: "\(value)".count)
+            animationRange = Array(repeating: 0, count: "\(integerPart)".count)
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
                 updateText()
             }
         }
-        .onChange(of: value) { newValue in
-            let extra = "\(value)".count - animationRange.count
+        .onChange(of: integerPart) { newValue in
+            let extra = "\(integerPart)".count - animationRange.count
             
             if extra > 0 {
                 for _ in 0..<extra {
@@ -60,7 +60,7 @@ struct RollingTextView: View {
     }
     
     func updateText() {
-        let stringValue = "\(value)"
+        let stringValue = "\(integerPart)"
         
         for (index, value) in zip(0..<stringValue.count, stringValue) {
             var fraction = Double(index) * 0.15
@@ -75,6 +75,6 @@ struct RollingTextView: View {
 
 struct RollingTextView_Previews: PreviewProvider {
     static var previews: some View {
-        RollingTextView(value: .constant(0))
+        RollingTextView(integerPart: .constant(0))
     }
 }

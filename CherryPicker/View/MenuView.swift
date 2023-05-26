@@ -104,7 +104,7 @@ struct MenuView: View {
             }
             
             NavigationLink {
-                UserPreferenceView()
+                UserAnalyzeView()
             } label: {
                 HStack {
                     Text("취향분석")

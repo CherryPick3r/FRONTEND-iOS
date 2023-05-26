@@ -98,3 +98,12 @@ extension ShopSimple {
         return shops
     }
 }
+
+extension UserAnalyzeResponse {
+    static var preview: UserAnalyzeResponse {
+        let cherrypickCount = Int.random(in: 0...100)
+        let clippingCount = Int.random(in: 0...100)
+        
+        return UserAnalyzeResponse(userNickname: "체리체리1q2w3e", userPercentile: Double.random(in: 0.0...100.0), cherrypickClippingTotalCount: cherrypickCount + clippingCount, cherrypickCount: cherrypickCount, recentCherrypickShops: ShopSimple.preview, clippingCount: clippingCount, recentClippingShops: ShopSimple.preview, weeklyTags: TagTitle.allCases)
+    }
+}

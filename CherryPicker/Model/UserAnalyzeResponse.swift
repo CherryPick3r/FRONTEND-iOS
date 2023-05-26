@@ -12,7 +12,8 @@ struct UserAnalyzeResponse: Codable {
     let userPercentile: Double
     let cherrypickClippingTotalCount: Int
     let cherrypickCount: Int
+    let recentCherrypickShops: ShopSimples
     let clippingCount: Int
     let recentClippingShops: ShopSimples
-    let weeklyTags: [String]
+    let weeklyTags: [TagTitle]
 }

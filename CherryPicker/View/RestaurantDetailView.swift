@@ -93,6 +93,7 @@ struct RestaurantDetailView: View {
                         .padding(.top, topSafeArea)
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
+                    
                     Spacer()
                     
                     if showIndicators {

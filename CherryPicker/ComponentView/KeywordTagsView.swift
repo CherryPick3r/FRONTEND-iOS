@@ -70,7 +70,7 @@ struct KeywordTagsView: View {
                     Spacer()
                     
                     
-                    RollingTextView(value: value)
+                    RollingTextView(integerPart: value)
                         .font(.footnote)
                         .fontWeight(.bold)
                         .foregroundColor(Color("shape-light-color"))
