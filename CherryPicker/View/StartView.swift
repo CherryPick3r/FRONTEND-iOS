@@ -22,7 +22,7 @@ struct StartView: View {
     @State private var contentOffsetY = CGFloat.zero
     @State private var dragOffsetY = CGFloat.zero
     @State private var isCategoryContent = false
-    @State private var isFastDragging = false
+    @State private var maxVelocity = CGFloat.zero
     
     var body: some View {
         NavigationStack {
@@ -44,11 +44,9 @@ struct StartView: View {
                         .onChanged({ drag in
                             DispatchQueue.global(qos: .userInteractive).async {
                                 let moveY = drag.translation.height
-                                let velocity = contentOffsetY - moveY
+                                let velocity = moveY - (contentOffsetY - dragOffsetY)
                                 
-                                if !isFastDragging {
-                                    isFastDragging = ((velocity < 0) ? -velocity : velocity) >= 30
-                                }
+                                calculateMaxVelocity(velocity: velocity)
                                 
                                 isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
                             }
@@ -57,7 +55,7 @@ struct StartView: View {
                             DispatchQueue.global(qos: .userInteractive).async {
                                 isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
                                 
-                                isFastDragging = false
+                                maxVelocity = CGFloat.zero
                             }
                         })
                 )
@@ -424,6 +422,14 @@ struct StartView: View {
         }
     }
     
+    func calculateMaxVelocity(velocity: CGFloat) {
+        if velocity < 0 {
+            maxVelocity = velocity < maxVelocity ? velocity : maxVelocity
+        } else {
+            maxVelocity = velocity > maxVelocity ? velocity : maxVelocity
+        }
+    }
+    
     func showingStartContent(moveY: CGFloat, height: CGFloat) {
         contentOffsetY = ((contentOffsetY < -height && moveY < 0) ? (moveY / 3) : moveY) + dragOffsetY
     }
@@ -434,7 +440,7 @@ struct StartView: View {
     
     func showCategoryContent(height: CGFloat) {
         withAnimation(.spring()) {
-            isCategoryContent = contentOffsetY < -150 || isFastDragging
+            isCategoryContent = (contentOffsetY < -150 || maxVelocity <= -30) && maxVelocity < 0
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
@@ -446,10 +452,11 @@ struct StartView: View {
     
     func showStartContent(height: CGFloat) {
         withAnimation(.spring()) {
-            isCategoryContent = contentOffsetY < -550 || !isFastDragging
+            isCategoryContent = (contentOffsetY < -550 && maxVelocity <= 30) || maxVelocity < 0
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
+        
         dragOffsetY = contentOffsetY
         
         categoryIndicatorOffsetY = 15
