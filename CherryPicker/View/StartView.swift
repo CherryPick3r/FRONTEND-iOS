@@ -22,7 +22,6 @@ struct StartView: View {
     @State private var contentOffsetY = CGFloat.zero
     @State private var dragOffsetY = CGFloat.zero
     @State private var isCategoryContent = false
-    @State private var isFastDragging = false
     @State private var maxVelocity = CGFloat.zero
     
     var body: some View {
@@ -55,8 +54,6 @@ struct StartView: View {
                         .onEnded({ drag in
                             DispatchQueue.global(qos: .userInteractive).async {
                                 isCategoryContent ? showStartContent(height: height) : showCategoryContent(height: height)
-                                
-                                isFastDragging = false
                                 
                                 maxVelocity = CGFloat.zero
                             }
@@ -459,6 +456,7 @@ struct StartView: View {
             
             contentOffsetY = isCategoryContent ? -height : 0
         }
+        
         dragOffsetY = contentOffsetY
         
         categoryIndicatorOffsetY = 15
