@@ -667,11 +667,11 @@ struct RestaurantDetailView: View {
 
                 
                 Button {
-                    isSharing = true
+                    let activityViewController = UIActivityViewController(activityItems: ["https://m.place.naver.com/restaurant/\(restuarantNaverID)/home"], applicationActivities: nil)
+                    UIApplication.shared.windows.first?.rootViewController?.present(activityViewController, animated: true, completion: nil)
                 } label: {
                     Label("공유하기", systemImage: "square.and.arrow.up")
                         .labelStyle(.iconOnly)
-                        .modifier(ParticleModifier(systemImage: "square.and.arrow.up", status: isSharing))
                 }
                 .padding(.bottom, 4)
                 

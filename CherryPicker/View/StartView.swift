@@ -49,8 +49,6 @@ struct StartView: View {
                                 
                                 calculateMaxVelocity(velocity: velocity)
                                 
-                                print(contentOffsetY)
-                                
                                 isCategoryContent ? showingStartContent(moveY: moveY, height: height) : showingCategoryContent(moveY: moveY)
                             }
                         })

@@ -321,8 +321,8 @@ struct UserPreferenceView: View {
                     tags(tagList: ["컨셉이 독특해요", "쾌적한 공간", "술집", "혼밥하기 좋아요", "아늑한 분위기"])
                 }
                 .padding()
-                .offset(x: tagsOffsetX)
-                .animation(.easeInOut(duration: 30).repeatForever(), value: tagsOffsetX)
+//                .offset(x: tagsOffsetX)
+//                .animation(.easeInOut(duration: 30).repeatForever(), value: tagsOffsetX)
             }
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay {
@@ -336,7 +336,7 @@ struct UserPreferenceView: View {
             .background {
                 contentBackground()
             }
-            .scrollDisabled(true)
+//            .scrollDisabled(true)
         }
     }
     
