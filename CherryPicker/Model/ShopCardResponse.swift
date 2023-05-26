@@ -15,7 +15,7 @@ struct ShopCardResponse: Codable {
     let shopCategory: String
     let oneLineReview: String
     let topTags: TopTags
-    let shopClipping: Int
+    let shopClipping: ShopClipping
 }
 
 typealias ShopCardResponses = [ShopCardResponse]

@@ -12,13 +12,14 @@ struct AppView: View {
     
     @State private var isCherryPick = false
     @State private var isCherryPickDone = false
+    @State private var restaurantId: Int?
     
     var body: some View {
         if isCherryPick {
-            CherryPickView(isCherryPick: $isCherryPick, isCherryPickDone: $isCherryPickDone, cherryPickMode: .cherryPick)
+            CherryPickView(isCherryPick: $isCherryPick, isCherryPickDone: $isCherryPickDone, restaurantId: $restaurantId, cherryPickMode: .cherryPick)
                 .environmentObject(userViewModel)
-        } else if isCherryPickDone {
-            RestaurantDetailView(isCherryPick: $isCherryPick, isCherryPickDone: $isCherryPickDone)
+        } else if isCherryPickDone, let shopId = restaurantId {
+            RestaurantDetailView(isCherryPick: $isCherryPick, isCherryPickDone: $isCherryPickDone, restaurantId: shopId)
                 .environmentObject(userViewModel)
         } else {
             StartView(isCherryPick: $isCherryPick)

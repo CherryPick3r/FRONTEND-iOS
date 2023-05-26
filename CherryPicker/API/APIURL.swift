@@ -31,7 +31,7 @@ enum APIURL {
     case clippingUndo
     
     var url: URL {
-        var serverURL = URLComponents(string: "https://www.cherrypick3r.shop")!
+        var serverURL = URLComponents(string: "http://43.202.25.158:8080")!
         
         switch self {
         case .appleLogin:
@@ -92,10 +92,10 @@ enum APIURL {
             serverURL.path = "/api/v1/user/unregister"
             break
         case .clippingDo:
-            serverURL.path = "api/v1/clipping/do"
+            serverURL.path = "/api/v1/clipping/do"
             break
         case .clippingUndo:
-            serverURL.path = "api/v1/clipping/undo"
+            serverURL.path = "/api/v1/clipping/undo"
             break
         }
         

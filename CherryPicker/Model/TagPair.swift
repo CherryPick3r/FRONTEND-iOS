@@ -8,8 +8,8 @@
 import Foundation
 
 struct TagPair: Codable {
-    let description: String
-    let value: Double
+    var description: String
+    var value: Double
 }
 
 typealias TopTags = [TagPair]

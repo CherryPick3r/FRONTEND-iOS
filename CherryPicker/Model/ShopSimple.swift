@@ -7,13 +7,18 @@
 
 import Foundation
 
-struct ShopSimple: Codable {
-    let shopId: Int
+struct ShopSimple: Codable, Identifiable {
+    let id: Int
     let shopName: String
     let shopCategory: String
     let shopAddress: String
     let operatingHours: String
     let mainPhotoUrl: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "shopId"
+        case shopName, shopCategory, shopAddress, operatingHours, mainPhotoUrl
+    }
 }
 
 typealias ShopSimples = [ShopSimple]

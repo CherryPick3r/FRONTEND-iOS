@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 enum CherryPickMode {
     case tutorial
@@ -19,11 +20,15 @@ enum UserSelection {
 }
 
 struct CherryPickView: View {
+    @EnvironmentObject var userViewModel: UserViewModel
+    
     @Binding var isCherryPick: Bool
     @Binding var isCherryPickDone: Bool
+    @Binding var restaurantId: Int?
     
     @State var cherryPickMode: CherryPickMode
     
+    @State private var subscriptions = Set<AnyCancellable>()
     @State private var showRestaurantCard = false
     @State private var showIndicators = false
     @State private var likeAndHateButtonsScale = CGFloat(1.2)
@@ -35,10 +40,13 @@ struct CherryPickView: View {
     @State private var cardDgree = 0.0
     @State private var userSelection = UserSelection.none
     @State private var indicatorsOpacity = 1.0
+    @State private var gameResponse: GameResponse?
+    @State private var shopCardResponse: ShopCardResponse = ShopCardResponse.preview
+    @State private var error: APIError?
+    @State private var showError = false
+    @State private var isClipped = false
     
     //임시용
-    @State private var isBookmarked = false
-    @State private var cardCount = 3
     @State private var isLoading = false
     
     var body: some View {
@@ -101,19 +109,13 @@ struct CherryPickView: View {
                         closeButton()
                     }
                 }
-                .onAppear(perform: showContentActions)
-                .onChange(of: cardCount) { newValue in
-                    //임시
-                    if newValue == 0 {
-                        withAnimation(.easeInOut) {
-                            isCherryPick = false
-                            isCherryPickDone = true
-                        }
-                    }
+                .task {
+                    appearingView()
                 }
             }
         }
         .tint(Color("main-point-color"))
+        .modifier(ErrorViewModifier(showError: $showError, error: $error))
     }
     
     @ViewBuilder
@@ -217,12 +219,12 @@ struct CherryPickView: View {
             
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
-                    Text("이이요")
+                    Text(shopCardResponse.shopName)
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(Color("main-text-color"))
                     
-                    Text("일식당")
+                    Text(shopCardResponse.shopCategory)
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(Color("main-point-color-weak"))
@@ -230,25 +232,22 @@ struct CherryPickView: View {
                     Spacer()
                     
                     Button {
-                        withAnimation(.easeInOut) {
-                            isBookmarked.toggle()
-                        }
+                        clippingAction()
                     } label: {
-                        Label("즐겨찾기", systemImage: isBookmarked ? "bookmark.fill" : "bookmark")
+                        Label("즐겨찾기", systemImage: isClipped ? "bookmark.fill" : "bookmark")
                             .labelStyle(.iconOnly)
-                            .font(.title2)
-                            .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isBookmarked))
+                            .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isClipped))
                     }
                 }
                 
-                Text("식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"")
+                Text(shopCardResponse.oneLineReview)
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("secondary-text-color-strong"))
             }
             .padding(.bottom)
             
-            KeywordTagsView()
+            KeywordTagsView(topTags: .constant(TagPair.preview))
                 .opacity(isTutorial ? 0 : 1)
         }
         .blur(radius: isTutorial ? 10 : 0)
@@ -276,7 +275,7 @@ struct CherryPickView: View {
                         .foregroundColor(Color("secondary-text-color-strong"))
                         .padding(40)
                         
-                        KeywordTagsView()
+                        KeywordTagsView(topTags: .constant(TagPair.preview))
                             .padding()
                     }
                 }
@@ -316,29 +315,13 @@ struct CherryPickView: View {
         .onDisappear() {
             withAnimation(.easeInOut) {
                 indicatorsOpacity = 1.0
-                
-                //임시용
                 isLoading = false
-                isBookmarked = false
-            }
-            
-            withAnimation(.spring()) {
-                showRestaurantCard = true
+                isClipped = false
             }
             
             cardDgree = 0
-        }
-    }
-    
-    func showContentActions() {
-        withAnimation(.spring()) {
-            showRestaurantCard = true
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            withAnimation(.easeInOut) {
-                showIndicators = true
-            }
+            
+            showShopCard()
         }
     }
     
@@ -380,7 +363,7 @@ struct CherryPickView: View {
             cardOffsetY = .zero
         }
         
-        cardCount -= 1
+        doSwipped()
     }
     
     func cancelDecisionUserSelection() {
@@ -393,11 +376,105 @@ struct CherryPickView: View {
             indicatorsOpacity = 1.0
         }
     }
+    
+    func showShopCard() {
+        if let shopCard = gameResponse?.recommendShops?.popLast() {
+            withAnimation(.spring()) {
+                shopCardResponse = shopCard
+                isClipped = shopCardResponse.shopClipping == .isClipped
+                isLoading = false
+                showRestaurantCard = true
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.easeInOut) {
+                    showIndicators = true
+                }
+            }
+        } else {
+            withAnimation(.easeInOut) {
+                isLoading = true
+            }
+        }
+    }
+    
+    func appearingView() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        APIFunction.doStartGame(token: userViewModel.readToken, gameStartRequest: GameStartRequest(userEmail: userViewModel.readUserEmail, gameMode: 0), subscriptions: &subscriptions) { game in
+            APIError.closeError(showError: &showError, error: &error)
+            
+            gameResponse = game
+            
+            showShopCard()
+        } errorHandling: { apiError in
+            APIError.showError(showError: &showError, error: &error, catchError: apiError)
+        }
+    }
+    
+    func doSwipped() {
+        if let game = gameResponse {
+            APIError.closeError(showError: &showError, error: &error)
+            
+            APIFunction.doGameSwipe(token: userViewModel.readToken, gameRequest: GameRequest(gameId: game.gameId, shopId: shopCardResponse.shopId), swipeType: userSelection, subscriptions: &subscriptions) { data in
+                APIError.closeError(showError: &showError, error: &error)
+                
+                if let game = try? JSONDecoder().decode(GameResponse.self, from: data) {
+                    if game.recommendShopIds != nil || game.recommendShops != nil {
+                        gameResponse = game
+                    }
+                } else if let game = try? JSONDecoder().decode(GameEndResponse.self, from: data) {
+                    restaurantId = game.recommendedShopId
+                    
+                    withAnimation(.easeInOut) {
+                        isCherryPick = false
+                        isCherryPickDone = true
+                    }
+                }
+            } errorHandling: { apiError in
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+    }
+    
+    func clippingAction() {
+        withAnimation(.spring()) {
+            showError = false
+            error = nil
+        }
+        
+        let clippingRequset = ShopOrClippingRequest(shopId: shopCardResponse.shopId, userEmail: userViewModel.readUserEmail)
+        
+        if isClipped {
+            APIFunction.deleteClipping(token: userViewModel.readToken, clippingUndoRequest: clippingRequset, subscriptions: &subscriptions) { clippingUndoResponse in
+                APIError.closeError(showError: &showError, error: &error)
+                
+                withAnimation(.spring()) {
+                    isClipped = false
+                }
+            } errorHanding: { apiError in
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        } else {
+            APIFunction.doClipping(token: userViewModel.readToken, clippingDoRequest: clippingRequset, subscriptions: &subscriptions) { clippingDoResponse in
+                APIError.closeError(showError: &showError, error: &error)
+                
+                withAnimation(.spring()) {
+                    isClipped = true
+                }
+            } errorHanding: { apiError in
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+    }
 }
 
 struct CherryPickView_Previews: PreviewProvider {
     static var previews: some View {
-        CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), cherryPickMode: .cherryPick)
+        CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), restaurantId: .constant(0), cherryPickMode: .cherryPick)
             .tint(Color("main-point-color"))
+            .environmentObject(UserViewModel())
     }
 }

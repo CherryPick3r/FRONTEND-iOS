@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct RestaurantDetailView: View {
     @Namespace var heroEffect
@@ -13,12 +14,15 @@ struct RestaurantDetailView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
     
+    @EnvironmentObject var userViewModel: UserViewModel
+    
     @Binding var isCherryPick: Bool
     @Binding var isCherryPickDone: Bool
     
     private let isResultView: Bool
     private let maxOffsetY = CGFloat(250)
     
+    @State private var subscriptions = Set<AnyCancellable>()
     @State private var showDetailInformation = false
     @State private var showInformation = false
     @State private var showIndicators = false
@@ -33,18 +37,24 @@ struct RestaurantDetailView: View {
     @State private var showSelectMapDialog = false
     @State private var showDetailMenu = false
     @State private var maxVelocity = CGFloat.zero
+    @State private var isLoading = false
+    @State private var subMenus = MenuSimples()
+    @State private var error: APIError?
+    @State private var showError = false
+    @State private var imagePage = 0
+    @State private var isClipped = false
+    @State private var restaurant = ShopDetailResponse.preview
+    
+    private let restaurantId: Int
     
     //임시
-    @State private var imagePage = 0
-    @State private var isBookmarked = false
     @State private var isSharing = false
-    @State private var restuarantNaverID = 38738686
-    @State private var restuarantKakaoID = 861945610
     
-    init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true) {
+    init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true, restaurantId: Int) {
         self._isCherryPick = isCherryPick
         self._isCherryPickDone = isCherryPickDone
         self.isResultView = isResultView
+        self.restaurantId = restaurantId
     }
     
     var body: some View {
@@ -99,6 +109,7 @@ struct RestaurantDetailView: View {
                     if showInformation {
                         information(height: height - (topSafeArea + bottomSafeArea + 30))
                             .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .redacted(reason: isLoading ? [.placeholder] : [])
                     }
                     
                     if showDetailInformation {
@@ -122,18 +133,23 @@ struct RestaurantDetailView: View {
                     })
             )
             .opacity(opacity)
+            .ignoresSafeArea()
+            .overlay(alignment: .top) {
+                if showImages {
+                    images()
+                }
+            }
+            .modifier(ErrorViewModifier(showError: $showError, error: $error))
+            .task {
+                fetchRestaurant()
+            }
             .onAppear() {
                 withAnimation(.spring()) {
                     showInformation = true
                     showIndicators = true
                 }
             }
-            .ignoresSafeArea()
-            .overlay {
-                if showImages {
-                    images()
-                }
-            }
+            
         }
     }
     
@@ -170,15 +186,25 @@ struct RestaurantDetailView: View {
     
     @ViewBuilder
     func backgroundImage() -> some View {
-        Image("restaurant-sample1")
-            .resizable()
-            .scaledToFill()
-            .overlay {
-                imageShadowOverlay()
+        Group {
+            if let mainPhotoURL = restaurant.shopMainPhotoURLs.first {
+                AsyncImage(url: URL(string: mainPhotoURL)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .matchedGeometryEffect(id: mainPhotoURL, in: heroEffect)
+                } placeholder: {
+                    imageLoading()
+                }
+            } else {
+                Color("background-color")
             }
-            .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
-            .blur(radius: 20 * imageBlur / 100)
-            .onTapGesture(perform: showImagesAction)
+        }
+        .overlay {
+            imageShadowOverlay()
+        }
+        .blur(radius: 20 * imageBlur / 100)
+        .onTapGesture(perform: showImagesAction)
     }
     
     @ViewBuilder
@@ -186,7 +212,7 @@ struct RestaurantDetailView: View {
         let isNoneNotchiPhone = height == 597
         
         VStack(alignment: .leading, spacing: isNoneNotchiPhone ? 10 : 15) {
-            informationContent(detailMenuDisable: isNoneNotchiPhone)
+            informationContent(detailSubMenuDisable: isNoneNotchiPhone)
         }
         .padding(isNoneNotchiPhone ? 15 : 20)
         .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
@@ -210,8 +236,7 @@ struct RestaurantDetailView: View {
                 detailMenu()
                     .rotation3DEffect(Angle(degrees: 180), axis: (x: 0, y: 1, z: 0))
                     .opacity(showDetailMenu ? 1 : 0)
-                    .padding(isNoneNotchiPhone ? 15 : 20)
-                    .padding(.bottom, showDetailInformation ? 0 : (isNoneNotchiPhone ? 10 : 15))
+                    .padding([.horizontal, .top], isNoneNotchiPhone ? 15 : 20)
             }
         }
         .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
@@ -225,7 +250,7 @@ struct RestaurantDetailView: View {
                         let moveY = drag.translation.height
                         let velocity = informationOffsetY - moveY
                         
-                        if showDetailMenu {
+                        if showDetailMenu || isLoading {
                             informationOffsetY = moveY / 3
                         } else {
                             calculateMaxVelocity(velocity: velocity)
@@ -275,7 +300,7 @@ struct RestaurantDetailView: View {
             HStack {
                 Spacer()
                 
-                Text("총 1093명이 체리픽 받았어요!")
+                Text("총 \(restaurant.totalCherryPickCount)명이 체리픽 받았어요!")
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("shape-light-color"))
@@ -296,15 +321,15 @@ struct RestaurantDetailView: View {
     }
     
     @ViewBuilder
-    func informationContent(detailMenuDisable: Bool) -> some View {
+    func informationContent(detailSubMenuDisable: Bool) -> some View {
         Group {
             HStack(alignment: .bottom) {
-                Text("이이요")
+                Text(restaurant.shopName)
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-text-color"))
                 
-                Text("일식당")
+                Text(restaurant.shopCategory)
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(Color("main-point-color-weak"))
@@ -313,13 +338,13 @@ struct RestaurantDetailView: View {
                 Spacer()
             }
             
-            Text("식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"")
+            Text(restaurant.oneLineReview)
                 .font(.subheadline)
                 .fontWeight(.bold)
                 .foregroundColor(Color("secondary-text-color-strong"))
             
             VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
-                Label("서울 광진구 능동로19길 36 1층", systemImage: "map")
+                Label(restaurant.shopAddress, systemImage: "map")
                     .font(.footnote)
                     .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                 
@@ -333,7 +358,7 @@ struct RestaurantDetailView: View {
                             .fontWeight(.bold)
                             .foregroundColor(Color("main-point-color"))
                         
-                        KeywordTagsView()
+                        KeywordTagsView(topTags: .constant(restaurant.topTags))
                     }
                     .padding(.bottom, 5)
                     .transition(.opacity.animation(.easeInOut(duration: 0.3)))
@@ -353,13 +378,13 @@ struct RestaurantDetailView: View {
                 }
             }
             
-            representativeMenu(detailMenuDisable: detailMenuDisable)
+            representativeMenu(detailSubMenuDisable: detailSubMenuDisable)
         }
         .opacity(showDetailMenu ? 0 : 1)
     }
     
     @ViewBuilder
-    func representativeMenu(detailMenuDisable: Bool) -> some View {
+    func representativeMenu(detailSubMenuDisable: Bool) -> some View {
         VStack(spacing: 10) {
             HStack {
                 Text(showDetailInformation ? "메뉴" : "대표메뉴")
@@ -369,7 +394,7 @@ struct RestaurantDetailView: View {
                 
                 Spacer()
                 
-                if showDetailInformation {
+                if showDetailInformation && restaurant.shopMenus.count > 5 {
                     Button("더보기") {
                         withAnimation(.spring()) {
                             showDetailMenu = true
@@ -381,18 +406,16 @@ struct RestaurantDetailView: View {
             }
             
             VStack(spacing: 10) {
-                menu(title: "초밥(11P)", price: 20000)
-                
-                menu(title: "회덮밥(점심)", price: 13500)
-                
-                menu(title: "이이요 스페셜 카이센동", price: 35000)
-                
-                if showDetailInformation && !detailMenuDisable {
-                    menu(title: "야끼돈부리", price: 16000)
-                    
-                    menu(title: "도미연어덮밥", price: 16500)
+                ForEach(subMenus, id: \.name) { menuSimple in
+                    menu(title: menuSimple.name, price: menuSimple.price)
                 }
             }
+        }
+        .onAppear() {
+            updateSubMenus(detailSubMenuDisable: detailSubMenuDisable)
+        }
+        .onChange(of: showDetailInformation) { newValue in
+            updateSubMenus(detailSubMenuDisable: detailSubMenuDisable)
         }
     }
     
@@ -423,103 +446,15 @@ struct RestaurantDetailView: View {
             
             ViewThatFits(in: .vertical) {
                 LazyVStack(spacing: 10) {
-                    Group {
-                        menu(title: "초밥(11P)", price: 20000)
-                        
-                        menu(title: "회덮밥(점심)", price: 13500)
-                        
-                        menu(title: "이이요 스페셜 카이센동", price: 35000)
-                        
-                        menu(title: "야끼돈부리", price: 16000)
-                        
-                        menu(title: "도미연어덮밥", price: 16500)
-                    }
-                    
-                    Group {
-                        menu(title: "초밥(11P)", price: 20000)
-                        
-                        menu(title: "회덮밥(점심)", price: 13500)
-                        
-                        menu(title: "이이요 스페셜 카이센동", price: 35000)
-                        
-                        menu(title: "야끼돈부리", price: 16000)
-                        
-                        menu(title: "도미연어덮밥", price: 16500)
-                    }
-                    
-                    Group {
-                        menu(title: "초밥(11P)", price: 20000)
-                        
-                        menu(title: "회덮밥(점심)", price: 13500)
-                        
-                        menu(title: "이이요 스페셜 카이센동", price: 35000)
-                        
-                        menu(title: "야끼돈부리", price: 16000)
-                        
-                        menu(title: "도미연어덮밥", price: 16500)
-                    }
-                    
-                    Group {
-                        menu(title: "초밥(11P)", price: 20000)
-                        
-                        menu(title: "회덮밥(점심)", price: 13500)
-                        
-                        menu(title: "이이요 스페셜 카이센동", price: 35000)
-                        
-                        menu(title: "야끼돈부리", price: 16000)
-                        
-                        menu(title: "도미연어덮밥", price: 16500)
+                    ForEach(restaurant.shopMenus, id: \.name) { menuSimple in
+                        menu(title: menuSimple.name, price: menuSimple.price)
                     }
                 }
                 
                 ScrollView {
                     LazyVStack(spacing: 10) {
-                        Group {
-                            menu(title: "초밥(11P)", price: 20000)
-                            
-                            menu(title: "회덮밥(점심)", price: 13500)
-                            
-                            menu(title: "이이요 스페셜 카이센동", price: 35000)
-                            
-                            menu(title: "야끼돈부리", price: 16000)
-                            
-                            menu(title: "도미연어덮밥", price: 16500)
-                        }
-                        
-                        Group {
-                            menu(title: "초밥(11P)", price: 20000)
-                            
-                            menu(title: "회덮밥(점심)", price: 13500)
-                            
-                            menu(title: "이이요 스페셜 카이센동", price: 35000)
-                            
-                            menu(title: "야끼돈부리", price: 16000)
-                            
-                            menu(title: "도미연어덮밥", price: 16500)
-                        }
-                        
-                        Group {
-                            menu(title: "초밥(11P)", price: 20000)
-                            
-                            menu(title: "회덮밥(점심)", price: 13500)
-                            
-                            menu(title: "이이요 스페셜 카이센동", price: 35000)
-                            
-                            menu(title: "야끼돈부리", price: 16000)
-                            
-                            menu(title: "도미연어덮밥", price: 16500)
-                        }
-                        
-                        Group {
-                            menu(title: "초밥(11P)", price: 20000)
-                            
-                            menu(title: "회덮밥(점심)", price: 13500)
-                            
-                            menu(title: "이이요 스페셜 카이센동", price: 35000)
-                            
-                            menu(title: "야끼돈부리", price: 16000)
-                            
-                            menu(title: "도미연어덮밥", price: 16500)
+                        ForEach(restaurant.shopMenus, id: \.name) { menuSimple in
+                            menu(title: menuSimple.name, price: menuSimple.price)
                         }
                     }
                 }
@@ -656,17 +591,18 @@ struct RestaurantDetailView: View {
                 }
                 .confirmationDialog("지도 선택", isPresented: $showSelectMapDialog) {
                     Button("네이버 지도") {
-                        openMapApplication(urlScheme: "nmap://place?id=\(restuarantNaverID)", websiteURL: "https://m.place.naver.com/restaurant/\(restuarantNaverID)/home")
+                        openMapApplication(urlScheme: "nmap://place?id=\(restaurant.shopNaverId)", websiteURL: "https://m.place.naver.com/restaurant/\(restaurant.shopNaverId)/home")
                     }
                     
                     Button("카카오 지도") {
-                        openMapApplication(urlScheme: "kakaomap://place?id=\(restuarantKakaoID)", websiteURL: "https://place.map.kakao.com/\(restuarantKakaoID)")
+                        openMapApplication(urlScheme: "kakaomap://place?id=\(restaurant.shopKakaoId)", websiteURL: "https://place.map.kakao.com/\(restaurant.shopKakaoId)")
                     }
                 }
-
+                
                 
                 Button {
-                    isSharing = true
+                    let activityViewController = UIActivityViewController(activityItems: ["https://m.place.naver.com/restaurant/\(restaurant.shopNaverId)/home"], applicationActivities: nil)
+                    UIApplication.shared.windows.first?.rootViewController?.present(activityViewController, animated: true, completion: nil)
                 } label: {
                     Label("공유하기", systemImage: "square.and.arrow.up")
                         .labelStyle(.iconOnly)
@@ -675,13 +611,11 @@ struct RestaurantDetailView: View {
                 .padding(.bottom, 4)
                 
                 Button {
-                    withAnimation(.easeInOut) {
-                        isBookmarked.toggle()
-                    }
+                    clippingAction()
                 } label: {
-                    Label("즐겨찾기", systemImage: isBookmarked ? "bookmark.fill" : "bookmark")
+                    Label("즐겨찾기", systemImage: isClipped ? "bookmark.fill" : "bookmark")
                         .labelStyle(.iconOnly)
-                        .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isBookmarked))
+                        .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isClipped))
                 }
             }
         }
@@ -705,16 +639,17 @@ struct RestaurantDetailView: View {
     func images() -> some View {
         ZStack {
             TabView(selection: $imagePage) {
-                Image("restaurant-sample1")
-                    .resizable()
-                    .scaledToFit()
-                    .matchedGeometryEffect(id: "restaurant-sample1", in: heroEffect)
-                    .tag(0)
-                
-                Image("restaurant-sample2")
-                    .resizable()
-                    .scaledToFit()
-                    .tag(1)
+                ForEach(restaurant.shopMainPhotoURLs, id: \.hashValue) { photoURL in
+                    AsyncImage(url: URL(string: photoURL)) { image in
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .matchedGeometryEffect(id: photoURL, in: heroEffect)
+                    } placeholder: {
+                        imageLoading()
+                    }
+                    .tag(restaurant.shopMainPhotoURLs.firstIndex(of: photoURL) ?? 0)
+                }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .offset(y: detailImageOffsetY)
@@ -753,7 +688,7 @@ struct RestaurantDetailView: View {
             }
             
             HStack {
-                if imagePage == 1 {
+                if imagePage == 0 {
                     Button {
                         withAnimation(.easeInOut) {
                             imagePage -= 1
@@ -769,7 +704,7 @@ struct RestaurantDetailView: View {
                 
                 Spacer()
                 
-                if imagePage == 0 {
+                if imagePage == restaurant.shopMainPhotoURLs.endIndex - 1 {
                     Button {
                         withAnimation(.easeInOut) {
                             imagePage += 1
@@ -787,6 +722,26 @@ struct RestaurantDetailView: View {
         }
         .background(.black)
         .opacity(detailImageBackgroundOpacity)
+    }
+    
+    @ViewBuilder
+    func imageLoading() -> some View {
+        VStack {
+            Spacer()
+            
+            HStack {
+                Spacer()
+                
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .controlSize(.large)
+                    .tint(Color("main-point-color"))
+                
+                Spacer()
+            }
+            
+            Spacer()
+        }
     }
     
     func calculateMaxVelocity(velocity: CGFloat) {
@@ -900,6 +855,10 @@ struct RestaurantDetailView: View {
     }
     
     func showImagesAction() {
+        guard !showError else {
+            return
+        }
+        
         if !showDetailInformation {
             withAnimation(.spring()) {
                 showInformation = false
@@ -964,10 +923,71 @@ struct RestaurantDetailView: View {
             UIApplication.shared.open(websiteURL, options: [:], completionHandler: nil)
         }
     }
+    
+    func updateSubMenus(detailSubMenuDisable: Bool) {
+        subMenus.removeAll()
+        
+        for (index, menuSimple) in restaurant.shopMenus.enumerated() {
+            if index <= (showDetailInformation ? (detailSubMenuDisable ? 2 : 4) : 2) {
+                subMenus.append(menuSimple)
+            } else {
+                break
+            }
+        }
+    }
+    
+    func fetchRestaurant() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        APIFunction.fetchShopDetail(token: userViewModel.readToken, shopDetailRequest: ShopOrClippingRequest(shopId: restaurantId, userEmail: userViewModel.readUserEmail), subscriptions: &subscriptions) { shopDetailResponse in
+            APIError.closeError(showError: &showError, error: &error)
+            
+            restaurant = shopDetailResponse
+            
+            APIError.closeError(showError: &showError, error: &error)
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            APIError.showError(showError: &showError, error: &error, catchError: apiError)
+        }
+    }
+    
+    func clippingAction() {
+        APIError.closeError(showError: &showError, error: &error)
+        
+        let clippingRequset = ShopOrClippingRequest(shopId: restaurant.shopId, userEmail: userViewModel.readUserEmail)
+        
+        if isClipped {
+            APIFunction.deleteClipping(token: userViewModel.readToken, clippingUndoRequest: clippingRequset, subscriptions: &subscriptions) { clippingUndoResponse in
+                APIError.closeError(showError: &showError, error: &error)
+                
+                withAnimation(.spring()) {
+                    isClipped = false
+                }
+            } errorHanding: { apiError in
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        } else {
+            APIFunction.doClipping(token: "", clippingDoRequest: clippingRequset, subscriptions: &subscriptions) { clippingDoResponse in
+                APIError.closeError(showError: &showError, error: &error)
+                
+                withAnimation(.spring()) {
+                    isClipped = true
+                }
+            } errorHanding: { apiError in
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+    }
 }
 
 struct RestaurantDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        RestaurantDetailView(isCherryPick: .constant(false), isCherryPickDone: .constant(true))
+        RestaurantDetailView(isCherryPick: .constant(false), isCherryPickDone: .constant(true), restaurantId: 0)
+            .environmentObject(UserViewModel())
     }
 }

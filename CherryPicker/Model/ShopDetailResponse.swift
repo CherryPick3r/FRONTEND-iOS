@@ -12,10 +12,11 @@ struct ShopDetailResponse: Codable {
     let shopName: String
     let shopCategory: String
     let oneLineReview: String
+    let shopAddress: String
     let totalCherryPickCount: Int
     let operatingHours: String
     let topTags: TopTags
-    let shopClipping: Int
+    let shopClipping: ShopClipping
     let shopMenus: MenuSimples
     let shopMainPhotoURLs: [String]
     let shopNaverId: Int
