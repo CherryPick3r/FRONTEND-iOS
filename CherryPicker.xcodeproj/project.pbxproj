@@ -135,6 +135,7 @@
 				C57C261C2A1F4AEF00E73FCB /* TagTitle.swift */,
 				C57C261E2A1F51F800E73FCB /* ShopClipping.swift */,
 				C58A01C82A2222B000CF3C9C /* GameCategory.swift */,
+				C57C261A2A1F484F00E73FCB /* PreviewModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -211,7 +212,6 @@
 			isa = PBXGroup;
 			children = (
 				C59D212129C9D83B00275DBA /* Preview Assets.xcassets */,
-				C57C261A2A1F484F00E73FCB /* PreviewModel.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
