@@ -946,6 +946,7 @@ struct RestaurantDetailView: View {
         
         APIFunction.fetchShopDetail(token: userViewModel.readToken, shopId: restaurantId, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { shopDetailResponse in
             restaurant = shopDetailResponse
+            isClipped = restaurant.shopClipping == .isClipped
             
             withAnimation(.easeInOut) {
                 isLoading = false
@@ -976,7 +977,7 @@ struct RestaurantDetailView: View {
 
 struct RestaurantDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        RestaurantDetailView(isCherryPick: .constant(false), isCherryPickDone: .constant(true), restaurantId: 0)
+        RestaurantDetailView(isCherryPick: .constant(false), isCherryPickDone: .constant(true), restaurantId: 3)
             .environmentObject(UserViewModel())
     }
 }

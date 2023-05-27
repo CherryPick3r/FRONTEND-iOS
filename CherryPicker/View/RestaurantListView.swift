@@ -98,6 +98,11 @@ struct RestaurantListView: View {
         .onChange(of: restaurantId) { newValue in
             showRestaurantDetailView = restaurantId != nil
         }
+        .onChange(of: showRestaurantDetailView) { newValue in
+            if !newValue {
+                restaurantId = nil
+            }
+        }
     }
     
     @ViewBuilder
