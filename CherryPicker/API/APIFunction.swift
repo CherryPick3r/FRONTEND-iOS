@@ -17,23 +17,21 @@ enum APIFunction {
             switch failure {
             case .authenticationFailure:
                 errorHandling(.authenticationFailure)
-                
                 break
             case .invalidResponse:
                 errorHandling(.invalidResponse)
-                
                 break
             case .jsonDecodingError:
                 errorHandling(.jsonDecodingError)
-                
                 break
             case .jsonEncodingError:
                 errorHandling(.jsonEncodingError)
-                
+                break
+            case .urlError(let error):
+                errorHandling(.urlError(error))
                 break
             case .unknown(let statusCode):
                 errorHandling(.unknown(statusCode: statusCode))
-                
                 break
             }
         }

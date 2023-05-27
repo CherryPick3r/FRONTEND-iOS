@@ -85,10 +85,10 @@ struct RestaurantListView: View {
                 }
             }
         }
+        .modifier(ErrorViewModifier(showError: $showError, error: $error))
         .task {
             fetchList()
         }
-        .modifier(ErrorViewModifier(showError: $showError, error: $error))
     }
     
     @ViewBuilder
@@ -345,6 +345,10 @@ struct RestaurantListView: View {
     }
     
     func fetchList() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
         APIFunction.fetchShopSimples(token: userViewModel.readToken, simpleShopRequest: SimpleShopRequest(userEmail: userViewModel.readUserEmail, gameCategory: 0), isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
             shopSimpleList = simpleShopResponse
             
@@ -352,7 +356,9 @@ struct RestaurantListView: View {
                 isLoading = false
             }
         } errorHandling: { apiError in
-            APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
         }
 
     }

@@ -17,6 +17,7 @@ struct ErrorViewModifier: ViewModifier {
                 if showError {
                     ErrorView(error: $error)
                         .transition(.move(edge: .top).combined(with: .opacity))
+                        .animation(.spring(), value: showError)
                 }
             }
     }

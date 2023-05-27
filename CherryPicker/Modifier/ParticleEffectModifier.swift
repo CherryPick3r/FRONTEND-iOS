@@ -59,7 +59,7 @@ struct ParticleModifier: ViewModifier {
                             let total: CGFloat = CGFloat(particles.count)
                             let progress: CGFloat = CGFloat(index) / total
                             
-                            let maxX: CGFloat = (progress > 0.5) ? 70 : -70
+                            let maxX: CGFloat = (progress > 0.5) ? 50 : -50
                             let maxY: CGFloat = 60
                             
                             let randomX: CGFloat = ((progress > 0.5 ? progress - 0.5 : progress) * maxX)
@@ -77,7 +77,7 @@ struct ParticleModifier: ViewModifier {
                                 particles[index].scale = randomScale
                             }
                             
-                            withAnimation(.spring(response: 1.2).delay(Double(index) * 0.03)) {
+                            withAnimation(.spring(response: 1.5).delay(Double(index * 2) * 0.03)) {
                                 particles[index].scale = 0.001
                             }
                         }

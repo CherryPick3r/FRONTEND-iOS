@@ -14,6 +14,7 @@ struct StartView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     
     @Binding var isCherryPick: Bool
+    @Binding var gameCategory: GameCategory?
     
     @State private var showSignInView = false
     @State private var showSignUpView = false
@@ -71,6 +72,9 @@ struct StartView: View {
                                 .foregroundColor(Color("main-point-color"))
                         }
                     }
+                }
+                .onAppear() {
+                    gameCategory = nil
                 }
                 .sheet(isPresented: $showSignInView) {
                     signIn()
@@ -183,7 +187,7 @@ struct StartView: View {
                 .font(.headline)
                 .fontWeight(.bold)
                 .foregroundColor(Color("secondary-text-color-strong"))
-                .padding(.bottom, isCategoryContent ? 150 : 80)
+                .padding(.bottom, isCategoryContent ? 140 : 80)
         }
         .overlay(alignment: .bottom) {
             if !isCategoryContent {
@@ -233,26 +237,23 @@ struct StartView: View {
     @ViewBuilder
     func categoryList() -> some View {
         LazyVStack(spacing: 40) {
-            categoryButton(title: "\"\("단체모임")\"", tags: ["쾌적한 공간", "푸짐해요", "단체모임", "가성비 맛집"])
-            
-            categoryButton(title: "\"\("카페/공부")\"", tags: ["카페", "커피맛집", "오래 있기 좋아요", "맛있는 음료"])
-            
-            categoryButton(title: "\"\("사진맛집")\"", tags: ["컨셉이 독특해요", "감성사진"])
-            
-            categoryButton(title: "\"\("혼밥")\"", tags: ["가성비 맛집", "혼밥하기 좋아요"])
+            ForEach(GameCategory.allCases, id: \.self) { category in
+                categoryButton(category: category, tags: category.tags)
+            }
         }
     }
     
     @ViewBuilder
-    func categoryButton(title: String, tags: [String]) -> some View {
+    func categoryButton(category: GameCategory, tags: [TagTitle]) -> some View {
         Button {
             showSignInView = true
+            gameCategory = category
         } label: {
             VStack(spacing: 0) {
                 HStack {
                     Spacer()
                     
-                    Text(title)
+                    Text("\"\(category.name)\"")
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(Color("main-point-color"))
@@ -261,17 +262,31 @@ struct StartView: View {
                 }
                 .padding(.bottom)
                 
-                HStack {
-                    Spacer()
-                    
-                    ForEach(tags, id: \.self) { tag in
-                        Text("#\(tag)")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color("secondary-text-color-weak"))
+                ViewThatFits(in: .horizontal) {
+                    HStack {
+                        Spacer()
+                        
+                        ForEach(tags, id: \.self) { tag in
+                            Text("#\(tag.rawValue)")
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color("secondary-text-color-weak"))
+                        }
+                        
+                        Spacer()
                     }
                     
-                    Spacer()
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(tags, id: \.self) { tag in
+                                Text("#\(tag.rawValue)")
+                                    .font(.footnote)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(Color("secondary-text-color-weak"))
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                 }
             }
             .padding(.vertical)
@@ -465,7 +480,7 @@ struct StartView: View {
 
 struct StartView_Previews: PreviewProvider {
     static var previews: some View {
-        StartView(isCherryPick: .constant(false))
+        StartView(isCherryPick: .constant(false), gameCategory: .constant(nil))
             .environmentObject(UserViewModel())
     }
 }

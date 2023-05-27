@@ -37,7 +37,7 @@ struct RestaurantDetailView: View {
     @State private var showSelectMapDialog = false
     @State private var showDetailMenu = false
     @State private var maxVelocity = CGFloat.zero
-    @State private var isLoading = false
+    @State private var isLoading = true
     @State private var subMenus = MenuSimples()
     @State private var error: APIError?
     @State private var showError = false
@@ -563,7 +563,6 @@ struct RestaurantDetailView: View {
                     .shadow(color: .black.opacity(0.25), radius: 5)
             }
         }
-
     }
     
     @ViewBuilder
@@ -588,7 +587,6 @@ struct RestaurantDetailView: View {
                 } label: {
                     Label("지도", systemImage: "location")
                         .labelStyle(.iconOnly)
-                        .modifier(ParticleModifier(systemImage: "location", status: showSelectMapDialog))
                 }
                 .confirmationDialog("지도 선택", isPresented: $showSelectMapDialog) {
                     Button("네이버 지도") {
@@ -633,6 +631,7 @@ struct RestaurantDetailView: View {
             }
         }
         .padding()
+        .disabled(isLoading || showError)
     }
     
     @ViewBuilder
@@ -941,45 +940,49 @@ struct RestaurantDetailView: View {
             isLoading = true
         }
         
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
         APIFunction.fetchShopDetail(token: userViewModel.readToken, shopDetailRequest: ShopOrClippingRequest(shopId: restaurantId, userEmail: userViewModel.readUserEmail), subscriptions: &subscriptions) { shopDetailResponse in
-            APIError.closeError(showError: &showError, error: &error)
-            
             restaurant = shopDetailResponse
-            
-            APIError.closeError(showError: &showError, error: &error)
             
             withAnimation(.easeInOut) {
                 isLoading = false
             }
         } errorHandling: { apiError in
-            APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
         }
     }
     
     func clippingAction() {
-        APIError.closeError(showError: &showError, error: &error)
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
         
         let clippingRequset = ShopOrClippingRequest(shopId: restaurant.shopId, userEmail: userViewModel.readUserEmail)
         
         if isClipped {
             APIFunction.deleteClipping(token: userViewModel.readToken, clippingUndoRequest: clippingRequset, subscriptions: &subscriptions) { clippingUndoResponse in
-                APIError.closeError(showError: &showError, error: &error)
-                
                 withAnimation(.spring()) {
                     isClipped = false
                 }
             } errorHanding: { apiError in
-                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                withAnimation(.spring()) {
+                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                }
             }
         } else {
             APIFunction.doClipping(token: "", clippingDoRequest: clippingRequset, subscriptions: &subscriptions) { clippingDoResponse in
-                APIError.closeError(showError: &showError, error: &error)
-                
                 withAnimation(.spring()) {
                     isClipped = true
                 }
             } errorHanding: { apiError in
-                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                withAnimation(.spring()) {
+                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                }
             }
         }
     }

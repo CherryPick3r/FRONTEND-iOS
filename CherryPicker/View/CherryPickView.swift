@@ -25,6 +25,7 @@ struct CherryPickView: View {
     @Binding var isCherryPick: Bool
     @Binding var isCherryPickDone: Bool
     @Binding var restaurantId: Int?
+    @Binding var gameCategory: GameCategory?
     
     @State var cherryPickMode: CherryPickMode
     
@@ -109,13 +110,13 @@ struct CherryPickView: View {
                         closeButton()
                     }
                 }
+                .modifier(ErrorViewModifier(showError: $showError, error: $error))
                 .task {
                     appearingView()
                 }
             }
         }
         .tint(Color("main-point-color"))
-        .modifier(ErrorViewModifier(showError: $showError, error: $error))
     }
     
     @ViewBuilder
@@ -403,24 +404,29 @@ struct CherryPickView: View {
             isLoading = true
         }
         
-        APIFunction.doStartGame(token: userViewModel.readToken, gameStartRequest: GameStartRequest(userEmail: userViewModel.readUserEmail, gameMode: 0), subscriptions: &subscriptions) { game in
+        withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        APIFunction.doStartGame(token: userViewModel.readToken, gameStartRequest: GameStartRequest(userEmail: userViewModel.readUserEmail, gameMode: gameCategory?.rawValue ?? 0), subscriptions: &subscriptions) { game in
             
             gameResponse = game
             
             showShopCard()
         } errorHandling: { apiError in
-            APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
         }
     }
     
     func doSwipped() {
         if let game = gameResponse {
-            APIError.closeError(showError: &showError, error: &error)
+            withAnimation(.spring()) {
+                APIError.closeError(showError: &showError, error: &error)
+            }
             
             APIFunction.doGameSwipe(token: userViewModel.readToken, gameRequest: GameRequest(gameId: game.gameId, shopId: shopCardResponse.shopId), swipeType: userSelection, subscriptions: &subscriptions) { data in
-                APIError.closeError(showError: &showError, error: &error)
-                
                 if let game = try? JSONDecoder().decode(GameResponse.self, from: data) {
                     if game.recommendShopIds != nil || game.recommendShops != nil {
                         gameResponse = game
@@ -434,38 +440,39 @@ struct CherryPickView: View {
                     }
                 }
             } errorHandling: { apiError in
-                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                withAnimation(.spring()) {
+                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                }
             }
         }
     }
     
     func clippingAction() {
         withAnimation(.spring()) {
-            showError = false
-            error = nil
+            APIError.closeError(showError: &showError, error: &error)
         }
         
         let clippingRequset = ShopOrClippingRequest(shopId: shopCardResponse.shopId, userEmail: userViewModel.readUserEmail)
         
         if isClipped {
             APIFunction.deleteClipping(token: userViewModel.readToken, clippingUndoRequest: clippingRequset, subscriptions: &subscriptions) { clippingUndoResponse in
-                APIError.closeError(showError: &showError, error: &error)
-                
                 withAnimation(.spring()) {
                     isClipped = false
                 }
             } errorHanding: { apiError in
-                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                withAnimation(.spring()) {
+                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                }
             }
         } else {
             APIFunction.doClipping(token: userViewModel.readToken, clippingDoRequest: clippingRequset, subscriptions: &subscriptions) { clippingDoResponse in
-                APIError.closeError(showError: &showError, error: &error)
-                
                 withAnimation(.spring()) {
                     isClipped = true
                 }
             } errorHanding: { apiError in
-                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                withAnimation(.spring()) {
+                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
+                }
             }
         }
     }
@@ -473,7 +480,7 @@ struct CherryPickView: View {
 
 struct CherryPickView_Previews: PreviewProvider {
     static var previews: some View {
-        CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), restaurantId: .constant(0), cherryPickMode: .cherryPick)
+        CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), restaurantId: .constant(0), gameCategory: .constant(.group), cherryPickMode: .cherryPick)
             .tint(Color("main-point-color"))
             .environmentObject(UserViewModel())
     }

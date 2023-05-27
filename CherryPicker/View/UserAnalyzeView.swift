@@ -6,15 +6,22 @@
 //
 
 import SwiftUI
+import Combine
 
 struct UserAnalyzeView: View {
-    private let columns = [
-        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
-    ]
+    @EnvironmentObject var userViewModel: UserViewModel
     
+    @State private var subscriptions = Set<AnyCancellable>()
     @State private var userPreferenceLoad = false
     @State private var tagsOffsetX = CGFloat.zero
     @State private var userAnalyze = UserAnalyzeResponse.preview
+    @State private var isLoading = false
+    @State private var error: APIError?
+    @State private var showError = false
+    
+    private let columns = [
+        GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
+    ]
     
     var body: some View {
         ViewThatFits(in: .vertical) {
@@ -26,6 +33,10 @@ struct UserAnalyzeView: View {
         }
         .background(Color("background-color"))
         .navigationTitle("취향분석")
+        .modifier(ErrorViewModifier(showError: $showError, error: $error))
+        .task {
+            fetchUserAnalyze()
+        }
     }
     
     @ViewBuilder
@@ -41,14 +52,21 @@ struct UserAnalyzeView: View {
             }
             .padding(.vertical)
             
-            LazyVGrid(columns: columns) {
-                userInitialPreference()
-                
-                userType()
-                
-                weeklyStats()
-                
-                weeklyTag()
+            if isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .controlSize(.large)
+                    .tint(Color("main-point-color"))
+            } else {
+                LazyVGrid(columns: columns) {
+                    userInitialPreference()
+                    
+                    userType()
+                    
+                    weeklyStats()
+                    
+                    weeklyTag()
+                }
             }
             
             Spacer()
@@ -338,6 +356,29 @@ struct UserAnalyzeView: View {
             }
         }
     }
+    
+    func fetchUserAnalyze() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        APIFunction.fetchUserAnalyze(token: userViewModel.readToken, userAnalyzeReqeust: UserRequest(userEmail: userViewModel.readUserEmail), subscriptions: &subscriptions) { userAnalyzeResponse in
+            userAnalyze = userAnalyzeResponse
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+
+    }
 }
 
 struct UserAnalyzeView_Previews: PreviewProvider {
@@ -345,6 +386,7 @@ struct UserAnalyzeView_Previews: PreviewProvider {
         NavigationStack {
             UserAnalyzeView()
                 .navigationBarTitleDisplayMode(.inline)
+                .environmentObject(UserViewModel())
         }
         .tint(Color("main-point-color"))
     }

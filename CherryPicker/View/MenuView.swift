@@ -6,14 +6,19 @@
 //
 
 import SwiftUI
+import Combine
 
 struct MenuView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     
-    @State private var userName = "체리체리1q2w3e"
+    @State private var subscriptions = Set<AnyCancellable>()
+    @State private var userName = ""
     @State private var isUserNameEditing = false
     @State private var showDisplayStyleDialog = false
     @State private var showWithdrawalView = false
+    @State private var isLoading = false
+    @State private var error: APIError?
+    @State private var showError = false
     
     @FocusState private var isUserNameFocused: Bool
     
@@ -37,8 +42,12 @@ struct MenuView: View {
             isUserNameEditing = false
         }
         .tint(Color("main-point-color"))
+        .modifier(ErrorViewModifier(showError: $showError, error: $error))
         .fullScreenCover(isPresented: $showWithdrawalView) {
             WithdrawalView()
+        }
+        .task {
+            fetchUserNickname()
         }
     }
     
@@ -75,17 +84,25 @@ struct MenuView: View {
     func userMenu() -> some View {
         VStack(spacing: 20) {
             HStack(spacing: 0) {
-                TextField("닉네임", text: $userName)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-point-color"))
-                    .fixedSize(horizontal: true, vertical: false)
-                    .disabled(!isUserNameEditing)
-                    .focused($isUserNameFocused)
-                    .onSubmit {
-                        isUserNameFocused = false
-                        isUserNameEditing = false
-                    }
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .controlSize(.mini)
+                } else {
+                    TextField("닉네임", text: $userName)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-point-color"))
+                        .fixedSize(horizontal: true, vertical: false)
+                        .disabled(!isUserNameEditing)
+                        .focused($isUserNameFocused)
+                        .onSubmit {
+                            isUserNameFocused = false
+                            isUserNameEditing = false
+                            
+                            changeUserNickname()
+                        }
+                }
                 
                 Text("님")
                     .fontWeight(.bold)
@@ -99,6 +116,7 @@ struct MenuView: View {
                         .labelStyle(.iconOnly)
                 }
                 .padding(.leading, 5)
+                .disabled(showError || isLoading)
                 
                 Spacer()
             }
@@ -271,6 +289,50 @@ struct MenuView: View {
             }
         }
         .padding()
+    }
+    
+    func fetchUserNickname() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        APIFunction.fetchUserNickname(token: userViewModel.readToken, userNicknameRequest: UserRequest(userEmail: userViewModel.readUserEmail), subscriptions: &subscriptions) { userNicknameResponse in
+            userName = userNicknameResponse.userNickname
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+    }
+    
+    func changeUserNickname() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        APIFunction.changeUserNickname(token: userViewModel.readToken, userNickNameChangeRequest: UserNicknameChangeRequest(userEmail: userViewModel.readUserEmail, changeUserNickname: userName), subscriptions: &subscriptions) { userNicknameChangeResponse in
+            userName = userNicknameChangeResponse.changedUserNickname
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
     }
 }
 
