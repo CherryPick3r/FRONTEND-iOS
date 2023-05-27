@@ -366,7 +366,7 @@ struct UserAnalyzeView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        APIFunction.fetchUserAnalyze(token: userViewModel.readToken, userAnalyzeReqeust: UserRequest(userEmail: userViewModel.readUserEmail), subscriptions: &subscriptions) { userAnalyzeResponse in
+        APIFunction.fetchUserAnalyze(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { userAnalyzeResponse in
             userAnalyze = userAnalyzeResponse
             
             withAnimation(.easeInOut) {

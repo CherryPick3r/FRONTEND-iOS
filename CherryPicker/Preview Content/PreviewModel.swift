@@ -27,7 +27,7 @@ extension TagPair {
 
 extension ShopCardResponse {
     static var preview: ShopCardResponse {
-        return ShopCardResponse(shopId: 1, shopMainPhotoURL1: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjRfMzAw%2FMDAxNjg0ODg3NTUyMjgx.Qn57svOeG3hKWKnZ_KhwHmt4dtEM1tt249C9hY1bGIog.KIDM7JD12qAIoGzdTkEqkFat0uIGJZvkK_14lCWZd50g.JPEG%2FIMG_7106.jpeg", shopMainPhotoURL2: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjFfMTQ3%2FMDAxNjg0NjUwOTY2NDg5.fxWxtx6LQ8GYxlLuUw5w1fOFU-GwK6qrBU1n9WrPm5gg.txLdPEFPBXxkMNw7Nk-dFx1FiyrTxZwKk1Pa1Rbzl7Ig.JPEG%2F474CB7D3-B7A6-4AC6-A2DC-458B927E31D6.jpeg", shopName: "이이요", shopCategory: "일식당", oneLineReview: "식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"", topTags: TagPair.preview, shopClipping: .isNotClipped)
+        return ShopCardResponse(shopId: 1, shopMainPhoto1: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjRfMzAw%2FMDAxNjg0ODg3NTUyMjgx.Qn57svOeG3hKWKnZ_KhwHmt4dtEM1tt249C9hY1bGIog.KIDM7JD12qAIoGzdTkEqkFat0uIGJZvkK_14lCWZd50g.JPEG%2FIMG_7106.jpeg", shopMainPhoto2: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjFfMTQ3%2FMDAxNjg0NjUwOTY2NDg5.fxWxtx6LQ8GYxlLuUw5w1fOFU-GwK6qrBU1n9WrPm5gg.txLdPEFPBXxkMNw7Nk-dFx1FiyrTxZwKk1Pa1Rbzl7Ig.JPEG%2F474CB7D3-B7A6-4AC6-A2DC-458B927E31D6.jpeg", shopName: "이이요", shopCategory: "일식당", oneLineReview: "식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"", topTags: TagPair.preview, shopClipping: .isNotClipped)
     }
 }
 
@@ -36,7 +36,7 @@ extension ShopCardResponses {
         var shopCards = ShopCardResponses()
         
         for _ in 0..<3 {
-            shopCards.append(ShopCardResponse(shopId: 1, shopMainPhotoURL1: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjRfMzAw%2FMDAxNjg0ODg3NTUyMjgx.Qn57svOeG3hKWKnZ_KhwHmt4dtEM1tt249C9hY1bGIog.KIDM7JD12qAIoGzdTkEqkFat0uIGJZvkK_14lCWZd50g.JPEG%2FIMG_7106.jpeg", shopMainPhotoURL2: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjFfMTQ3%2FMDAxNjg0NjUwOTY2NDg5.fxWxtx6LQ8GYxlLuUw5w1fOFU-GwK6qrBU1n9WrPm5gg.txLdPEFPBXxkMNw7Nk-dFx1FiyrTxZwKk1Pa1Rbzl7Ig.JPEG%2F474CB7D3-B7A6-4AC6-A2DC-458B927E31D6.jpeg", shopName: "이이요", shopCategory: "일식당", oneLineReview: "식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"", topTags: TagPair.preview, shopClipping: .isNotClipped))
+            shopCards.append(ShopCardResponse(shopId: 1, shopMainPhoto1: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjRfMzAw%2FMDAxNjg0ODg3NTUyMjgx.Qn57svOeG3hKWKnZ_KhwHmt4dtEM1tt249C9hY1bGIog.KIDM7JD12qAIoGzdTkEqkFat0uIGJZvkK_14lCWZd50g.JPEG%2FIMG_7106.jpeg", shopMainPhoto2: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjFfMTQ3%2FMDAxNjg0NjUwOTY2NDg5.fxWxtx6LQ8GYxlLuUw5w1fOFU-GwK6qrBU1n9WrPm5gg.txLdPEFPBXxkMNw7Nk-dFx1FiyrTxZwKk1Pa1Rbzl7Ig.JPEG%2F474CB7D3-B7A6-4AC6-A2DC-458B927E31D6.jpeg", shopName: "이이요", shopCategory: "일식당", oneLineReview: "식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"", topTags: TagPair.preview, shopClipping: .isNotClipped))
         }
         
         return shopCards
@@ -83,7 +83,7 @@ extension MenuSimple {
 
 extension ShopDetailResponse {
     static var preview: ShopDetailResponse {
-        return ShopDetailResponse(shopId: 1, shopName: "이이요", shopCategory: "일식당", oneLineReview: "식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"", shopAddress: "서울 광진구 능동로19길 36 1층", totalCherryPickCount: Int.random(in: 10...1000), operatingHours: "", topTags: TagPair.preview, shopClipping: .isNotClipped, shopMenus: MenuSimple.preview, shopMainPhotoURLs: ["https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjRfMzAw%2FMDAxNjg0ODg3NTUyMjgx.Qn57svOeG3hKWKnZ_KhwHmt4dtEM1tt249C9hY1bGIog.KIDM7JD12qAIoGzdTkEqkFat0uIGJZvkK_14lCWZd50g.JPEG%2FIMG_7106.jpeg", "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjFfMTQ3%2FMDAxNjg0NjUwOTY2NDg5.fxWxtx6LQ8GYxlLuUw5w1fOFU-GwK6qrBU1n9WrPm5gg.txLdPEFPBXxkMNw7Nk-dFx1FiyrTxZwKk1Pa1Rbzl7Ig.JPEG%2F474CB7D3-B7A6-4AC6-A2DC-458B927E31D6.jpeg", "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MThfMjU5%2FMDAxNjg0NDA3ODE4NzAz.5zQI3hGJqs1ud6uOWTtfHpFj8q4ga3EQQC9WD6e0yNUg.B4adpa8VnfPcEdl2kFX6T-ocG2u7V3cZKfcMB_4yqHsg.JPEG%2F20230518_180922.jpg"], shopNaverId: 38738686, shopKakaoId: 861945610)
+        return ShopDetailResponse(shopId: 1, shopName: "이이요", shopCategory: "일식당", oneLineReview: "식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"", shopAddress: "서울 광진구 능동로19길 36 1층", totalCherryPickCount: Int.random(in: 10...1000), operatingHours: "", topTags: TagPair.preview, shopClipping: .isNotClipped, shopMenus: MenuSimple.preview, shopMainPhotoURLs: ["", "", ""], shopNaverId: 38738686, shopKakaoId: 861945610)
     }
 }
 

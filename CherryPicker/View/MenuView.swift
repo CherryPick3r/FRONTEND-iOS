@@ -292,20 +292,18 @@ struct MenuView: View {
     }
     
     func fetchUserNickname() {
-        withAnimation(.easeInOut) {
-            isLoading = true
-        }
+        isLoading = true
         
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        APIFunction.fetchUserNickname(token: userViewModel.readToken, userNicknameRequest: UserRequest(userEmail: userViewModel.readUserEmail), subscriptions: &subscriptions) { userNicknameResponse in
-            userName = userNicknameResponse.userNickname
-            
-            withAnimation(.easeInOut) {
-                isLoading = false
+        APIFunction.fetchOrChangeUserNickname(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { userNicknameResponse in
+            if let nickname = try? JSONDecoder().decode(UserNicknameResponse.self, from: userNicknameResponse).userNickname {
+                userName = nickname
             }
+            
+            isLoading = false
         } errorHandling: { apiError in
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
@@ -322,9 +320,7 @@ struct MenuView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        APIFunction.changeUserNickname(token: userViewModel.readToken, userNickNameChangeRequest: UserNicknameChangeRequest(userEmail: userViewModel.readUserEmail, changeUserNickname: userName), subscriptions: &subscriptions) { userNicknameChangeResponse in
-            userName = userNicknameChangeResponse.changedUserNickname
-            
+        APIFunction.fetchOrChangeUserNickname(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, changeUserNickname: userName, subscriptions: &subscriptions) { _ in
             withAnimation(.easeInOut) {
                 isLoading = false
             }

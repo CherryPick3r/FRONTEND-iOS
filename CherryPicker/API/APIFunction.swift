@@ -55,8 +55,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func doUserPreferenceStart(token: String, userPreferenceStartRequest: UserRequest, subscriptions: inout Set<AnyCancellable>, receieveValue: @escaping (UserPreferenceStartResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.doUserPreferenceStart(token: token, userPreferenceStartRequset: userPreferenceStartRequest).subscribe(on: DispatchQueue.main).sink { completion in
+    static func doUserPreferenceStart(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receieveValue: @escaping (UserPreferenceStartResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.doUserPreferenceStart(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receieveValue(data)
@@ -64,8 +64,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func doUserPreferenceSwipe(token: String, userPreferenceRequest: UserPreferenceRequest, swipeType: UserSelection, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (UserPreferenceResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.doUserPreferenceSwipe(token: token, userPreferenceRequest: userPreferenceRequest, swipeType: swipeType).subscribe(on: DispatchQueue.main).sink { completion in
+    static func doUserPreferenceSwipe(token: String, userEmail: String, preferenceGameId: Int, swipeType: UserSelection, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (UserPreferenceResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.doUserPreferenceSwipe(token: token, userEmail: userEmail, preferenceGameId: preferenceGameId, swipeType: swipeType).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -73,8 +73,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func doStartGame(token: String, gameStartRequest: GameStartRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (GameResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.doStartGame(token: token, gameStartRequest: gameStartRequest).subscribe(on: DispatchQueue.main).sink { completion in
+    static func doStartGame(token: String, userEmail: String, gameMode: Int, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (GameResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.doStartGame(token: token, userEmail: userEmail, gameMode: gameMode).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -82,8 +82,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func doGameSwipe(token: String, gameRequest: GameRequest, swipeType: UserSelection, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (Data) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.doGameSwipe(token: token, gameRequest: gameRequest, swipeType: swipeType).subscribe(on: DispatchQueue.main).sink { completion in
+    static func doGameSwipe(token: String, gameId: Int, shopId: Int, swipeType: UserSelection, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (Data) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.doGameSwipe(token: token, gameId: gameId, shopId: shopId, swipeType: swipeType).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -91,8 +91,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func fetchShopCard(token: String, shopCardRequest: ShopOrClippingRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (ShopCardResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchShopCard(token: token, shopCardRequest: shopCardRequest).subscribe(on: DispatchQueue.global(qos: .userInteractive)).sink { completion in
+    static func fetchShopCard(token: String, shopId: Int, userEmail: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (ShopCardResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.fetchShopCard(token: token, shopId: shopId, userEmail: userEmail).subscribe(on: DispatchQueue.global(qos: .userInteractive)).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -100,8 +100,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func fetchShopDetail(token: String, shopDetailRequest: ShopOrClippingRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (ShopDetailResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchShopDetail(token: token, shopDetailRequest: shopDetailRequest).subscribe(on: DispatchQueue.main).sink { completion in
+    static func fetchShopDetail(token: String, shopId: Int, userEmail: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (ShopDetailResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.fetchShopDetail(token: token, shopId: shopId, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -109,8 +109,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func fetchShopSimples(token: String, simpleShopRequest: SimpleShopRequest, isResultRequest: Bool, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (SimpleShopResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchShopSimples(token: token, simpleShopRequest: simpleShopRequest, isResultRequest: isResultRequest).subscribe(on: DispatchQueue.main).sink { completion in
+    static func fetchShopSimples(token: String, userEmail: String, gameCategory: Int, isResultRequest: Bool, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (SimpleShopResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.fetchShopSimples(token: token, userEmail: userEmail, gameCategory: gameCategory, isResultRequest: isResultRequest).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -118,8 +118,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func fetchUserAnalyze(token: String, userAnalyzeReqeust: UserRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (UserAnalyzeResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchUserAnalyze(token: token, userAnalyzeRequest: userAnalyzeReqeust).subscribe(on: DispatchQueue.main).sink { completion in
+    static func fetchUserAnalyze(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (UserAnalyzeResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.fetchUserAnalyze(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -127,8 +127,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func fetchUserNickname(token: String, userNicknameRequest: UserRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (UserNicknameResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchUserNickname(token: token, userNicknameRequest: userNicknameRequest).subscribe(on: DispatchQueue.main).sink { completion in
+    static func fetchOrChangeUserNickname(token: String, userEmail: String, changeUserNickname: String? = nil, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (Data) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.fetchOrChangeUserNickname(token: token, userEmail: userEmail, changeUserNickname: changeUserNickname).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -136,23 +136,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func changeUserNickname(token: String, userNickNameChangeRequest: UserNicknameChangeRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (UserNicknameChangeResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.changeUserNickname(token: token, userNicknameChangeRequest: userNickNameChangeRequest).subscribe(on: DispatchQueue.global(qos: .background)).sink { completion in
-            completionHandler(completion: completion) { apiError in
-                DispatchQueue.main.async {
-                    errorHandling(apiError)
-                }
-            }
-        } receiveValue: { data in
-            DispatchQueue.main.async {
-                receiveValue(data)
-            }
-        }
-        .store(in: &subscriptions)
-    }
-    
-    static func deleteUser(token: String, userDeleteRequest: UserRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (LoginResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.deleteUser(token: token, userDeleteRequest: userDeleteRequest).subscribe(on: DispatchQueue.main).sink { completion in
+    static func deleteUser(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (LoginResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.deleteUser(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -160,17 +145,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func doClipping(token: String, clippingDoRequest: ShopOrClippingRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (ClippingDoResponse) -> Void, errorHanding: @escaping (APIError) -> Void) {
-        APIService.doClipping(token: token, clippingDoRequest: clippingDoRequest).subscribe(on: DispatchQueue.global(qos: .userInteractive)).sink { completion in
-            completionHandler(completion: completion, errorHandling: errorHanding)
-        } receiveValue: { data in
-            receiveValue(data)
-        }
-        .store(in: &subscriptions)
-    }
-    
-    static func deleteClipping(token: String, clippingUndoRequest: ShopOrClippingRequest, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (ShopOrClippingRequest) -> Void, errorHanding: @escaping (APIError) -> Void) {
-        APIService.deleteClipping(token: token, clippingUndoRequest: clippingUndoRequest).subscribe(on: DispatchQueue.global(qos: .userInteractive)).sink { completion in
+    static func doOrUndoClipping(token: String, userEmail: String, shopId: Int, isClipped: Bool, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (Data) -> Void, errorHanding: @escaping (APIError) -> Void) {
+        APIService.doOrUndoClipping(token: token, userEmail: userEmail, shopId: shopId, isClipped: isClipped).subscribe(on: DispatchQueue.global(qos: .userInteractive)).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHanding)
         } receiveValue: { data in
             receiveValue(data)

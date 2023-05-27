@@ -9,8 +9,8 @@ import Foundation
 
 struct ShopCardResponse: Codable {
     let shopId: Int
-    let shopMainPhotoURL1: String
-    let shopMainPhotoURL2: String
+    let shopMainPhoto1: String
+    let shopMainPhoto2: String
     let shopName: String
     let shopCategory: String
     let oneLineReview: String

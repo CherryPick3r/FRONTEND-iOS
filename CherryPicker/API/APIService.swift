@@ -112,8 +112,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func doUserPreferenceStart(token: String, userPreferenceStartRequset: UserRequest) -> AnyPublisher<UserPreferenceStartResponse, APIError> {
-        let request = request(apiURL: .preferenceCherryPickStartGame, httpMethod: "POST", bearerToken: token, bodyData: userPreferenceStartRequset)
+    static func doUserPreferenceStart(token: String, userEmail: String) -> AnyPublisher<UserPreferenceStartResponse, APIError> {
+        let request = request(apiURL: .preferenceCherryPickStartGame(userEmail: userEmail), httpMethod: "POST", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -125,8 +125,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func doUserPreferenceSwipe(token: String, userPreferenceRequest: UserPreferenceRequest, swipeType: UserSelection) -> AnyPublisher<UserPreferenceResponse, APIError> {
-        let request = request(apiURL: swipeType == .like ? .preferenceCherryPickSwipeRight : .preferenceCherryPickSwipeLeft, httpMethod: "POST", bearerToken: token, bodyData: userPreferenceRequest)
+    static func doUserPreferenceSwipe(token: String, userEmail: String, preferenceGameId: Int, swipeType: UserSelection) -> AnyPublisher<UserPreferenceResponse, APIError> {
+        let request = request(apiURL: swipeType == .like ? .preferenceCherryPickSwipeRight(userEmail: userEmail, preferenceGameId: preferenceGameId) : .preferenceCherryPickSwipeLeft(userEmail: userEmail, preferenceGameId: preferenceGameId), httpMethod: "POST", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -138,8 +138,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func doStartGame(token: String, gameStartRequest: GameStartRequest) -> AnyPublisher<GameResponse, APIError> {
-        let request = request(apiURL: .cherryPicksStartGame, httpMethod: "POST", bearerToken: token, bodyData: gameStartRequest)
+    static func doStartGame(token: String, userEmail: String, gameMode: Int) -> AnyPublisher<GameResponse, APIError> {
+        let request = request(apiURL: .cherryPicksStartGame(userEmail: userEmail, gameMode: gameMode), httpMethod: "POST", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -151,8 +151,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func doGameSwipe(token: String, gameRequest: GameRequest, swipeType: UserSelection) -> AnyPublisher<Data, APIError> {
-        let request = request(apiURL: swipeType == .like ? .cherryPickSwipeRight : .cherryPickSwipeLeft, httpMethod: "POST", bearerToken: token, bodyData: gameRequest)
+    static func doGameSwipe(token: String, gameId: Int, shopId: Int, swipeType: UserSelection) -> AnyPublisher<Data, APIError> {
+        let request = request(apiURL: swipeType == .like ? .cherryPickSwipeRight(gameId: gameId, shopId: shopId) : .cherryPickSwipeLeft(gameId: gameId, shopId: shopId), httpMethod: "POST", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -163,8 +163,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func fetchShopCard(token: String, shopCardRequest: ShopOrClippingRequest) -> AnyPublisher<ShopCardResponse, APIError> {
-        let request = request(apiURL: .shopCard, bearerToken: token, bodyData: shopCardRequest)
+    static func fetchShopCard(token: String, shopId: Int, userEmail: String) -> AnyPublisher<ShopCardResponse, APIError> {
+        let request = request(apiURL: .shopCard(shopId: shopId, userEmail: userEmail), bearerToken: token)
     
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -176,8 +176,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func fetchShopDetail(token: String, shopDetailRequest: ShopOrClippingRequest) -> AnyPublisher<ShopDetailResponse, APIError> {
-        let request = request(apiURL: .shopDetail, bearerToken: token, bodyData: shopDetailRequest)
+    static func fetchShopDetail(token: String, shopId: Int, userEmail: String) -> AnyPublisher<ShopDetailResponse, APIError> {
+        let request = request(apiURL: .shopDetail(shopId: shopId, userEmail: userEmail), bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -189,8 +189,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func fetchShopSimples(token: String, simpleShopRequest: SimpleShopRequest, isResultRequest: Bool) -> AnyPublisher<SimpleShopResponse, APIError> {
-        let request = request(apiURL: isResultRequest ? .shopResultSimple : .shopClippingSimple, bearerToken: token, bodyData: simpleShopRequest)
+    static func fetchShopSimples(token: String, userEmail: String, gameCategory: Int, isResultRequest: Bool) -> AnyPublisher<SimpleShopResponse, APIError> {
+        let request = request(apiURL: isResultRequest ? .shopResultSimple(userEmail: userEmail, gameCategory: gameCategory) : .shopClippingSimple(userEmail: userEmail, gameCategory: gameCategory), bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -202,8 +202,8 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func fetchUserAnalyze(token: String, userAnalyzeRequest: UserRequest) -> AnyPublisher<UserAnalyzeResponse, APIError> {
-        let request = request(apiURL: .userAnalyze, bearerToken: token, bodyData: userAnalyzeRequest)
+    static func fetchUserAnalyze(token: String, userEmail: String) -> AnyPublisher<UserAnalyzeResponse, APIError> {
+        let request = request(apiURL: .userAnalyze(userEmail: userEmail), bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -215,34 +215,20 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func fetchUserNickname(token: String, userNicknameRequest: UserRequest) -> AnyPublisher<UserNicknameResponse, APIError> {
-        let request = request(apiURL: .userNickname, bearerToken: token, bodyData: userNicknameRequest)
+    static func fetchOrChangeUserNickname(token: String, userEmail: String, changeUserNickname: String?) -> AnyPublisher<Data, APIError> {
+        let request = request(apiURL: .userNickname(userEmail: userEmail, changeUserNickname: changeUserNickname), httpMethod: changeUserNickname == nil ? "GET" : "PATCH", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
         }
-        .decode(type: UserNicknameResponse.self, decoder: JSONDecoder())
         .mapError { error in
             APIError.convert(error: error)
         }
         .eraseToAnyPublisher()
     }
     
-    static func changeUserNickname(token: String, userNicknameChangeRequest: UserNicknameChangeRequest) -> AnyPublisher<UserNicknameChangeResponse, APIError> {
-        let request = request(apiURL: .userNickname, httpMethod: "PATCH", bearerToken: token, bodyData: userNicknameChangeRequest)
-        
-        return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
-            try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
-        }
-        .decode(type: UserNicknameChangeResponse.self, decoder: JSONDecoder())
-        .mapError { error in
-            APIError.convert(error: error)
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    static func deleteUser(token: String, userDeleteRequest: UserRequest) -> AnyPublisher<LoginResponse, APIError> {
-        let request = request(apiURL: .userUnregister, httpMethod: "DELETE", bearerToken: token, bodyData: userDeleteRequest)
+    static func deleteUser(token: String, userEmail: String) -> AnyPublisher<LoginResponse, APIError> {
+        let request = request(apiURL: .userUnregister(userEmail: userEmail), httpMethod: "DELETE", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
@@ -254,26 +240,12 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func doClipping(token: String, clippingDoRequest: ShopOrClippingRequest) -> AnyPublisher<ClippingDoResponse, APIError> {
-        let request = request(apiURL: .clippingDo, httpMethod: "POST", bearerToken: token, bodyData: clippingDoRequest)
+    static func doOrUndoClipping(token: String, userEmail: String, shopId: Int, isClipped: Bool) -> AnyPublisher<Data, APIError> {
+        let request = isClipped ? request(apiURL: .clippingUndo(userEmail: userEmail, shopId: shopId), httpMethod: "DELETE", bearerToken: token) : request(apiURL: .clippingDo(userEmail: userEmail, shopId: shopId), httpMethod: "POST", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
         }
-        .decode(type: ClippingDoResponse.self, decoder: JSONDecoder())
-        .mapError { error in
-            APIError.convert(error: error)
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    static func deleteClipping(token: String, clippingUndoRequest: ShopOrClippingRequest) -> AnyPublisher<ShopOrClippingRequest, APIError> {
-        let request = request(apiURL: .clippingUndo, httpMethod: "DELETE", bearerToken: token, bodyData: clippingUndoRequest)
-        
-        return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
-            try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
-        }
-        .decode(type: ShopOrClippingRequest.self, decoder: JSONDecoder())
         .mapError { error in
             APIError.convert(error: error)
         }

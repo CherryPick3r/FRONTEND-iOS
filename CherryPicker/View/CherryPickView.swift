@@ -304,7 +304,7 @@ struct CherryPickView: View {
                 })
                 .onEnded({ drag in
                     DispatchQueue.global(qos: .userInteractive).async {
-                        userSelection != .none ? disappearingCard() : cancelDecisionUserSelection()
+                        userSelection != .none ? doSwipped() : cancelDecisionUserSelection()
                         
                         withAnimation(.spring()) {
                             cardDgree = 0
@@ -363,11 +363,11 @@ struct CherryPickView: View {
             cardOffsetX = .zero
             cardOffsetY = .zero
         }
-        
-        doSwipped()
     }
     
     func cancelDecisionUserSelection() {
+        userSelection = .none
+        
         withAnimation(.spring()) {
             cardOffsetX = .zero
             cardOffsetY = .zero
@@ -408,12 +408,12 @@ struct CherryPickView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        APIFunction.doStartGame(token: userViewModel.readToken, gameStartRequest: GameStartRequest(userEmail: userViewModel.readUserEmail, gameMode: gameCategory?.rawValue ?? 0), subscriptions: &subscriptions) { game in
-            
+        APIFunction.doStartGame(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameMode: gameCategory?.rawValue ?? 0, subscriptions: &subscriptions) { game in
             gameResponse = game
             
             showShopCard()
         } errorHandling: { apiError in
+            print(#function)
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
@@ -426,11 +426,13 @@ struct CherryPickView: View {
                 APIError.closeError(showError: &showError, error: &error)
             }
             
-            APIFunction.doGameSwipe(token: userViewModel.readToken, gameRequest: GameRequest(gameId: game.gameId, shopId: shopCardResponse.shopId), swipeType: userSelection, subscriptions: &subscriptions) { data in
+            APIFunction.doGameSwipe(token: userViewModel.readToken, gameId: game.gameId, shopId: shopCardResponse.shopId, swipeType: userSelection, subscriptions: &subscriptions) { data in
                 if let game = try? JSONDecoder().decode(GameResponse.self, from: data) {
                     if game.recommendShopIds != nil || game.recommendShops != nil {
                         gameResponse = game
                     }
+                    
+                    disappearingCard()
                 } else if let game = try? JSONDecoder().decode(GameEndResponse.self, from: data) {
                     restaurantId = game.recommendedShopId
                     
@@ -440,6 +442,8 @@ struct CherryPickView: View {
                     }
                 }
             } errorHandling: { apiError in
+                print(#function)
+                cancelDecisionUserSelection()
                 withAnimation(.spring()) {
                     APIError.showError(showError: &showError, error: &error, catchError: apiError)
                 }
@@ -452,27 +456,12 @@ struct CherryPickView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        let clippingRequset = ShopOrClippingRequest(shopId: shopCardResponse.shopId, userEmail: userViewModel.readUserEmail)
-        
-        if isClipped {
-            APIFunction.deleteClipping(token: userViewModel.readToken, clippingUndoRequest: clippingRequset, subscriptions: &subscriptions) { clippingUndoResponse in
-                withAnimation(.spring()) {
-                    isClipped = false
-                }
-            } errorHanding: { apiError in
-                withAnimation(.spring()) {
-                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
-                }
-            }
-        } else {
-            APIFunction.doClipping(token: userViewModel.readToken, clippingDoRequest: clippingRequset, subscriptions: &subscriptions) { clippingDoResponse in
-                withAnimation(.spring()) {
-                    isClipped = true
-                }
-            } errorHanding: { apiError in
-                withAnimation(.spring()) {
-                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
-                }
+        APIFunction.doOrUndoClipping(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, shopId: shopCardResponse.shopId, isClipped: isClipped, subscriptions: &subscriptions) { _ in
+            isClipped = !isClipped
+        } errorHanding: { apiError in
+            print(#function)
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
         }
     }

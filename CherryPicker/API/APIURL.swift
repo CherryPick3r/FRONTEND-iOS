@@ -14,21 +14,21 @@ enum APIURL {
     case appleLoginCallback
     case kakoLoginCallback
     case googleLogincCallback
-    case preferenceCherryPickStartGame
-    case preferenceCherryPickSwipeLeft
-    case preferenceCherryPickSwipeRight
-    case cherryPicksStartGame
-    case cherryPickSwipeLeft
-    case cherryPickSwipeRight
-    case shopCard
-    case shopDetail
-    case shopResultSimple
-    case shopClippingSimple
-    case userAnalyze
-    case userNickname
-    case userUnregister
-    case clippingDo
-    case clippingUndo
+    case preferenceCherryPickStartGame(userEmail: String)
+    case preferenceCherryPickSwipeLeft(userEmail: String, preferenceGameId: Int)
+    case preferenceCherryPickSwipeRight(userEmail: String, preferenceGameId: Int)
+    case cherryPicksStartGame(userEmail: String, gameMode: Int)
+    case cherryPickSwipeLeft(gameId: Int, shopId: Int)
+    case cherryPickSwipeRight(gameId: Int, shopId: Int)
+    case shopCard(shopId: Int, userEmail: String)
+    case shopDetail(shopId: Int, userEmail: String)
+    case shopResultSimple(userEmail: String, gameCategory: Int)
+    case shopClippingSimple(userEmail: String, gameCategory: Int)
+    case userAnalyze(userEmail: String)
+    case userNickname(userEmail: String, changeUserNickname: String?)
+    case userUnregister(userEmail: String)
+    case clippingDo(userEmail: String, shopId: Int)
+    case clippingUndo(userEmail: String, shopId: Int)
     
     var url: URL {
         var serverURL = URLComponents(string: "http://43.202.25.158:8080")!
@@ -52,53 +52,72 @@ enum APIURL {
         case .googleLogincCallback:
             serverURL.path = "/api/v1/auth/google/callback"
             break
-        case .preferenceCherryPickStartGame:
+        case .preferenceCherryPickStartGame(let userEmail):
             serverURL.path = "/api/v1/preference/start-game"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail)]
             break
-        case .preferenceCherryPickSwipeLeft:
+        case .preferenceCherryPickSwipeLeft(let userEmail, let preferenceGameId):
             serverURL.path = "/api/v1/preference/swipe-left"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "preferenceGameId", value: String(preferenceGameId))]
             break
-        case .preferenceCherryPickSwipeRight:
+        case .preferenceCherryPickSwipeRight(let userEmail, let preferenceGameId):
             serverURL.path = "/api/v1/preference/swipe-right"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "preferenceGameId", value: String(preferenceGameId))]
             break
-        case .cherryPicksStartGame:
+        case .cherryPicksStartGame(let userEmail, let gameMode):
             serverURL.path = "/api/v1/game/start-game"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "gameMode", value: String(gameMode))]
             break
-        case .cherryPickSwipeLeft:
+        case .cherryPickSwipeLeft(let gameId, let shopId):
             serverURL.path = "/api/v1/game/swipe-left"
+            serverURL.queryItems = [URLQueryItem(name: "gameId", value: String(gameId)), URLQueryItem(name: "shopId", value: String(shopId))]
             break
-        case .cherryPickSwipeRight:
+        case .cherryPickSwipeRight(let gameId, let shopId):
             serverURL.path = "/api/v1/game/swipe-right"
+            serverURL.queryItems = [URLQueryItem(name: "gameId", value: String(gameId)), URLQueryItem(name: "shopId", value: String(shopId))]
             break
-        case .shopCard:
+        case .shopCard(let shopId, let userEmail):
             serverURL.path = "/api/v1/shop/card"
+            serverURL.queryItems = [URLQueryItem(name: "shopId", value: String(shopId)), URLQueryItem(name: "userEmail", value: userEmail)]
             break
-        case .shopDetail:
+        case .shopDetail(let shopId, let userEmail):
             serverURL.path = "/api/v1/shop/detail"
+            serverURL.queryItems = [URLQueryItem(name: "shopId", value: String(shopId)), URLQueryItem(name: "userEmail", value: userEmail)]
             break
-        case .shopResultSimple:
+        case .shopResultSimple(let userEmail, let gameCategory):
             serverURL.path = "/api/v1/shop/results-simple"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "gameCategory", value: String(gameCategory))]
             break
-        case .shopClippingSimple:
+        case .shopClippingSimple(let userEmail, let gameCategory):
             serverURL.path = "/api/v1/shop/clippings-simple"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "gameCategory", value: String(gameCategory))]
             break
-        case .userAnalyze:
+        case .userAnalyze(let userEmail):
             serverURL.path = "/api/v1/user/analyze"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail)]
             break
-        case .userNickname:
+        case .userNickname(let userEmail, let changeUserNickname):
             serverURL.path = "/api/v1/user/nickname"
+            if let nickname = changeUserNickname {
+                serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "changeUserNickname", value: nickname)]
+            } else {
+                serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail)]
+            }
             break
-        case .userUnregister:
+        case .userUnregister(let userEmail):
             serverURL.path = "/api/v1/user/unregister"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail)]
             break
-        case .clippingDo:
+        case .clippingDo(let userEmail, let shopId):
             serverURL.path = "/api/v1/clipping/do"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "shopId", value: String(shopId))]
             break
-        case .clippingUndo:
+        case .clippingUndo(let userEmail, let shopId):
             serverURL.path = "/api/v1/clipping/undo"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "shopId", value: String(shopId))]
             break
         }
-        
+        print(serverURL.url!)
         return serverURL.url!
     }
 }

@@ -42,6 +42,7 @@ struct RestaurantListView: View {
     @State private var isSearching = false
     @State private var showRestaurantDetailView = false
     @State private var shopSimpleList = SimpleShopResponse(shopSimples: ShopSimples())
+    @State private var restaurantId: Int?
     @State private var isLoading = false
     @State private var error: APIError?
     @State private var showError = false
@@ -86,8 +87,16 @@ struct RestaurantListView: View {
             }
         }
         .modifier(ErrorViewModifier(showError: $showError, error: $error))
+        .fullScreenCover(isPresented: $showRestaurantDetailView) {
+            if let shopId = restaurantId {
+                RestaurantDetailView(isResultView: false, restaurantId: shopId)
+            }
+        }
         .task {
             fetchList()
+        }
+        .onChange(of: restaurantId) { newValue in
+            showRestaurantDetailView = restaurantId != nil
         }
     }
     
@@ -185,7 +194,9 @@ struct RestaurantListView: View {
     @ViewBuilder
     func subRestaurant(shop: ShopSimple) -> some View {
         Button {
-            showRestaurantDetailView = true
+            restaurantId = shop.id
+            
+//            showRestaurantDetailView = true
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 15) {
@@ -221,12 +232,22 @@ struct RestaurantListView: View {
                 
                 Spacer()
                 
-                Image(shop.mainPhotoUrl)
-                    .resizable()
-                    .scaledToFill()
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .shadow(color: .black.opacity(0.1), radius: 5)
-                    .frame(width: 100, height: 100)
+                AsyncImage(url: URL(string: shop.mainPhotoUrl)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } placeholder: {
+                    ZStack {
+                        Color("main-point-color-weak")
+                        
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    }
+                }
+                .frame(width: 100, height: 100)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .clipped()
+                .shadow(color: .black.opacity(0.1), radius: 5)
             }
             .padding()
             .background {
@@ -272,9 +293,6 @@ struct RestaurantListView: View {
             LazyVGrid(columns: columns) {
                 ForEach(shopSimpleList.shopSimples) { shop in
                     subRestaurant(shop: shop)
-                        .fullScreenCover(isPresented: $showRestaurantDetailView) {
-                            RestaurantDetailView(isResultView: false, restaurantId: shop.id)
-                        }
                 }
             }
             .padding([.horizontal])
@@ -349,7 +367,7 @@ struct RestaurantListView: View {
             isLoading = true
         }
         
-        APIFunction.fetchShopSimples(token: userViewModel.readToken, simpleShopRequest: SimpleShopRequest(userEmail: userViewModel.readUserEmail, gameCategory: 0), isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
+        APIFunction.fetchShopSimples(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameCategory: 0 , isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
             shopSimpleList = simpleShopResponse
             
             withAnimation(.easeInOut) {

@@ -687,7 +687,7 @@ struct RestaurantDetailView: View {
             }
             
             HStack {
-                if imagePage == 0 {
+                if imagePage != 0 {
                     Button {
                         withAnimation(.easeInOut) {
                             imagePage -= 1
@@ -703,7 +703,7 @@ struct RestaurantDetailView: View {
                 
                 Spacer()
                 
-                if imagePage == restaurant.shopMainPhotoURLs.endIndex - 1 {
+                if imagePage != restaurant.shopMainPhotoURLs.endIndex - 1 {
                     Button {
                         withAnimation(.easeInOut) {
                             imagePage += 1
@@ -944,12 +944,14 @@ struct RestaurantDetailView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        APIFunction.fetchShopDetail(token: userViewModel.readToken, shopDetailRequest: ShopOrClippingRequest(shopId: restaurantId, userEmail: userViewModel.readUserEmail), subscriptions: &subscriptions) { shopDetailResponse in
+        APIFunction.fetchShopDetail(token: userViewModel.readToken, shopId: restaurantId, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { shopDetailResponse in
             restaurant = shopDetailResponse
             
             withAnimation(.easeInOut) {
                 isLoading = false
             }
+            
+            print(restaurant)
         } errorHandling: { apiError in
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
@@ -962,27 +964,11 @@ struct RestaurantDetailView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        let clippingRequset = ShopOrClippingRequest(shopId: restaurant.shopId, userEmail: userViewModel.readUserEmail)
-        
-        if isClipped {
-            APIFunction.deleteClipping(token: userViewModel.readToken, clippingUndoRequest: clippingRequset, subscriptions: &subscriptions) { clippingUndoResponse in
-                withAnimation(.spring()) {
-                    isClipped = false
-                }
-            } errorHanding: { apiError in
-                withAnimation(.spring()) {
-                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
-                }
-            }
-        } else {
-            APIFunction.doClipping(token: "", clippingDoRequest: clippingRequset, subscriptions: &subscriptions) { clippingDoResponse in
-                withAnimation(.spring()) {
-                    isClipped = true
-                }
-            } errorHanding: { apiError in
-                withAnimation(.spring()) {
-                    APIError.showError(showError: &showError, error: &error, catchError: apiError)
-                }
+        APIFunction.doOrUndoClipping(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, shopId: restaurant.shopId, isClipped: isClipped, subscriptions: &subscriptions) { _ in
+            isClipped = !isClipped
+        } errorHanding: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
         }
     }
