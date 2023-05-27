@@ -117,7 +117,6 @@ enum APIURL {
             serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "shopId", value: String(shopId))]
             break
         }
-        print(serverURL.url!)
         return serverURL.url!
     }
 }

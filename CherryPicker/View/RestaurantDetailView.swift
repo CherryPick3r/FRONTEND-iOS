@@ -198,7 +198,15 @@ struct RestaurantDetailView: View {
                     imageLoading()
                 }
             } else {
-                Color("background-color")
+                ZStack {
+                    Color("background-color")
+                    
+                    Text("제공되는 이미지가 존재하지 않아요.")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-point-color"))
+                        .padding(.bottom, 250)
+                }
             }
         }
         .overlay {
@@ -854,7 +862,7 @@ struct RestaurantDetailView: View {
     }
     
     func showImagesAction() {
-        guard !showError else {
+        guard !showError || !restaurant.shopMainPhotoURLs.isEmpty else {
             return
         }
         
@@ -951,8 +959,6 @@ struct RestaurantDetailView: View {
             withAnimation(.easeInOut) {
                 isLoading = false
             }
-            
-            print(restaurant)
         } errorHandling: { apiError in
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)

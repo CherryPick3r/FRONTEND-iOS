@@ -15,7 +15,7 @@ struct UserAnalyzeView: View {
     @State private var userPreferenceLoad = false
     @State private var tagsOffsetX = CGFloat.zero
     @State private var userAnalyze = UserAnalyzeResponse.preview
-    @State private var isLoading = false
+    @State private var isLoading = true
     @State private var error: APIError?
     @State private var showError = false
     
@@ -65,7 +65,9 @@ struct UserAnalyzeView: View {
                     
                     weeklyStats()
                     
-                    weeklyTag()
+                    if !userAnalyze.weeklyTags.isEmpty {
+                        weeklyTag()
+                    }
                 }
             }
             
@@ -230,7 +232,7 @@ struct UserAnalyzeView: View {
                         }
                     }
                     
-                    ForEach(subCherryPicks) { cherrypick in
+                    ForEach(Array(subCherryPicks)) { cherrypick in
                         restaurantListElement(title: cherrypick.shopName, date: "23/04/13")
                     }
                 }
@@ -261,7 +263,7 @@ struct UserAnalyzeView: View {
                         }
                     }
                     
-                    ForEach(subClippingShops) { clippingShop in
+                    ForEach(Array(subClippingShops)) { clippingShop in
                         restaurantListElement(title: clippingShop.shopName, date: "23/04/13")
                     }
                 }

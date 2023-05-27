@@ -46,9 +46,7 @@ struct CherryPickView: View {
     @State private var error: APIError?
     @State private var showError = false
     @State private var isClipped = false
-    
-    //임시용
-    @State private var isLoading = false
+    @State private var isLoading = true
     
     var body: some View {
         NavigationStack {
@@ -413,7 +411,6 @@ struct CherryPickView: View {
             
             showShopCard()
         } errorHandling: { apiError in
-            print(#function)
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
@@ -442,7 +439,6 @@ struct CherryPickView: View {
                     }
                 }
             } errorHandling: { apiError in
-                print(#function)
                 cancelDecisionUserSelection()
                 withAnimation(.spring()) {
                     APIError.showError(showError: &showError, error: &error, catchError: apiError)
@@ -459,7 +455,6 @@ struct CherryPickView: View {
         APIFunction.doOrUndoClipping(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, shopId: shopCardResponse.shopId, isClipped: isClipped, subscriptions: &subscriptions) { _ in
             isClipped = !isClipped
         } errorHanding: { apiError in
-            print(#function)
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }

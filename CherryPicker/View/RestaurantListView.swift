@@ -43,7 +43,7 @@ struct RestaurantListView: View {
     @State private var showRestaurantDetailView = false
     @State private var shopSimpleList = SimpleShopResponse(shopSimples: ShopSimples())
     @State private var restaurantId: Int?
-    @State private var isLoading = false
+    @State private var isLoading = true
     @State private var error: APIError?
     @State private var showError = false
     
