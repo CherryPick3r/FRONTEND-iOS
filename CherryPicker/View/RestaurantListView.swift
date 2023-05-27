@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 enum ListMode: String {
     case cherryPick = "체리픽"
@@ -29,14 +30,22 @@ enum ListSortType: String {
 struct RestaurantListView: View {
     @Environment(\.colorScheme) var colorScheme
     
+    @EnvironmentObject var userViewModel: UserViewModel
+    
     @FocusState private var searchFocus: Bool
     
     @State var listMode: ListMode
+    @State private var subscriptions = Set<AnyCancellable>()
     @State private var seletedFilterTypes = Set<FilterType>()
     @State private var selectedSortType = ListSortType.newest
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var showRestaurantDetailView = false
+    @State private var shopSimpleList = SimpleShopResponse(shopSimples: ShopSimples())
+    @State private var restaurantId: Int?
+    @State private var isLoading = true
+    @State private var error: APIError?
+    @State private var showError = false
     
     private let columns = [
         GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
@@ -77,8 +86,22 @@ struct RestaurantListView: View {
                 }
             }
         }
+        .modifier(ErrorViewModifier(showError: $showError, error: $error))
         .fullScreenCover(isPresented: $showRestaurantDetailView) {
-            RestaurantDetailView(isResultView: false)
+            if let shopId = restaurantId {
+                RestaurantDetailView(isResultView: false, restaurantId: shopId)
+            }
+        }
+        .task {
+            fetchList()
+        }
+        .onChange(of: restaurantId) { newValue in
+            showRestaurantDetailView = restaurantId != nil
+        }
+        .onChange(of: showRestaurantDetailView) { newValue in
+            if !newValue {
+                restaurantId = nil
+            }
         }
     }
     
@@ -174,25 +197,27 @@ struct RestaurantListView: View {
     }
     
     @ViewBuilder
-    func subRestaurant() -> some View {
+    func subRestaurant(shop: ShopSimple) -> some View {
         Button {
-            showRestaurantDetailView = true
+            restaurantId = shop.id
+            
+//            showRestaurantDetailView = true
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 15) {
                     HStack(alignment: .bottom) {
-                        Text("하루")
+                        Text(shop.shopName)
                             .font(.headline)
                             .fontWeight(.bold)
                             .foregroundColor(Color("main-text-color"))
                         
-                        Text("이자카야")
+                        Text(shop.shopCategory)
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(Color("secondary-text-color-weak"))
                     }
                     
-                    Label("서울 광진구 면목로 53 1층", systemImage: "map")
+                    Label(shop.shopAddress, systemImage: "map")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
@@ -212,12 +237,22 @@ struct RestaurantListView: View {
                 
                 Spacer()
                 
-                Image("restaurant-sample3")
-                    .resizable()
-                    .scaledToFill()
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .shadow(color: .black.opacity(0.1), radius: 5)
-                    .frame(width: 100, height: 100)
+                AsyncImage(url: URL(string: shop.mainPhotoUrl)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } placeholder: {
+                    ZStack {
+                        Color("main-point-color-weak")
+                        
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    }
+                }
+                .frame(width: 100, height: 100)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .clipped()
+                .shadow(color: .black.opacity(0.1), radius: 5)
             }
             .padding()
             .background {
@@ -231,12 +266,42 @@ struct RestaurantListView: View {
     
     @ViewBuilder
     func list() -> some View {
-        LazyVGrid(columns: columns) {
-            ForEach(0..<12, id: \.self) { index in
-                subRestaurant()
+        if isLoading {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .controlSize(.large)
+                .tint(Color("main-point-color"))
+        } else if shopSimpleList.shopSimples.isEmpty {
+            Group {
+                Spacer()
+                
+                switch listMode {
+                case .cherryPick:
+                    Text("아직 체리픽을 이용하지 않으셨나요?")
+                        .padding(.bottom)
+                    
+                    Text("체리픽으로 매장을 추가해보세요!")
+                case .bookmark:
+                    Text("아직 즐겨찾기한 매장이 없어요.")
+                        .padding(.bottom)
+                    
+                    Text("매장에 책갈피 모양 버튼을 눌러,")
+                        .padding(.bottom)
+                    
+                    Text("즐겨찾기에 추가해보세요!")
+                }
             }
+            .font(.title3)
+            .fontWeight(.bold)
+            .foregroundColor(Color("main-point-color"))
+        } else {
+            LazyVGrid(columns: columns) {
+                ForEach(shopSimpleList.shopSimples) { shop in
+                    subRestaurant(shop: shop)
+                }
+            }
+            .padding([.horizontal])
         }
-        .padding([.horizontal])
     }
     
     @ViewBuilder
@@ -277,10 +342,10 @@ struct RestaurantListView: View {
                 .tint(Color("main-point-color"))
             
             Button("취소", action: closeSearching)
-            .font(.subheadline)
-            .fontWeight(.bold)
-            .foregroundColor(Color("main-point-color"))
-            .padding(.trailing)
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .foregroundColor(Color("main-point-color"))
+                .padding(.trailing)
         }
         .transition(.move(edge: .top).combined(with: .opacity))
     }
@@ -301,6 +366,25 @@ struct RestaurantListView: View {
             searchText = ""
         }
     }
+    
+    func fetchList() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        APIFunction.fetchShopSimples(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameCategory: 0 , isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
+            shopSimpleList = simpleShopResponse
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+
+    }
 }
 
 struct RestaurantListView_Previews: PreviewProvider {
@@ -308,6 +392,7 @@ struct RestaurantListView_Previews: PreviewProvider {
         NavigationStack {
             RestaurantListView(listMode: .cherryPick)
                 .navigationBarTitleDisplayMode(.inline)
+                .environmentObject(UserViewModel())
         }
     }
 }

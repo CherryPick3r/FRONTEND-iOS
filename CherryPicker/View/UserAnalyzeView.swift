@@ -6,24 +6,22 @@
 //
 
 import SwiftUI
+import Combine
 
-struct UserPreferenceView: View {
+struct UserAnalyzeView: View {
+    @EnvironmentObject var userViewModel: UserViewModel
+    
+    @State private var subscriptions = Set<AnyCancellable>()
+    @State private var userPreferenceLoad = false
+    @State private var tagsOffsetX = CGFloat.zero
+    @State private var userAnalyze = UserAnalyzeResponse.preview
+    @State private var isLoading = true
+    @State private var error: APIError?
+    @State private var showError = false
+    
     private let columns = [
         GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
     ]
-    
-    //임시
-    let tagColors = [
-        "caffeine-vampire-tag-color",
-        "drunkard-tag-color",
-        "etc-tag-color",
-        "food-explorer-tag-color",
-        "healthy-food-tag-color",
-        "mini-influencer-tag-color",
-        "solo-tag-color"
-    ]
-    @State private var userPreferenceLoad = false
-    @State private var tagsOffsetX = CGFloat.zero
     
     var body: some View {
         ViewThatFits(in: .vertical) {
@@ -35,13 +33,17 @@ struct UserPreferenceView: View {
         }
         .background(Color("background-color"))
         .navigationTitle("취향분석")
+        .modifier(ErrorViewModifier(showError: $showError, error: $error))
+        .task {
+            fetchUserAnalyze()
+        }
     }
     
     @ViewBuilder
     func content() -> some View {
         VStack {
             HStack {
-                Text("체리체리1q2w3e님은,")
+                Text("\(userAnalyze.userNickname)님은,")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color"))
@@ -50,14 +52,23 @@ struct UserPreferenceView: View {
             }
             .padding(.vertical)
             
-            LazyVGrid(columns: columns) {
-                userInitialPreference()
-                
-                userType()
-                
-                weeklyStats()
-                
-                weeklyTag()
+            if isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .controlSize(.large)
+                    .tint(Color("main-point-color"))
+            } else {
+                LazyVGrid(columns: columns) {
+                    userInitialPreference()
+                    
+                    userType()
+                    
+                    weeklyStats()
+                    
+                    if !userAnalyze.weeklyTags.isEmpty {
+                        weeklyTag()
+                    }
+                }
             }
             
             Spacer()
@@ -74,8 +85,14 @@ struct UserPreferenceView: View {
     
     @ViewBuilder
     func userInitialPreference() -> some View {
+        let tag1 = TagTitle.allCases.randomElement() ?? .comfortableSpace
+        let tag2 = TagTitle.allCases.randomElement() ?? .comfortableSpace
+        let tag3 = TagTitle.allCases.randomElement() ?? .comfortableSpace
+        let tag4 = TagTitle.allCases.randomElement() ?? .comfortableSpace
+        let tag5 = TagTitle.allCases.randomElement() ?? .comfortableSpace
+        
         VStack(alignment: .leading) {
-            Text("상위 1%의 취향이에요!")
+            Text("상위 \(userAnalyze.userPercentile)%의 취향이에요!")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color("main-point-color"))
@@ -84,7 +101,7 @@ struct UserPreferenceView: View {
             
             VStack(alignment: .center, spacing: 15) {
                 HStack {
-                    Text("체리체리1q2w3e님의 취향태그")
+                    Text("\(userAnalyze.userNickname)님의 취향태그")
                         .font(.caption)
                         .foregroundColor(Color("secondary-text-color-weak"))
                     
@@ -92,33 +109,23 @@ struct UserPreferenceView: View {
                 }
                 
                 Group {
-                    Text("음식이 맛있어요")
-                        .font(userPreferenceLoad ? .title2 : nil)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("solo-tag-color"))
+                    Text(tag1.rawValue)
+                        .modifier(TagTitleColorModifier(text: tag1.rawValue, font: userPreferenceLoad ? .title2 : nil, colors: tag1.tagColor))
                     
-                    Text("특별한 메뉴가 있어요")
-                        .font(userPreferenceLoad ? .title3 : nil)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("food-explorer-tag-color"))
+                    Text(tag2.rawValue)
+                        .modifier(TagTitleColorModifier(text: tag2.rawValue, font: userPreferenceLoad ? .title3 : nil, colors: tag2.tagColor))
                         .opacity(0.9)
                     
-                    Text("재료가 신선해요")
-                        .font(userPreferenceLoad ? .headline : nil)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("mini-influencer-tag-color"))
+                    Text(tag3.rawValue)
+                        .modifier(TagTitleColorModifier(text: tag3.rawValue, font: userPreferenceLoad ? .subheadline : nil, colors: tag3.tagColor))
                         .opacity(0.8)
                     
-                    Text("친절해요")
-                        .font(userPreferenceLoad ? .footnote : nil)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("food-explorer-tag-color"))
+                    Text(tag4.rawValue)
+                        .modifier(TagTitleColorModifier(text: tag4.rawValue, font: userPreferenceLoad ? .footnote : nil, colors: tag4.tagColor))
                         .opacity(0.7)
                     
-                    Text("혼밥하기 좋아요")
-                        .font(userPreferenceLoad ? .caption : nil)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("solo-tag-color"))
+                    Text(tag5.rawValue)
+                        .modifier(TagTitleColorModifier(text: tag5.rawValue, font: userPreferenceLoad ? .caption : nil, colors: tag5.tagColor))
                         .opacity(0.6)
                 }
                 .shadow(color: .black.opacity(0.1), radius: 10)
@@ -187,8 +194,12 @@ struct UserPreferenceView: View {
     
     @ViewBuilder
     func weeklyStats() -> some View {
+        let subCherryPicks = userAnalyze.cherrypickCount < 3 ? userAnalyze.recentCherrypickShops[0..<userAnalyze.cherrypickCount] : userAnalyze.recentCherrypickShops[0..<3]
+        
+        let subClippingShops = userAnalyze.clippingCount < 3 ? userAnalyze.recentClippingShops[0..<userAnalyze.clippingCount] : userAnalyze.recentClippingShops[0..<3]
+        
         VStack(alignment: .leading) {
-            Text("총 130개의 음식점을 알게 되었어요")
+            Text("총 \(userAnalyze.cherrypickClippingTotalCount)개의 음식점을 알게 되었어요")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color("main-point-color"))
@@ -201,7 +212,7 @@ struct UserPreferenceView: View {
                         Text("총 ")
                             .fontWeight(.bold)
                             .foregroundColor(Color("main-text-color"))
-                        + Text("30")
+                        + Text("\(userAnalyze.cherrypickCount)")
                             .fontWeight(.bold)
                             .foregroundColor(Color("main-point-color"))
                         + Text("번의 체리픽을 받았어요")
@@ -210,20 +221,20 @@ struct UserPreferenceView: View {
                         
                         Spacer()
                         
-                        NavigationLink {
-                            RestaurantListView(listMode: .cherryPick)
-                        } label: {
-                            Text("더보기")
-                                .font(.footnote)
-                                .foregroundColor(Color("main-point-color"))
+                        if userAnalyze.recentCherrypickShops.count > 0 {
+                            NavigationLink {
+                                RestaurantListView(listMode: .cherryPick)
+                            } label: {
+                                Text("더보기")
+                                    .font(.footnote)
+                                    .foregroundColor(Color("main-point-color"))
+                            }
                         }
                     }
                     
-                    restaurantListElement(title: "이이요", date: "23/04/13")
-                    
-                    restaurantListElement(title: "하루", date: "23/04/13")
-                    
-                    restaurantListElement(title: "멕시칼리", date: "23/04/13")
+                    ForEach(Array(subCherryPicks)) { cherrypick in
+                        restaurantListElement(title: cherrypick.shopName, date: "23/04/13")
+                    }
                 }
                 .padding(.bottom)
                 
@@ -232,7 +243,7 @@ struct UserPreferenceView: View {
                         Text("총 ")
                             .fontWeight(.bold)
                             .foregroundColor(Color("main-text-color"))
-                        + Text("100")
+                        + Text("\(userAnalyze.clippingCount)")
                             .fontWeight(.bold)
                             .foregroundColor(Color("main-point-color"))
                         + Text("개의 음식점을 즐겨찾기 했어요")
@@ -241,20 +252,20 @@ struct UserPreferenceView: View {
                         
                         Spacer()
                         
-                        NavigationLink {
-                            RestaurantListView(listMode: .bookmark)
-                        } label: {
-                            Text("더보기")
-                                .font(.footnote)
-                                .foregroundColor(Color("main-point-color"))
+                        if userAnalyze.recentClippingShops.count > 0 {
+                            NavigationLink {
+                                RestaurantListView(listMode: .bookmark)
+                            } label: {
+                                Text("더보기")
+                                    .font(.footnote)
+                                    .foregroundColor(Color("main-point-color"))
+                            }
                         }
                     }
                     
-                    restaurantListElement(title: "이이요", date: "23/04/13")
-                    
-                    restaurantListElement(title: "하루", date: "23/04/13")
-                    
-                    restaurantListElement(title: "멕시칼리", date: "23/04/13")
+                    ForEach(Array(subClippingShops)) { clippingShop in
+                        restaurantListElement(title: clippingShop.shopName, date: "23/04/13")
+                    }
                 }
             }
             .padding()
@@ -289,21 +300,27 @@ struct UserPreferenceView: View {
     }
     
     @ViewBuilder
-    func tag(title: String, type: String) -> some View {
-        Text(title)
+    func tag(tag: TagTitle) -> some View {
+        Text(tag.rawValue)
             .fontWeight(.bold)
             .padding(.vertical, 10)
             .padding(.horizontal)
             .foregroundColor(.white)
             .background {
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(type))
+                    .fill(LinearGradient(gradient: Gradient(colors: tag.tagColor), startPoint: .top, endPoint: .bottom))
                     .shadow(color: .black.opacity(0.1), radius: 5)
             }
     }
     
     @ViewBuilder
     func weeklyTag() -> some View {
+        let weeklyTagsCount = userAnalyze.weeklyTags.count
+        let count = Int(floor(Double(weeklyTagsCount) / 3.0))
+        let firstLineeTags = count == 0 ? userAnalyze.weeklyTags : Array(userAnalyze.weeklyTags[0..<count])
+        let secondeLineTags = count == 0 ? nil : userAnalyze.weeklyTags[count..<count * 2]
+        let thirdLineTags = count == 0 ? nil : userAnalyze.weeklyTags[count * 2..<weeklyTagsCount]
+        
         VStack(alignment: .leading) {
             Text("이번주에 이런 키워드를 찾았어요")
                 .font(.title2)
@@ -314,47 +331,64 @@ struct UserPreferenceView: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 VStack(alignment: .leading) {
-                    tags(tagList: ["음식이 빨리 나와요", "신선해요", "술집", "이색맛집", "코스요리 맛집"])
+                    tags(tags: firstLineeTags)
                     
-                    tags(tagList: ["혼술 맛집", "감성사진", "로컬맛집", "특별한 날 가기 좋아요", "친절해요"])
+                    if let sceond = secondeLineTags {
+                        tags(tags: Array(sceond))
+                    }
                     
-                    tags(tagList: ["컨셉이 독특해요", "쾌적한 공간", "술집", "혼밥하기 좋아요", "아늑한 분위기"])
+                    if let third = thirdLineTags {
+                        tags(tags: Array(third))
+                    }
                 }
                 .padding()
-//                .offset(x: tagsOffsetX)
-//                .animation(.easeInOut(duration: 30).repeatForever(), value: tagsOffsetX)
             }
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay {
-                GeometryReader { reader in
-                    Color.clear
-                        .onAppear {
-                            tagsOffsetX = -reader.size.width + reader.safeAreaInsets.top + reader.safeAreaInsets.bottom
-                        }
-                }
-            }
             .background {
                 contentBackground()
             }
-//            .scrollDisabled(true)
         }
     }
     
     @ViewBuilder
-    func tags(tagList: [String]) -> some View {
+    func tags(tags: [TagTitle]) -> some View {
         LazyHStack {
-            ForEach(tagList, id: \.self) { title in
-                tag(title: title, type: tagColors.randomElement() ?? "")
+            ForEach(tags, id: \.self) { tagTitle in
+                tag(tag: tagTitle)
             }
         }
     }
+    
+    func fetchUserAnalyze() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        APIFunction.fetchUserAnalyze(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { userAnalyzeResponse in
+            userAnalyze = userAnalyzeResponse
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+
+    }
 }
 
-struct UserPreferenceView_Previews: PreviewProvider {
+struct UserAnalyzeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            UserPreferenceView()
+            UserAnalyzeView()
                 .navigationBarTitleDisplayMode(.inline)
+                .environmentObject(UserViewModel())
         }
         .tint(Color("main-point-color"))
     }

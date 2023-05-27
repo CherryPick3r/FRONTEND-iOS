@@ -15,4 +15,19 @@ enum UserColorScheme: String {
 
 class UserViewModel: ObservableObject {
     @AppStorage("화면스타일") var userColorScheme: UserColorScheme = .system
+    
+    @Published private var userEmail = "kakao_test@naver.com"
+    @Published private var token = ""
+    
+    var readUserEmail: String {
+        get {
+            return userEmail
+        }
+    }
+    
+    var readToken: String {
+        get {
+            return token
+        }
+    }
 }
