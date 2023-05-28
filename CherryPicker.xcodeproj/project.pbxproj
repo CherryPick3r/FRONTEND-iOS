@@ -25,7 +25,6 @@
 		C58C0DFA2A1E3CDA00167C8E /* GameResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DF92A1E3CDA00167C8E /* GameResponse.swift */; };
 		C58C0DFE2A1E3F2100167C8E /* ShopCardResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */; };
 		C58C0E002A1E3F6300167C8E /* ShopDetailResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */; };
-		C58C0E022A1E413C00167C8E /* GameEndResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E012A1E413C00167C8E /* GameEndResponse.swift */; };
 		C58C0E082A1E49BE00167C8E /* SimpleShopResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */; };
 		C58C0E0A2A1F06B200167C8E /* UserAnalyzeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E092A1F06B200167C8E /* UserAnalyzeResponse.swift */; };
 		C58C0E0C2A1F06C700167C8E /* ShopSimple.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58C0E0B2A1F06C700167C8E /* ShopSimple.swift */; };
@@ -73,7 +72,6 @@
 		C58C0DF92A1E3CDA00167C8E /* GameResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameResponse.swift; sourceTree = "<group>"; };
 		C58C0DFD2A1E3F2100167C8E /* ShopCardResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopCardResponse.swift; sourceTree = "<group>"; };
 		C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopDetailResponse.swift; sourceTree = "<group>"; };
-		C58C0E012A1E413C00167C8E /* GameEndResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEndResponse.swift; sourceTree = "<group>"; };
 		C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleShopResponse.swift; sourceTree = "<group>"; };
 		C58C0E092A1F06B200167C8E /* UserAnalyzeResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAnalyzeResponse.swift; sourceTree = "<group>"; };
 		C58C0E0B2A1F06C700167C8E /* ShopSimple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopSimple.swift; sourceTree = "<group>"; };
@@ -123,7 +121,6 @@
 				C58C0DF32A1E38E300167C8E /* UserPrefereceResponse.swift */,
 				C58C0DF92A1E3CDA00167C8E /* GameResponse.swift */,
 				C58C0DFF2A1E3F6300167C8E /* ShopDetailResponse.swift */,
-				C58C0E012A1E413C00167C8E /* GameEndResponse.swift */,
 				C58C0DF72A1E3C2400167C8E /* TagPair.swift */,
 				C58C0E072A1E49BE00167C8E /* SimpleShopResponse.swift */,
 				C58C0E0B2A1F06C700167C8E /* ShopSimple.swift */,
@@ -336,7 +333,6 @@
 				C58F418429FDD7F900A98B2F /* StartView.swift in Sources */,
 				C57C261F2A1F51F800E73FCB /* ShopClipping.swift in Sources */,
 				C58C0DFE2A1E3F2100167C8E /* ShopCardResponse.swift in Sources */,
-				C58C0E022A1E413C00167C8E /* GameEndResponse.swift in Sources */,
 				C58C0E002A1E3F6300167C8E /* ShopDetailResponse.swift in Sources */,
 				C5C2D4672A1F89F600266DD8 /* ErrorView.swift in Sources */,
 				C58C0DFA2A1E3CDA00167C8E /* GameResponse.swift in Sources */,
