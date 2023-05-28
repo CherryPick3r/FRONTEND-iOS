@@ -393,8 +393,8 @@ struct CherryPickView: View {
         if let shopCard = gameResponse?.recommendShops?.popLast() {
             withAnimation(.spring()) {
                 shopCardResponse = shopCard
-                isClipped = shopCardResponse.shopClipping == .isClipped
                 isLoading = false
+                isClipped = shopCardResponse.shopClipping == .isClipped
                 showRestaurantCard = true
             }
             
