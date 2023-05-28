@@ -19,6 +19,7 @@ struct MenuView: View {
     @State private var isLoading = false
     @State private var error: APIError?
     @State private var showError = false
+    @State private var retryAction: (() -> Void)?
     
     @FocusState private var isUserNameFocused: Bool
     
@@ -42,7 +43,7 @@ struct MenuView: View {
             isUserNameEditing = false
         }
         .tint(Color("main-point-color"))
-        .modifier(ErrorViewModifier(showError: $showError, error: $error))
+        .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
         .fullScreenCover(isPresented: $showWithdrawalView) {
             WithdrawalView()
         }
@@ -295,6 +296,7 @@ struct MenuView: View {
         isLoading = true
         
         withAnimation(.spring()) {
+            retryAction = nil
             APIError.closeError(showError: &showError, error: &error)
         }
         
@@ -306,6 +308,7 @@ struct MenuView: View {
             isLoading = false
         } errorHandling: { apiError in
             withAnimation(.spring()) {
+                retryAction = fetchUserNickname
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
         }
@@ -317,6 +320,7 @@ struct MenuView: View {
         }
         
         withAnimation(.spring()) {
+            retryAction = nil
             APIError.closeError(showError: &showError, error: &error)
         }
         
@@ -326,6 +330,7 @@ struct MenuView: View {
             }
         } errorHandling: { apiError in
             withAnimation(.spring()) {
+                retryAction = changeUserNickname
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
         }

@@ -46,6 +46,7 @@ struct RestaurantListView: View {
     @State private var isLoading = true
     @State private var error: APIError?
     @State private var showError = false
+    @State private var retryAction: (() -> Void)?
     
     private let columns = [
         GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
@@ -86,7 +87,7 @@ struct RestaurantListView: View {
                 }
             }
         }
-        .modifier(ErrorViewModifier(showError: $showError, error: $error))
+        .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
         .fullScreenCover(isPresented: $showRestaurantDetailView) {
             if let shopId = restaurantId {
                 RestaurantDetailView(isResultView: false, restaurantId: shopId)
@@ -372,6 +373,12 @@ struct RestaurantListView: View {
             isLoading = true
         }
         
+        retryAction = nil
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
         APIFunction.fetchShopSimples(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameCategory: 0 , isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
             shopSimpleList = simpleShopResponse
             
@@ -379,6 +386,7 @@ struct RestaurantListView: View {
                 isLoading = false
             }
         } errorHandling: { apiError in
+            retryAction = fetchList
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }

@@ -31,7 +31,7 @@ enum APIURL {
     case clippingUndo(userEmail: String, shopId: Int)
     
     var url: URL {
-        var serverURL = URLComponents(string: "http://43.202.25.158:8080")!
+        var serverURL = URLComponents(string: "https://cherrypick3r.shop")!
         
         switch self {
         case .appleLogin:

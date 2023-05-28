@@ -47,6 +47,7 @@ struct CherryPickView: View {
     @State private var showError = false
     @State private var isClipped = false
     @State private var isLoading = true
+    @State private var retryAction: (() -> Void)?
     
     var body: some View {
         NavigationStack {
@@ -108,9 +109,9 @@ struct CherryPickView: View {
                         closeButton()
                     }
                 }
-                .modifier(ErrorViewModifier(showError: $showError, error: $error))
+                .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
                 .task {
-                    appearingView()
+                    fetchGame()
                 }
             }
         }
@@ -201,13 +202,25 @@ struct CherryPickView: View {
         
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                Image("restaurant-sample1")
-                    .resizable()
-                    .scaledToFill()
+                AsyncImage(url: URL(string: shopCardResponse.shopMainPhoto1)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } placeholder: {
+                    ZStack {
+                        Color("main-point-color-weak")
+                    }
+                }
                 
-                Image("restaurant-sample2")
-                    .resizable()
-                    .scaledToFill()
+                AsyncImage(url: URL(string: shopCardResponse.shopMainPhoto2)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } placeholder: {
+                    ZStack {
+                        Color("main-point-color-weak")
+                    }
+                }
             }
             .frame(width: width)
             .frame(maxWidth: 500)
@@ -246,7 +259,7 @@ struct CherryPickView: View {
             }
             .padding(.bottom)
             
-            KeywordTagsView(topTags: .constant(TagPair.preview))
+            KeywordTagsView(topTags: .constant(shopCardResponse.topTags))
                 .opacity(isTutorial ? 0 : 1)
         }
         .blur(radius: isTutorial ? 10 : 0)
@@ -397,13 +410,14 @@ struct CherryPickView: View {
         }
     }
     
-    func appearingView() {
+    func fetchGame() {
         withAnimation(.easeInOut) {
             isLoading = true
         }
         
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
+            retryAction = nil
         }
         
         APIFunction.doStartGame(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameMode: gameCategory?.rawValue ?? 0, subscriptions: &subscriptions) { game in
@@ -411,6 +425,8 @@ struct CherryPickView: View {
             
             showShopCard()
         } errorHandling: { apiError in
+            retryAction = fetchGame
+            
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
@@ -421,24 +437,28 @@ struct CherryPickView: View {
         if let game = gameResponse {
             withAnimation(.spring()) {
                 APIError.closeError(showError: &showError, error: &error)
+                retryAction = nil
             }
             
             APIFunction.doGameSwipe(token: userViewModel.readToken, gameId: game.gameId, shopId: shopCardResponse.shopId, swipeType: userSelection, subscriptions: &subscriptions) { data in
-                if let game = try? JSONDecoder().decode(GameResponse.self, from: data) {
-                    if game.recommendShopIds != nil || game.recommendShops != nil {
-                        gameResponse = game
-                    }
-                    
+                if data.recommendShopIds != nil || data.recommendShops != nil {
                     disappearingCard()
-                } else if let game = try? JSONDecoder().decode(GameEndResponse.self, from: data) {
-                    restaurantId = game.recommendedShopId
+                    
+                    gameResponse = data
+                } else if let shopId = data.recommendedShopId {
+                    disappearingCard()
+                    
+                    restaurantId = shopId
                     
                     withAnimation(.easeInOut) {
                         isCherryPick = false
                         isCherryPickDone = true
                     }
+                } else {
+                    disappearingCard()
                 }
             } errorHandling: { apiError in
+                retryAction = doSwipped
                 cancelDecisionUserSelection()
                 withAnimation(.spring()) {
                     APIError.showError(showError: &showError, error: &error, catchError: apiError)
@@ -450,6 +470,7 @@ struct CherryPickView: View {
     func clippingAction() {
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
+            retryAction = nil
         }
         
         APIFunction.doOrUndoClipping(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, shopId: shopCardResponse.shopId, isClipped: isClipped, subscriptions: &subscriptions) { _ in

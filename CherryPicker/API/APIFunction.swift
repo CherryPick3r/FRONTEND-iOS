@@ -21,6 +21,9 @@ enum APIFunction {
             case .invalidResponse:
                 errorHandling(.invalidResponse)
                 break
+            case .internalServerError:
+                errorHandling(.internalServerError)
+                break
             case .jsonDecodingError:
                 errorHandling(.jsonDecodingError)
                 break
@@ -82,7 +85,7 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func doGameSwipe(token: String, gameId: Int, shopId: Int, swipeType: UserSelection, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (Data) -> Void, errorHandling: @escaping (APIError) -> Void) {
+    static func doGameSwipe(token: String, gameId: Int, shopId: Int, swipeType: UserSelection, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (GameResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
         APIService.doGameSwipe(token: token, gameId: gameId, shopId: shopId, swipeType: swipeType).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in

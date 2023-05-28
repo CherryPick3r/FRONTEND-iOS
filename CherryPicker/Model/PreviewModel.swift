@@ -43,12 +43,6 @@ extension ShopCardResponses {
     }
 }
 
-extension GameResponse {
-    static var preview: GameResponse {
-        return GameResponse(gameId: 1, totalRound: 1, curRound: 1, gameStatus: 1, recommendShopIds: [1, 1, 1], recommendShops: ShopCardResponses.preview)
-    }
-}
-
 extension MenuSimple {
     static var preview: MenuSimples {
         return [

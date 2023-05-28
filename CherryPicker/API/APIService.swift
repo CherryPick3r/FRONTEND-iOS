@@ -62,6 +62,8 @@ enum APIService {
             switch httpResponse.statusCode {
             case 400:
                 throw error400
+            case 500:
+                throw APIError.internalServerError
             default:
                 throw APIError.unknown(statusCode: httpResponse.statusCode)
             }
@@ -151,12 +153,13 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func doGameSwipe(token: String, gameId: Int, shopId: Int, swipeType: UserSelection) -> AnyPublisher<Data, APIError> {
+    static func doGameSwipe(token: String, gameId: Int, shopId: Int, swipeType: UserSelection) -> AnyPublisher<GameResponse, APIError> {
         let request = request(apiURL: swipeType == .like ? .cherryPickSwipeRight(gameId: gameId, shopId: shopId) : .cherryPickSwipeLeft(gameId: gameId, shopId: shopId), httpMethod: "POST", bearerToken: token)
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
         }
+        .decode(type: GameResponse.self, decoder: JSONDecoder())
         .mapError { error in
             APIError.convert(error: error)
         }

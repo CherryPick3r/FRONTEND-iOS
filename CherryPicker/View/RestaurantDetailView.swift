@@ -41,6 +41,7 @@ struct RestaurantDetailView: View {
     @State private var subMenus = MenuSimples()
     @State private var error: APIError?
     @State private var showError = false
+    @State private var retryAction: (() -> Void)?
     @State private var imagePage = 0
     @State private var isClipped = false
     @State private var restaurant = ShopDetailResponse.preview
@@ -140,7 +141,7 @@ struct RestaurantDetailView: View {
                     images()
                 }
             }
-            .modifier(ErrorViewModifier(showError: $showError, error: $error))
+            .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
             .task {
                 fetchRestaurant()
             }
@@ -948,6 +949,8 @@ struct RestaurantDetailView: View {
             isLoading = true
         }
         
+        retryAction = nil
+        
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }
@@ -960,6 +963,8 @@ struct RestaurantDetailView: View {
                 isLoading = false
             }
         } errorHandling: { apiError in
+            retryAction = fetchRestaurant
+            
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
@@ -967,6 +972,8 @@ struct RestaurantDetailView: View {
     }
     
     func clippingAction() {
+        retryAction = nil
+        
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }
@@ -974,6 +981,8 @@ struct RestaurantDetailView: View {
         APIFunction.doOrUndoClipping(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, shopId: restaurant.shopId, isClipped: isClipped, subscriptions: &subscriptions) { _ in
             isClipped = !isClipped
         } errorHanding: { apiError in
+            retryAction = clippingAction
+            
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }

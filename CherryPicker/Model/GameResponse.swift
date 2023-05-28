@@ -14,4 +14,6 @@ struct GameResponse: Codable {
     let gameStatus: Int
     var recommendShopIds: [Int]?
     var recommendShops: ShopCardResponses?
+    let recommendedShopId: Int?
+    let reconmendedShopDetail: ShopDetailResponse?
 }

@@ -18,6 +18,7 @@ struct UserAnalyzeView: View {
     @State private var isLoading = true
     @State private var error: APIError?
     @State private var showError = false
+    @State private var retryAction: (() -> Void)?
     
     private let columns = [
         GridItem(.adaptive(minimum: 350, maximum: .infinity), spacing: nil, alignment: .top)
@@ -33,7 +34,7 @@ struct UserAnalyzeView: View {
         }
         .background(Color("background-color"))
         .navigationTitle("취향분석")
-        .modifier(ErrorViewModifier(showError: $showError, error: $error))
+        .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
         .task {
             fetchUserAnalyze()
         }
@@ -364,6 +365,7 @@ struct UserAnalyzeView: View {
             isLoading = true
         }
         
+        retryAction = nil
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }
@@ -375,6 +377,8 @@ struct UserAnalyzeView: View {
                 isLoading = false
             }
         } errorHandling: { apiError in
+            retryAction = fetchUserAnalyze
+            
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
