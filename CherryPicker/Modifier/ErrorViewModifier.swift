@@ -13,23 +13,30 @@ struct ErrorViewModifier: ViewModifier {
     @Binding var retryAction: (() -> Void)?
     
     @State private var offsetY = CGFloat.zero
+    @State private var opacity = 50.0
     
     func body(content: Content) -> some View {
         content
             .overlay(alignment: .top) {
                 if showError, let action = retryAction {
                     ErrorView(error: $error)
+                        .opacity(opacity / 50)
                         .offset(y: offsetY)
                         .gesture(
                             DragGesture()
                                 .onChanged({ drag in
-                                    offsetY = drag.translation.height
+                                    let moveY = drag.translation.height
+                                    offsetY = moveY
+                                    opacity = 50 + moveY
                                 })
                                 .onEnded({ drag in
                                     if offsetY < -50 {
                                         action()
-                                    } else {
+                                    }
+                                    
+                                    withAnimation(.spring()) {
                                         offsetY = .zero
+                                        opacity = 50.0
                                     }
                                 })
                         )

@@ -14,6 +14,7 @@ enum APIURL {
     case appleLoginCallback
     case kakoLoginCallback
     case googleLogincCallback
+    case checkPreferenceGame(userEmail: String)
     case preferenceCherryPickStartGame(userEmail: String)
     case preferenceCherryPickSwipeLeft(userEmail: String, preferenceGameId: Int)
     case preferenceCherryPickSwipeRight(userEmail: String, preferenceGameId: Int)
@@ -51,6 +52,10 @@ enum APIURL {
             break
         case .googleLogincCallback:
             serverURL.path = "/api/v1/auth/google/callback"
+            break
+        case .checkPreferenceGame(let userEmail):
+            serverURL.path = "/api/v1/preference/check-preference-game"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail)]
             break
         case .preferenceCherryPickStartGame(let userEmail):
             serverURL.path = "/api/v1/preference/start-game"

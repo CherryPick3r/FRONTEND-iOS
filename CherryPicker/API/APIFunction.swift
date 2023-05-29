@@ -12,6 +12,7 @@ enum APIFunction {
     static func completionHandler(completion: Subscribers.Completion<APIError>, errorHandling: @escaping (APIError) -> Void) {
         switch completion {
         case .finished:
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
             break
         case .failure(let failure):
             switch failure {
@@ -23,6 +24,9 @@ enum APIFunction {
                 break
             case .internalServerError:
                 errorHandling(.internalServerError)
+                break
+            case .loginFail:
+                errorHandling(.loginFail)
                 break
             case .jsonDecodingError:
                 errorHandling(.jsonDecodingError)
@@ -37,6 +41,10 @@ enum APIFunction {
                 errorHandling(.unknown(statusCode: statusCode))
                 break
             }
+            
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            
+            break
         }
     }
     
@@ -54,6 +62,15 @@ enum APIFunction {
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
+        }
+        .store(in: &subscriptions)
+    }
+    
+    static func checkPreferenceGame(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receieveValue: @escaping (CheckPreferenceGameResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.checkPreferenceGame(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
+            completionHandler(completion: completion, errorHandling: errorHandling)
+        } receiveValue: { data in
+            receieveValue(data)
         }
         .store(in: &subscriptions)
     }

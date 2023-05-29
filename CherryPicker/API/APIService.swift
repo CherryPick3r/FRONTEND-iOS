@@ -47,7 +47,7 @@ enum APIService {
         }
         
         if let token = bearerToken {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue(token, forHTTPHeaderField: "Authorization")
         }
         
         return request
@@ -108,6 +108,19 @@ enum APIService {
             
             return token
         }
+        .mapError { error in
+            APIError.convert(error: error)
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    static func checkPreferenceGame(token: String, userEmail: String) -> AnyPublisher<CheckPreferenceGameResponse, APIError> {
+        let request = request(apiURL: .checkPreferenceGame(userEmail: userEmail), bearerToken: token)
+        
+        return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
+            try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
+        }
+        .decode(type: CheckPreferenceGameResponse.self, decoder: JSONDecoder())
         .mapError { error in
             APIError.convert(error: error)
         }

@@ -14,16 +14,17 @@ struct AppView: View {
     @State private var isCherryPickDone = false
     @State private var restaurantId: Int?
     @State private var gameCategory: GameCategory?
+    @State private var isFirstCherryPick = false
     
     var body: some View {
         if isCherryPick {
-            CherryPickView(isCherryPick: $isCherryPick, isCherryPickDone: $isCherryPickDone, restaurantId: $restaurantId, gameCategory: $gameCategory, cherryPickMode: .cherryPick)
+            CherryPickView(isCherryPick: $isCherryPick, isCherryPickDone: $isCherryPickDone, restaurantId: $restaurantId, gameCategory: $gameCategory, isFirstCherryPick: $isFirstCherryPick, cherryPickMode: isFirstCherryPick ? .tutorial : .cherryPick)
                 .environmentObject(userViewModel)
         } else if isCherryPickDone, let shopId = restaurantId {
             RestaurantDetailView(isCherryPick: $isCherryPick, isCherryPickDone: $isCherryPickDone, restaurantId: shopId)
                 .environmentObject(userViewModel)
         } else {
-            StartView(isCherryPick: $isCherryPick, gameCategory: $gameCategory)
+            StartView(isCherryPick: $isCherryPick, gameCategory: $gameCategory, isFirstCherryPick: $isFirstCherryPick)
                 .environmentObject(userViewModel)
         }
     }

@@ -11,6 +11,7 @@ enum APIError: Error {
     case authenticationFailure
     case invalidResponse
     case internalServerError
+    case loginFail
     case jsonDecodingError
     case jsonEncodingError
     case urlError(URLError)
@@ -24,6 +25,8 @@ enum APIError: Error {
             return "잘못된 응답을 받았어요"
         case .internalServerError:
             return "서버에 문제가 생겼어요."
+        case .loginFail:
+            return "로그인에 실패했어요."
         case .jsonDecodingError:
             return "데이터 디코딩 에러"
         case .jsonEncodingError:

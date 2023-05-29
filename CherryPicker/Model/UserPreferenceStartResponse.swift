@@ -12,7 +12,7 @@ struct UserPreferenceStartResponse: Codable {
     let totalRound: Int
     let curRound: Int
     let gameStatus: Int
-    let preferenceCards: PreferenceCards
+    var preferenceCards: PreferenceCards
 }
 
 struct PreferenceCard: Codable {
