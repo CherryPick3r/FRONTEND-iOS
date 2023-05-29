@@ -80,6 +80,10 @@ struct ParticleModifier: ViewModifier {
                             withAnimation(.spring(response: 1.5).delay(Double(index * 2) * 0.03)) {
                                 particles[index].scale = 0.001
                             }
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.02) {
+                                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                            }
                         }
                     }
                 }

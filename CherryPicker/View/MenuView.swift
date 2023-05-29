@@ -11,6 +11,10 @@ import Combine
 struct MenuView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     
+    @FocusState private var isUserNameFocused: Bool
+    
+    @Binding var path: [NavigationPath]
+    
     @State private var subscriptions = Set<AnyCancellable>()
     @State private var userName = ""
     @State private var isUserNameEditing = false
@@ -20,8 +24,7 @@ struct MenuView: View {
     @State private var error: APIError?
     @State private var showError = false
     @State private var retryAction: (() -> Void)?
-    
-    @FocusState private var isUserNameFocused: Bool
+    @State private var showLogoutDialog = false
     
     var body: some View {
         ViewThatFits(in: .vertical) {
@@ -49,6 +52,19 @@ struct MenuView: View {
         }
         .task {
             fetchUserNickname()
+        }
+        .confirmationDialog("로그아웃", isPresented: $showLogoutDialog) {
+            Button("로그아웃", role: .destructive) {
+                userViewModel.deleteUserInfo()
+                
+                path.removeLast()
+            }
+            
+            Button("취소", role: .cancel) {
+                
+            }
+        } message: {
+            Text("로그아웃 하시겠아요?")
         }
     }
     
@@ -91,16 +107,18 @@ struct MenuView: View {
                         .controlSize(.mini)
                 } else {
                     TextField("닉네임", text: $userName)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .focused($isUserNameFocused)
+                        .disabled(!isUserNameEditing)
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(Color("main-point-color"))
                         .fixedSize(horizontal: true, vertical: false)
-                        .disabled(!isUserNameEditing)
-                        .focused($isUserNameFocused)
                         .onSubmit {
                             isUserNameFocused = false
                             isUserNameEditing = false
-                            
+
                             changeUserNickname()
                         }
                 }
@@ -112,6 +130,9 @@ struct MenuView: View {
                 Button {
                     isUserNameEditing = true
                     isUserNameFocused = true
+                    
+                    print(isUserNameEditing)
+                    print(isUserNameFocused)
                 } label: {
                     Label("수정", systemImage: "pencil.line")
                         .labelStyle(.iconOnly)
@@ -241,7 +262,7 @@ struct MenuView: View {
     @ViewBuilder
     func logoutButton() -> some View {
         Button {
-            
+            showLogoutDialog = true
         } label: {
             HStack {
                 Spacer()
@@ -340,7 +361,7 @@ struct MenuView: View {
 struct MenuView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            MenuView()
+            MenuView(path: .constant([.menuView]))
                 .environmentObject(UserViewModel())
         }
         .tint(Color("main-point-color"))

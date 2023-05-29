@@ -6,27 +6,42 @@
 //
 
 import SwiftUI
+import Combine
 import AuthenticationServices
+
+enum NavigationPath {
+    case menuView
+}
 
 struct StartView: View {
     @Namespace var heroEffect
+    
+    @Environment(\.colorScheme) var colorScheme
     
     @EnvironmentObject var userViewModel: UserViewModel
     
     @Binding var isCherryPick: Bool
     @Binding var gameCategory: GameCategory?
+    @Binding var isFirstCherryPick: Bool
     
+    @State private var subscriptions = Set<AnyCancellable>()
+    @State private var path = [NavigationPath]()
     @State private var showSignInView = false
-    @State private var showSignUpView = false
     @State private var categoryIndicatorOffsetY = CGFloat.zero
     @State private var contentID = 0
     @State private var contentOffsetY = CGFloat.zero
     @State private var dragOffsetY = CGFloat.zero
     @State private var isCategoryContent = false
     @State private var maxVelocity = CGFloat.zero
+    @State private var showLoginWebView = false
+    @State private var isLoading = false
+    @State private var error: APIError?
+    @State private var showError = false
+    @State private var retryAction: (() -> Void)?
+    @State private var loginURL = ""
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             GeometryReader { reader in
                 let height = reader.size.height
                 let width = reader.size.width
@@ -44,6 +59,10 @@ struct StartView: View {
                     DragGesture()
                         .onChanged({ drag in
                             DispatchQueue.global(qos: .userInteractive).async {
+                                guard !isFirstCherryPick else {
+                                    return
+                                }
+                                
                                 let moveY = drag.translation.height
                                 let velocity = moveY - (contentOffsetY - dragOffsetY)
                                 
@@ -65,24 +84,42 @@ struct StartView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem {
-                        NavigationLink {
-                            MenuView()
-                        } label: {
+                        NavigationLink(value: NavigationPath.menuView) {
                             Label("메뉴", systemImage: "line.3.horizontal")
                                 .foregroundColor(Color("main-point-color"))
                         }
+                        .disabled(!userViewModel.isAuthenticated)
                     }
                 }
                 .onAppear() {
                     gameCategory = nil
                 }
+                .task {
+                    checkPreferenceGame()
+                }
                 .sheet(isPresented: $showSignInView) {
                     signIn()
                         .presentationDetents([.medium])
                 }
-                .sheet(isPresented: $showSignUpView) {
-                    signUp()
-                        .presentationDetents([.medium])
+                .sheet(isPresented: $showLoginWebView) {
+                    LoginWebView(url: loginURL, onReceivedResponse: userViewModel.loginCallbackHandler(response:showLoginWebView:), showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
+                        .environmentObject(userViewModel)
+                }
+                .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
+                .onChange(of: loginURL) { newValue in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        showLoginWebView = loginURL != "" ? true : false
+                    }
+                    
+                    print(newValue)
+                }
+                .onChange(of: showLoginWebView) { newValue in
+                    if !newValue {
+                        loginURL = ""
+                    }
+                }
+                .navigationDestination(for: NavigationPath.self) { navigationPath in
+                    MenuView(path: $path)
                 }
             }
         }
@@ -92,12 +129,12 @@ struct StartView: View {
     @ViewBuilder
     func startButton() -> some View {
         Button {
-            showSignInView = true
+            startGame()
         } label: {
             HStack {
                 Spacer()
                 
-                Text("시작하기")
+                Text(isFirstCherryPick ? "튜토리얼 시작하기" : "시작하기")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color"))
@@ -246,8 +283,9 @@ struct StartView: View {
     @ViewBuilder
     func categoryButton(category: GameCategory, tags: [TagTitle]) -> some View {
         Button {
-            showSignInView = true
             gameCategory = category
+            
+            startGame()
         } label: {
             VStack(spacing: 0) {
                 HStack {
@@ -319,122 +357,109 @@ struct StartView: View {
             .padding()
             .padding(.top)
             
-            SignInWithAppleButton(
-                onRequest: { request in
-                    // 로그인 요청 시 처리할 코드
-                    
-                    //서버 연결되면 삭제 예정
-                    withAnimation(.easeInOut) {
-                        showSignInView = false
-                        isCherryPick = true
-                    }
-                },
-                onCompletion: { result in
-                    // 로그인 결과 처리할 코드
-                    switch result {
-                    case .success(let authResults):
-                        // 인증 결과 처리
-                        break
-                    case .failure(let error):
-                        // 인증 실패 처리
-                        break
-                    }
-                }
-            )
-            .padding(.horizontal, 30)
-            .padding(.vertical)
-            .frame(height: 80)
-            .cornerRadius(10)
-            
-            Spacer()
-            
-            Text("혹시 회원이 아니신가요?")
-                .fontWeight(.bold)
-                .foregroundColor(Color("main-text-color"))
-                .padding()
-            
             Button {
-                showSignInView = false
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    showSignUpView = true
-                }
+                let request = ASAuthorizationAppleIDProvider().createRequest()
+                request.requestedScopes = [.fullName, .email]
+
+                let controller = ASAuthorizationController(authorizationRequests: [request])
+                controller.performRequests()
             } label: {
-                Text("회원가입 하러 가기")
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-point-color-weak"))
-            }
-            .padding()
-            
-        }
-        .background(Color("background-shape-color"))
-    }
-    
-    @ViewBuilder
-    func signUp() -> some View {
-        VStack {
-            VStack {
-                HStack {
-                    Text("환영합니다!")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color"))
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Image(systemName: "apple.logo")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(colorScheme == .dark ? .black : .white)
+                            .frame(width: 15)
+                        
+                        Text("Apple로 로그인")
+                            .foregroundColor(colorScheme == .dark ? .black : .white)
+                        
+                        Spacer()
+                    }
                     
                     Spacer()
                 }
-                .padding()
-                .padding(.top)
-                
-                SignInWithAppleButton(
-                    onRequest: { request in
-                        // 로그인 요청 시 처리할 코드
-                        
-                        //서버 연결되면 삭제 예정
-                        withAnimation(.easeInOut) {
-                            showSignUpView = false
-                            isCherryPick = true
-                        }
-                    },
-                    onCompletion: { result in
-                        // 로그인 결과 처리할 코드
-                        switch result {
-                        case .success(let authResults):
-                            // 인증 결과 처리
-                            break
-                        case .failure(let error):
-                            // 인증 실패 처리
-                            break
-                        }
-                    }
-                )
-                .padding(.horizontal, 30)
-                .padding(.vertical)
-                .frame(height: 80)
-                .cornerRadius(10)
-                
-                Spacer()
-                
-                Text("혹시 회원이신가요?")
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-text-color"))
-                    .padding()
-                
-                Button {
-                    showSignUpView = false
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        showSignInView = true
-                    }
-                } label: {
-                    Text("로그인 하러 가기")
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color-weak"))
+                .background {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(colorScheme == .dark ? .white : .black)
                 }
-                .padding()
-                
+                .frame(width: 280, height: 60)
+                .padding(.top)
             }
-            .background(Color("background-shape-color"))
+            
+            Button {
+                kakaoLogin()
+            } label: {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Image("kakao-symbol")
+                            .resizable()
+                            .renderingMode(.template)
+                            .scaledToFit()
+                            .foregroundColor(Color("kakao-label-color"))
+                            .frame(width: 15)
+                        
+                        Text("카카오 로그인")
+                            .foregroundColor(Color("kakao-label-color").opacity(0.85))
+                        
+                        Spacer()
+                    }
+                    
+                    Spacer()
+                }
+                .background {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color("kakao-color"))
+                }
+                .frame(width: 280, height: 60)
+                .padding(.top)
+            }
+            
+            Button {
+                googleLogin()
+            } label: {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Image("google-logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 15)
+                        
+                        Text("Google로 로그인")
+                            .font(.custom("Roboto-Medium", size: 16, relativeTo: .headline))
+                            .foregroundColor(.black.opacity(0.54))
+                        
+                        Spacer()
+                    }
+                    
+                    Spacer()
+                }
+                .background {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(.white)
+                        .shadow(color: .black.opacity(0.1), radius: 3)
+                }
+                .frame(width: 280, height: 60)
+                .padding(.vertical)
+            }
+
+            
+            Spacer()
         }
+        .background(Color("background-shape-color"))
     }
     
     func calculateMaxVelocity(velocity: CGFloat) {
@@ -476,11 +501,91 @@ struct StartView: View {
         
         categoryIndicatorOffsetY = 15
     }
+    
+    func startGame() {
+        if userViewModel.isAuthenticated {
+            withAnimation(.easeInOut) {
+                isCherryPick = true
+            }
+        } else {
+            showSignInView = true
+        }
+    }
+    
+    func kakaoLogin() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        showSignInView = false
+        
+        APIFunction.fetchLoginResponse(platform: .kakao, subscriptions: &subscriptions) { loginResponse in
+            loginURL = loginResponse.loginURL
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+    }
+    
+    func googleLogin() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        showSignInView = false
+        
+        APIFunction.fetchLoginResponse(platform: .google, subscriptions: &subscriptions) { loginResponse in
+            
+            loginURL = loginResponse.loginURL
+            
+            withAnimation(.easeInOut) {
+                isLoading = false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+    }
+    
+    func checkPreferenceGame() {
+        withAnimation(.easeInOut) {
+            isLoading = true
+        }
+        
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        APIFunction.checkPreferenceGame(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { checkPreferenceGame in
+            withAnimation(.easeInOut) {
+                isFirstCherryPick = checkPreferenceGame.isPlayed == 0 ? true : false
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
+
+    }
 }
 
 struct StartView_Previews: PreviewProvider {
     static var previews: some View {
-        StartView(isCherryPick: .constant(false), gameCategory: .constant(nil))
+        StartView(isCherryPick: .constant(false), gameCategory: .constant(nil), isFirstCherryPick: .constant(false))
             .environmentObject(UserViewModel())
     }
 }

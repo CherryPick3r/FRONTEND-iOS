@@ -17,8 +17,10 @@
 	<array>
 		<string>kakaomap</string>
 		<string>nmap</string>
-		<string>kakaokompassauth</string>
-		<string>kakaolink</string>
+	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Roboto-Medium.ttf</string>
 	</array>
 </dict>
 </plist>
