@@ -234,13 +234,13 @@ struct RestaurantDetailView: View {
                 .fill(Color("background-shape-color"))
                 .shadow(color: .black.opacity(0.25), radius: 5)
                 .background {
-                    if showDetailMenu {
+                    if showDetailMenu || showDetailHours {
                         cherryPickCountInformation()
                     }
                 }
         }
         .overlay {
-            if !showDetailMenu {
+            if !showDetailMenu && !showDetailHours {
                 cherryPickCountInformation()
             }
         }
@@ -251,8 +251,15 @@ struct RestaurantDetailView: View {
                     .opacity(showDetailMenu ? 1 : 0)
                     .padding([.horizontal, .top], isNoneNotchiPhone ? 15 : 20)
             }
+            
+            if showDetailHours {
+                detailHours()
+                    .rotation3DEffect(Angle(degrees: 180), axis: (x: 0, y: 1, z: 0))
+                    .opacity(showDetailHours ? 1 : 0)
+                    .padding([.horizontal, .top], isNoneNotchiPhone ? 15 : 20)
+            }
         }
-        .rotation3DEffect(Angle(degrees: showDetailMenu ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
+        .rotation3DEffect(Angle(degrees: (showDetailMenu || showDetailHours) ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
         .offset(y: informationOffsetY)
         .frame(maxWidth: 500)
         .padding(.top)
@@ -317,7 +324,7 @@ struct RestaurantDetailView: View {
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(Color("shape-light-color"))
-                    .opacity(showDetailMenu ? 0 : 1)
+                    .opacity(showDetailMenu || showDetailHours ? 0 : 1)
                     .padding(.horizontal)
                     .padding(.vertical, 10)
                     .background {
@@ -359,10 +366,11 @@ struct RestaurantDetailView: View {
             VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
                 Label(restaurant.shopAddress, systemImage: "map")
                     .font(.footnote)
+                    .fontWeight(.semibold)
                     .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                 
                 HStack {
-                    Label(restaurant.todayHour ?? "정보없음", systemImage: "clock")
+                    Label("오늘 : \(restaurant.todayHour ?? "정보가 없어요.")", systemImage: "clock")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
@@ -376,10 +384,10 @@ struct RestaurantDetailView: View {
                     
                     Spacer()
                     
-                    if showDetailInformation {
+                    if showDetailInformation && restaurant.operatingHoursArray != nil {
                         moreButton {
                             withAnimation(.spring()) {
-                                
+                                showDetailHours = true
                             }
                         }
                     }
@@ -402,7 +410,7 @@ struct RestaurantDetailView: View {
             
             representativeMenu(detailSubMenuDisable: detailSubMenuDisable)
         }
-        .opacity(showDetailMenu ? 0 : 1)
+        .opacity(showDetailMenu || showDetailHours ? 0 : 1)
     }
     
     @ViewBuilder
@@ -447,6 +455,65 @@ struct RestaurantDetailView: View {
     }
     
     @ViewBuilder
+    func detailHours() -> some View {
+        VStack {
+            HStack {
+                Text("영업시간")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color"))
+                
+                Spacer()
+                
+                Button {
+                    withAnimation(.spring()) {
+                        showDetailHours = false
+                    }
+                } label: {
+                    Label("닫기", systemImage: "xmark.circle.fill")
+                        .labelStyle(.iconOnly)
+                        .font(.largeTitle)
+                        .foregroundColor(Color("main-point-color"))
+                        .shadow(color: .black.opacity(0.25), radius: 5)
+                }
+
+            }
+            
+            if let hours = restaurant.operatingHoursArray {
+                ViewThatFits(in: .vertical) {
+                    LazyVStack(spacing: 10) {
+                        ForEach(hours.indices) { index in
+                            HStack {
+                                Text(hours[index])
+                                
+                                Spacer()
+                            }
+                        }
+                    }
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color("main-text-color"))
+                    
+                    ScrollView {
+                        LazyVStack(spacing: 10) {
+                            ForEach(hours.indices) { index in
+                                HStack {
+                                    Text(hours[index])
+                                    
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color("main-text-color"))
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
     func detailMenu() -> some View {
         VStack {
             HStack {
@@ -477,6 +544,9 @@ struct RestaurantDetailView: View {
                         menu(title: menuSimple.name, price: menuSimple.price)
                     }
                 }
+                .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color("main-text-color"))
                 
                 ScrollView {
                     LazyVStack(spacing: 10) {
@@ -484,6 +554,9 @@ struct RestaurantDetailView: View {
                             menu(title: menuSimple.name, price: menuSimple.price)
                         }
                     }
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color("main-text-color"))
                 }
             }
         }
@@ -499,22 +572,6 @@ struct RestaurantDetailView: View {
             Text("\(price)원")
         }
         .font(.footnote)
-        .fontWeight(.semibold)
-        .foregroundColor(Color("main-text-color"))
-    }
-    
-    @ViewBuilder
-    func hour(week: String, startTime: String? = nil, endTime: String? = nil) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(week)
-            
-            Text(startTime ?? "정기")
-                .foregroundColor(startTime == nil ? Color("main-point-color-strong") : Color("main-text-color"))
-            
-            Text(endTime ?? "휴무")
-                .foregroundColor(endTime == nil ? Color("main-point-color-strong") : Color("main-text-color"))
-        }
-        .font(.caption)
         .fontWeight(.semibold)
         .foregroundColor(Color("main-text-color"))
     }

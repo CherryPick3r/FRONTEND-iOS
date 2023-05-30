@@ -50,7 +50,7 @@ struct ShopDetailResponse: Codable {
         let today = formatter.string(from: .now)
         
         guard let todayIndex = hours.firstIndex(where: { hour in
-            return hour.contains(today) || hour == "매일"
+            return hour == today || hour == "매일" || hour == (today + "요일")
         }) else {
             return nil
         }

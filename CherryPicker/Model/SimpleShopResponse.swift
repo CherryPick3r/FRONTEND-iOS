@@ -8,6 +8,6 @@
 import Foundation
 
 struct SimpleShopResponse: Codable {
-    let shopSimples: ShopSimples
+    var shopSimples: ShopSimples
 }
 

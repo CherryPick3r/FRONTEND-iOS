@@ -423,7 +423,12 @@ struct CherryPickView: View {
             
             cardDgree = 0
             
-            showShopCard()
+            switch cherryPickMode {
+            case .tutorial:
+                showPreferencCard()
+            case .cherryPick:
+                showShopCard()
+            }
         }
     }
     
@@ -622,6 +627,7 @@ struct CherryPickView: View {
             APIFunction.doUserPreferenceSwipe(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, preferenceGameId: game.preferenceGameId, swipeType: userSelection, subscriptions: &subscriptions) { data in
                 if game.preferenceCards.isEmpty {
                     disappearingCard()
+                    
                     isFirstCherryPick = false
                     
                     withAnimation(.easeInOut) {
