@@ -341,6 +341,10 @@ struct CherryPickView: View {
                 } placeholder: {
                     ZStack {
                         Color("main-point-color-weak")
+                            .opacity(0.5)
+                        
+                        ProgressView()
+                            .progressViewStyle(.circular)
                     }
                 }
                 
@@ -351,6 +355,10 @@ struct CherryPickView: View {
                 } placeholder: {
                     ZStack {
                         Color("main-point-color-weak")
+                            .opacity(0.5)
+                        
+                        ProgressView()
+                            .progressViewStyle(.circular)
                     }
                 }
             }

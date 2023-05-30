@@ -204,7 +204,6 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
     }
     
     private func appleLogin(userEmail: String, userName: String) {
-        print(#function)
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }

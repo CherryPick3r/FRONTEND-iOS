@@ -81,8 +81,6 @@ struct WithdrawalView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 showLoginWebView = loginURL != "" ? true : false
             }
-            
-            print(newValue)
         }
         .onChange(of: showLoginWebView) { newValue in
             if !newValue {
