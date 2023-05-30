@@ -36,6 +36,7 @@ struct RestaurantDetailView: View {
     @State private var toolButtonsOffsetX = CGFloat.zero
     @State private var showSelectMapDialog = false
     @State private var showDetailMenu = false
+    @State private var showDetailHours = false
     @State private var maxVelocity = CGFloat.zero
     @State private var isLoading = true
     @State private var subMenus = MenuSimples()
@@ -144,6 +145,8 @@ struct RestaurantDetailView: View {
             .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
             .task {
                 fetchRestaurant()
+                
+                print(restaurantId)
             }
             .onAppear() {
                 withAnimation(.spring()) {
@@ -358,10 +361,32 @@ struct RestaurantDetailView: View {
                     .font(.footnote)
                     .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                 
-                if showDetailInformation {
-                    detailHours()
-                        .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                HStack {
+                    Label(restaurant.todayHour ?? "정보없음", systemImage: "clock")
+                        .font(.footnote)
+                        .fontWeight(.semibold)
+                        .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                     
+                    if let regularHoliday = restaurant.regularHoliday {
+                        Text(regularHoliday)
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("main-point-color-strong"))
+                    }
+                    
+                    Spacer()
+                    
+                    if showDetailInformation {
+                        moreButton {
+                            withAnimation(.spring()) {
+                                
+                            }
+                        }
+                    }
+                }
+                .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                
+                if showDetailInformation {
                     VStack(alignment: .leading) {
                         Text("키워드 태그")
                             .font(.headline)
@@ -371,19 +396,6 @@ struct RestaurantDetailView: View {
                         KeywordTagsView(topTags: .constant(restaurant.topTags))
                     }
                     .padding(.bottom, 5)
-                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
-                } else {
-                    HStack {
-                        Label("11:50 ~ 22:00", systemImage: "clock")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
-                        
-                        Text("휴무 : 일요일")
-                            .font(.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color("main-point-color-strong"))
-                    }
                     .transition(.opacity.animation(.easeInOut(duration: 0.3)))
                 }
             }
@@ -405,13 +417,11 @@ struct RestaurantDetailView: View {
                 Spacer()
                 
                 if showDetailInformation && restaurant.shopMenus.count > 5 {
-                    Button("더보기") {
+                    moreButton {
                         withAnimation(.spring()) {
                             showDetailMenu = true
                         }
                     }
-                    .font(.footnote)
-                    .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                 }
             }
             
@@ -427,6 +437,13 @@ struct RestaurantDetailView: View {
         .onChange(of: showDetailInformation) { newValue in
             updateSubMenus(detailSubMenuDisable: detailSubMenuDisable)
         }
+    }
+    
+    @ViewBuilder
+    func moreButton(action: @escaping () -> Void) -> some View {
+        Button("더보기", action: action)
+            .font(.footnote)
+            .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
     }
     
     @ViewBuilder
@@ -484,56 +501,6 @@ struct RestaurantDetailView: View {
         .font(.footnote)
         .fontWeight(.semibold)
         .foregroundColor(Color("main-text-color"))
-    }
-    
-    @ViewBuilder
-    func detailHours() -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("영업시간")
-                .font(.headline)
-                .fontWeight(.bold)
-                .foregroundColor(Color("main-point-color"))
-            
-            HStack {
-                Group {
-                    hour(week: "월", startTime: "11:50", endTime: "22:00")
-                    
-                    Spacer()
-                }
-                
-                Group {
-                    hour(week: "화", startTime: "11:50", endTime: "22:00")
-                    
-                    Spacer()
-                }
-                
-                Group {
-                    hour(week: "수", startTime: "11:50", endTime: "22:00")
-                    
-                    Spacer()
-                }
-                
-                Group {
-                    hour(week: "목", startTime: "11:50", endTime: "22:00")
-                    
-                    Spacer()
-                }
-                
-                Group {
-                    hour(week: "금", startTime: "11:50", endTime: "22:00")
-                    
-                    Spacer()
-                }
-                
-                Group {
-                    hour(week: "토", startTime: "11:50", endTime: "22:00")
-                    
-                    Spacer()
-                }
-                
-                hour(week: "일")
-            }
-        }
     }
     
     @ViewBuilder
@@ -955,8 +922,13 @@ struct RestaurantDetailView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
+        print(userViewModel.readToken)
+        print(restaurantId)
+        print(userViewModel.readUserEmail)
+        
         APIFunction.fetchShopDetail(token: userViewModel.readToken, shopId: restaurantId, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { shopDetailResponse in
             restaurant = shopDetailResponse
+            
             isClipped = restaurant.shopClipping == .isClipped
             
             withAnimation(.easeInOut) {

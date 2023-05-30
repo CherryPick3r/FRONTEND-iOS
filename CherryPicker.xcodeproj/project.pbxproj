@@ -48,6 +48,7 @@
 		C5C2D4672A1F89F600266DD8 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C2D4662A1F89F600266DD8 /* ErrorView.swift */; };
 		C5C867BB2A1DE46C00BC486E /* APIURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C867BA2A1DE46C00BC486E /* APIURL.swift */; };
 		C5DF79782A0363780061DAD0 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DF79772A0363780061DAD0 /* AppView.swift */; };
+		C5E78EAC2A25E94000FC425F /* AppleLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E78EAB2A25E94000FC425F /* AppleLoginManager.swift */; };
 		C5F792622A17059C0081F63A /* RollingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F792612A17059C0081F63A /* RollingTextView.swift */; };
 		C5FFC65E2A076E9100933C9D /* UserAnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFC65D2A076E9100933C9D /* UserAnalyzeView.swift */; };
 		C5FFC6622A07B53100933C9D /* RadarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFC6612A07B53100933C9D /* RadarChartView.swift */; };
@@ -98,6 +99,7 @@
 		C5C2D4662A1F89F600266DD8 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		C5C867BA2A1DE46C00BC486E /* APIURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIURL.swift; sourceTree = "<group>"; };
 		C5DF79772A0363780061DAD0 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
+		C5E78EAB2A25E94000FC425F /* AppleLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleLoginManager.swift; sourceTree = "<group>"; };
 		C5F792612A17059C0081F63A /* RollingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingTextView.swift; sourceTree = "<group>"; };
 		C5FFC65D2A076E9100933C9D /* UserAnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAnalyzeView.swift; sourceTree = "<group>"; };
 		C5FFC6612A07B53100933C9D /* RadarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarChartView.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 		C59D211929C9D83A00275DBA /* CherryPicker */ = {
 			isa = PBXGroup;
 			children = (
+				C5E78EAA2A25E92F00FC425F /* Delegate */,
 				C514AC4A2A253FF300148661 /* CherryPicker.entitlements */,
 				C58C0DE42A1DEB5E00167C8E /* Model */,
 				C5C867B92A1DE45A00BC486E /* API */,
@@ -237,6 +240,14 @@
 				C58C0DEB2A1DEC6E00167C8E /* APIError.swift */,
 			);
 			path = API;
+			sourceTree = "<group>";
+		};
+		C5E78EAA2A25E92F00FC425F /* Delegate */ = {
+			isa = PBXGroup;
+			children = (
+				C5E78EAB2A25E94000FC425F /* AppleLoginManager.swift */,
+			);
+			path = Delegate;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -334,6 +345,7 @@
 				C5DF79782A0363780061DAD0 /* AppView.swift in Sources */,
 				C58F418429FDD7F900A98B2F /* StartView.swift in Sources */,
 				C57C261F2A1F51F800E73FCB /* ShopClipping.swift in Sources */,
+				C5E78EAC2A25E94000FC425F /* AppleLoginManager.swift in Sources */,
 				C58C0DFE2A1E3F2100167C8E /* ShopCardResponse.swift in Sources */,
 				C58C0E002A1E3F6300167C8E /* ShopDetailResponse.swift in Sources */,
 				C5C2D4672A1F89F600266DD8 /* ErrorView.swift in Sources */,

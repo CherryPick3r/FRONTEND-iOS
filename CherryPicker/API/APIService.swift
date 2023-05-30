@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-enum LoginPlatform {
+enum LoginPlatform: Int {
     case apple
     case kakao
     case google
