@@ -10,11 +10,9 @@ import WebKit
 
 struct WebView: UIViewRepresentable {
     @EnvironmentObject var userViewModel: UserViewModel
-    @EnvironmentObject var wKWebViewModel: WKWebViewModel
     
     let url: URL
     let onReceivedResponse: (HTTPURLResponse, inout Bool) throws -> Void
-    weak var webView: WKWebViewModel?
     
     @Binding var showError: Bool
     @Binding var error: APIError?
@@ -23,7 +21,6 @@ struct WebView: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
         webView.navigationDelegate = context.coordinator
-//        webView.navigationDelegate = wKWebViewModel
         return webView
     }
     
@@ -75,8 +72,6 @@ struct WebView: UIViewRepresentable {
 }
 
 struct LoginWebView: View {
-    @StateObject private var wKWebViewModel: WKWebViewModel = WKWebViewModel()
-    
     @EnvironmentObject var userViewModel: UserViewModel
     
     let url: String
@@ -87,83 +82,32 @@ struct LoginWebView: View {
     @Binding var showLoginWebView: Bool
     
     var body: some View {
-        VStack {
-            if wKWebViewModel.publishedIsLoading {
-                ProgressView(value: wKWebViewModel.publishedProgress)
+        NavigationStack {
+            VStack {
+                if let url = URL(string: url) {
+                    WebView(url: url, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
+                        .environmentObject(userViewModel)
+                } else {
+                    Spacer()
+                    
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .controlSize(.large)
+                    
+                    Spacer()
+                }
             }
-            
-            if let url = URL(string: url) {
-                WebView(url: url, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
-                    .environmentObject(userViewModel)
-                    .environmentObject(wKWebViewModel)
-            } else {
-                Spacer()
-                
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .controlSize(.large)
-                    .onAppear() {
-                        userViewModel.platform = .notLogined
-                    }
-                
-                Spacer()
-            }
-            
-            HStack {
-                Spacer()
-                
-                backButton()
-                
-                Spacer()
-                
-                forwardButton()
-                
-                Spacer()
-                
-                reloadButton()
-                
-                Spacer()
-            }
-            .padding()
+            .modifier(BackgroundModifier())
         }
         .tint(Color("main-point-color"))
-        .modifier(BackgroundModifier())
-    }
-    
-    @ViewBuilder
-    func backButton() -> some View {
-        Button{
-            if wKWebViewModel.publishedCanGoBack {
-                self.wKWebViewModel.goBack()
-            }
-        } label: {
-            Image(systemName: "chevron.backward")
-                .font(.title3)
-        }
-        .disabled(!wKWebViewModel.publishedCanGoBack)
-    }
-    
-    @ViewBuilder
-    func forwardButton() -> some View {
-        Button {
-            if wKWebViewModel.publishedCanForward {
-                self.wKWebViewModel.goForward()
-            }
-        } label: {
-            Image(systemName: "chevron.forward")
-                .font(.title3)
-        }
-        .disabled(!wKWebViewModel.publishedCanForward)
-    }
-    
-    @ViewBuilder
-    func reloadButton() -> some View {
-        Button {
-            self.wKWebViewModel.reload()
-        } label: {
-            Image(systemName: "arrow.clockwise")
-                .font(.title3)
-        }
     }
 }
 
+struct LoginWebView_Previews: PreviewProvider {
+    static var previews: some View {
+        LoginWebView(url: "https://www.apple.com", onReceivedResponse: { _, _ in
+            
+        }, showError: .constant(false), error: .constant(nil), showLoginWebView: .constant(true))
+            .environmentObject(UserViewModel())
+    }
+}

@@ -85,9 +85,6 @@ struct RestaurantListView: View {
                 RestaurantDetailView(isResultView: false, restaurantId: shopId)
             }
         }
-        .task {
-            fetchList()
-        }
         .onChange(of: restaurantId) { newValue in
             showRestaurantDetailView = restaurantId != nil
         }
@@ -95,6 +92,12 @@ struct RestaurantListView: View {
             if !newValue {
                 restaurantId = nil
             }
+        }
+        .onChange(of: selectedSortType) { newValue in
+            fetchList()
+        }
+        .task {
+            fetchList()
         }
     }
     
@@ -229,6 +232,7 @@ struct RestaurantListView: View {
                 } placeholder: {
                     ZStack {
                         Color("main-point-color-weak")
+                            .opacity(0.5)
                         
                         ProgressView()
                             .progressViewStyle(.circular)
@@ -350,11 +354,15 @@ struct RestaurantListView: View {
     }
     
     func closeSearching() {
-        searchFocus = false
-        
-        withAnimation(.spring()) {
-            isSearching = false
-            searchText = ""
+        if isSearching {
+            searchFocus = false
+            
+            withAnimation(.spring()) {
+                isSearching = false
+                searchText = ""
+            }
+            
+            fetchList()
         }
     }
     
@@ -370,9 +378,23 @@ struct RestaurantListView: View {
         }
         
         APIFunction.fetchShopSimples(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameCategory: seletedFilterTypes?.rawValue ?? 0, isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
-            shopSimpleList = simpleShopResponse
-            
             withAnimation(.easeInOut) {
+                switch selectedSortType {
+                case .newest:
+                    shopSimpleList = simpleShopResponse
+                    break
+                case .oldest:
+                    shopSimpleList = simpleShopResponse
+                    shopSimpleList.shopSimples.reverse()
+                    break
+                case .ascendingName:
+                    shopSimpleList = simpleShopResponse
+                    shopSimpleList.shopSimples.sort { lhs, rhs in
+                        return lhs.shopName < rhs.shopName
+                    }
+                    break
+                }
+                
                 isLoading = false
             }
         } errorHandling: { apiError in

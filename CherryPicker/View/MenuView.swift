@@ -48,7 +48,7 @@ struct MenuView: View {
         .tint(Color("main-point-color"))
         .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
         .fullScreenCover(isPresented: $showWithdrawalView) {
-            WithdrawalView()
+            WithdrawalView(path: $path)
         }
         .task {
             fetchUserNickname()
@@ -65,6 +65,44 @@ struct MenuView: View {
             }
         } message: {
             Text("로그아웃 하시겠아요?")
+        }
+        .sheet(isPresented: $isUserNameEditing) {
+            VStack {
+                HStack {
+                    Text("변경할 닉네임을 입력해주세요!")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-text-color"))
+                    
+                    Spacer()
+                }
+                .padding([.horizontal, .top])
+                .padding(.top)
+                
+                TextField("닉네임", text: $userName, prompt: Text("닉네임"))
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .focused($isUserNameFocused)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("main-point-color"))
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color("background-shape-color"))
+                            .shadow(color: .black.opacity(0.1), radius: 2)
+                    }
+                    .onSubmit {
+                        isUserNameFocused = false
+                        isUserNameEditing = false
+
+                        changeUserNickname()
+                    }
+                    .padding()
+                
+                Spacer()
+            }
+            .presentationDetents([.medium])
         }
     }
     
@@ -106,21 +144,10 @@ struct MenuView: View {
                         .progressViewStyle(.circular)
                         .controlSize(.mini)
                 } else {
-                    TextField("닉네임", text: $userName)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .focused($isUserNameFocused)
-                        .disabled(!isUserNameEditing)
+                    Text(userName)
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(Color("main-point-color"))
-                        .fixedSize(horizontal: true, vertical: false)
-                        .onSubmit {
-                            isUserNameFocused = false
-                            isUserNameEditing = false
-
-                            changeUserNickname()
-                        }
                 }
                 
                 Text("님")
@@ -129,10 +156,6 @@ struct MenuView: View {
                 
                 Button {
                     isUserNameEditing = true
-                    isUserNameFocused = true
-                    
-                    print(isUserNameEditing)
-                    print(isUserNameFocused)
                 } label: {
                     Label("수정", systemImage: "pencil.line")
                         .labelStyle(.iconOnly)

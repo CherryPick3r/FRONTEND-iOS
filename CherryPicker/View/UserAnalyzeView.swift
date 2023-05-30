@@ -169,7 +169,7 @@ struct UserAnalyzeView: View {
             .padding(.leading, 5)
             
             VStack(alignment: .leading) {
-                Text("체리체리1q2w3e님의 즐겨찾기 목록 분석 결과, ")
+                Text("\(userAnalyze.userNickname)님의 즐겨찾기 목록 분석 결과, ")
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-text-color"))
                 + Text("맛집탐방러")

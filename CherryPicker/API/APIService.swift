@@ -9,29 +9,15 @@ import Foundation
 import Combine
 
 enum LoginPlatform: Int {
-    case apple
     case kakao
     case google
     
     var loginURL: APIURL {
         switch self {
-        case .apple:
-            return APIURL.appleLogin
         case .kakao:
             return APIURL.kakoLogin
         case .google:
             return APIURL.googleLogin
-        }
-    }
-    
-    var callBackURL: APIURL {
-        switch self {
-        case .apple:
-            return APIURL.appleLoginCallback
-        case .kakao:
-            return APIURL.kakoLoginCallback
-        case .google:
-            return APIURL.googleLogincCallback
         }
     }
 }
@@ -72,21 +58,8 @@ enum APIService {
         return data
     }
     
-    static func fetchLoginResponse(platform: LoginPlatform) -> AnyPublisher<LoginResponse, APIError> {
-        let request = request(apiURL: platform.loginURL)
-        
-        return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
-            try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
-        }
-        .decode(type: LoginResponse.self, decoder: JSONDecoder())
-        .mapError { error in
-            APIError.convert(error: error)
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    static func fetchLoginCallback(platform: LoginPlatform) -> AnyPublisher<String, APIError> {
-        let request = request(apiURL: platform.callBackURL)
+    static func doAppleLogin(userEmail: String, nickname: String) -> AnyPublisher<(String, String), APIError> {
+        let request = request(apiURL: APIURL.appleLogin(userEmail: userEmail, nickname: nickname))
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             guard let httpResponse = response as? HTTPURLResponse else {
@@ -106,8 +79,25 @@ enum APIService {
                 throw APIError.invalidResponse
             }
             
-            return token
+            guard let email = httpResponse.value(forHTTPHeaderField: "UserEmail") else {
+                throw APIError.invalidResponse
+            }
+            
+            return (token, email)
         }
+        .mapError { error in
+            APIError.convert(error: error)
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    static func fetchLoginResponse(platform: LoginPlatform) -> AnyPublisher<LoginResponse, APIError> {
+        let request = request(apiURL: platform.loginURL)
+        
+        return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
+            try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
+        }
+        .decode(type: LoginResponse.self, decoder: JSONDecoder())
         .mapError { error in
             APIError.convert(error: error)
         }
@@ -243,13 +233,13 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
-    static func deleteUser(token: String, userEmail: String) -> AnyPublisher<LoginResponse, APIError> {
-        let request = request(apiURL: .userUnregister(userEmail: userEmail), httpMethod: "DELETE", bearerToken: token)
+    static func deleteUser(token: String, accessToken: String, userEmail: String) -> AnyPublisher<Data, APIError> {
+        var request = request(apiURL: .userUnregister(userEmail: userEmail), httpMethod: "DELETE", bearerToken: token)
+        request.setValue(accessToken, forHTTPHeaderField: "AccessToken")
         
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
         }
-        .decode(type: LoginResponse.self, decoder: JSONDecoder())
         .mapError { error in
             APIError.convert(error: error)
         }

@@ -28,8 +28,15 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
     @AppStorage("로그인플랫폼") var platform: LoginedPlatform = .notLogined
     
     @Published private var token = ""
+    @Published private var accessToken = ""
     @Published var isAuthenticated = false
+    @Published var isUserConfirmed = false
+    @Published var error: APIError?
+    @Published var showError = false
+    @Published var retryAction: (() -> Void)?
     
+    
+    private var subscriptions = Set<AnyCancellable>()
     private let tokenAccessKey = UIDevice.current.identifierForVendor!.uuidString
     
     var readUserEmail: String {
@@ -44,10 +51,16 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         }
     }
     
+    var readAccessToken: String {
+        get {
+            return accessToken
+        }
+    }
+    
     override init() {
         super.init()
         
-        if let token = self.loadTokenFromKeychain() {
+        if let token = self.loadTokenFromKeychain(key: UIDevice.current.identifierForVendor!.uuidString) {
             self.token = token
             self.isAuthenticated = true
         } else {
@@ -68,23 +81,30 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         }
         
         guard let token = response.value(forHTTPHeaderField: "Authorization") else {
-            print("Authorization fail")
+            return
+        }
+        
+        guard let accessToken = response.value(forHTTPHeaderField: "AccessToken") else {
             return
         }
         
         guard let email = response.value(forHTTPHeaderField: "UserEmail") else {
-            print("UserEmail fail")
+            
             return
         }
         
-        print(response.url)
+        withAnimation(.easeInOut) {
+            isUserConfirmed = true
+        }
         
         self.token = token
         isAuthenticated = true
         
-        saveTokenToKeychain(token: token)
+        saveTokenToKeychain(key: self.tokenAccessKey, token: token)
+        
         
         self.userEmail = email
+        self.accessToken = accessToken
         
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         
@@ -96,16 +116,17 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         userEmail = ""
         token = ""
         isAuthenticated = false
+        platform = .notLogined
     }
     
-    private func saveTokenToKeychain(token: String) {
+    private func saveTokenToKeychain(key: String, token: String) {
         guard let data = token.data(using: String.Encoding.utf8) else {
             return
         }
         
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: tokenAccessKey,
+            kSecAttrAccount as String: key,
             kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         ]
@@ -115,7 +136,7 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         
         guard status == errSecSuccess else {
             self.deleteTokenFromKeychain()
-            self.saveTokenToKeychain(token: token)
+            self.saveTokenToKeychain(key: self.tokenAccessKey, token: token)
             
             return
         }
@@ -130,10 +151,10 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         SecItemDelete(query as CFDictionary)
     }
     
-    private func loadTokenFromKeychain() -> String? {
+    private func loadTokenFromKeychain(key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: tokenAccessKey,
+            kSecAttrAccount as String: key,
             kSecReturnData as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
@@ -160,18 +181,53 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
             return
         }
         
-        guard let familyName = credential.fullName?.familyName, let givenName = credential.fullName?.givenName, let userEmail = credential.email else {
-            return
+        if let familyName = credential.fullName?.familyName, let givenName = credential.fullName?.givenName, let userEmail = credential.email {
+            appleLogin(userEmail: userEmail, userName: familyName + givenName)
+            saveAppleCredentialInfo(userIdentifier: credential.user, userEmail: userEmail, userName: familyName + givenName)
+        } else {
+            guard let userEmail = loadTokenFromKeychain(key: credential.user) else {
+                return
+            }
+            
+            guard let userName = loadTokenFromKeychain(key: userEmail) else {
+                return
+            }
+            
+            appleLogin(userEmail: userEmail, userName: userName)
         }
-        
-        appleLogin(userEmail: userEmail, userName: familyName + givenName)
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        
+        withAnimation(.spring()) {
+            APIError.showError(showError: &self.showError, error: &self.error, catchError: APIError.convert(error: error))
+        }
     }
     
     private func appleLogin(userEmail: String, userName: String) {
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
         
+        APIFunction.doAppleLogin(userEmail: userEmail, nickname: userName, subscriptions: &subscriptions) { token, email in
+            DispatchQueue.main.async {
+                self.token = token
+                self.isAuthenticated = true
+                
+                self.saveTokenToKeychain(key: self.tokenAccessKey, token: token)
+                
+                self.userEmail = email
+                
+                self.platform = .apple
+            }
+        } errorHandling: { apiError in
+            withAnimation(.spring()) {
+                APIError.showError(showError: &self.showError, error: &self.error, catchError: apiError)
+            }
+        }
+    }
+    
+    private func saveAppleCredentialInfo(userIdentifier: String, userEmail: String, userName: String) {
+        saveTokenToKeychain(key: userIdentifier, token: userEmail)
+        saveTokenToKeychain(key: userEmail, token: userName)
     }
 }

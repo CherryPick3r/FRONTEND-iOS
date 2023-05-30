@@ -145,8 +145,6 @@ struct RestaurantDetailView: View {
             .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
             .task {
                 fetchRestaurant()
-                
-                print(restaurantId)
             }
             .onAppear() {
                 withAnimation(.spring()) {
@@ -978,10 +976,6 @@ struct RestaurantDetailView: View {
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }
-        
-        print(userViewModel.readToken)
-        print(restaurantId)
-        print(userViewModel.readUserEmail)
         
         APIFunction.fetchShopDetail(token: userViewModel.readToken, shopId: restaurantId, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { shopDetailResponse in
             restaurant = shopDetailResponse

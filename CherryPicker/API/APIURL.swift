@@ -8,12 +8,9 @@
 import Foundation
 
 enum APIURL {
-    case appleLogin
+    case appleLogin(userEmail: String, nickname: String)
     case kakoLogin
     case googleLogin
-    case appleLoginCallback
-    case kakoLoginCallback
-    case googleLogincCallback
     case checkPreferenceGame(userEmail: String)
     case preferenceCherryPickStartGame(userEmail: String)
     case preferenceCherryPickSwipeLeft(userEmail: String, preferenceGameId: Int)
@@ -35,23 +32,15 @@ enum APIURL {
         var serverURL = URLComponents(string: "https://cherrypick3r.shop")!
         
         switch self {
-        case .appleLogin:
+        case .appleLogin(let userEmail, let nickname):
             serverURL.path = "/api/v1/auth/apple/login"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "nickname", value: nickname)]
             break
         case .kakoLogin:
             serverURL.path = "/api/v1/auth/kakao/login"
             break
         case .googleLogin:
             serverURL.path = "/api/v1/auth/google/login"
-            break
-        case .appleLoginCallback:
-            serverURL.path = "/api/v1/auth/apple/callback"
-            break
-        case .kakoLoginCallback:
-            serverURL.path = "/api/v1/auth/kakao/callback"
-            break
-        case .googleLogincCallback:
-            serverURL.path = "/api/v1/auth/google/callback"
             break
         case .checkPreferenceGame(let userEmail):
             serverURL.path = "/api/v1/preference/check-preference-game"
