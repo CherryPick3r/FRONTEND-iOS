@@ -206,15 +206,17 @@ struct RestaurantListView: View {
                         .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                     
                     HStack(spacing: 15) {
-                        Label("17:30 ~ 24:00", systemImage: "clock")
+                        Label("오늘 : \(shop.todayHour ?? "정보가 없어요.")", systemImage: "clock")
                             .font(.footnote)
                             .fontWeight(.semibold)
                             .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                         
-                        Text("휴무 : 없음")
-                            .font(.footnote)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color("main-point-color-strong"))
+                        if let regularHoliday = shop.regularHoliday {
+                            Text(regularHoliday)
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color("main-point-color-strong"))
+                        }
                     }
                 }
                 
@@ -304,6 +306,12 @@ struct RestaurantListView: View {
                 .onSubmit {
                     withAnimation(.spring()) {
                         searchFocus = false
+                    }
+                    
+                    withAnimation(.easeInOut) {
+                        shopSimpleList.shopSimples = shopSimpleList.shopSimples.filter({ shop in
+                            return shop.shopName.contains(searchText)
+                        })
                     }
                 }
                 .overlay(alignment: .trailing) {
