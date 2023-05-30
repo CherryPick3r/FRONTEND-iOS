@@ -13,18 +13,10 @@ enum ListMode: String {
     case bookmark = "즐겨찾기"
 }
 
-enum FilterType: String {
-    case open = "영업중"
-    case restaurant = "음식점"
-    case cafe = "카페/디저트"
-    case bar = "술집"
-}
-
 enum ListSortType: String {
     case newest = "최신순"
     case oldest = "오래된순"
     case ascendingName = "이름순"
-    case byDistance = "거리순"
 }
 
 struct RestaurantListView: View {
@@ -36,7 +28,7 @@ struct RestaurantListView: View {
     
     @State var listMode: ListMode
     @State private var subscriptions = Set<AnyCancellable>()
-    @State private var seletedFilterTypes = Set<FilterType>()
+    @State private var seletedFilterTypes: GameCategory?
     @State private var selectedSortType = ListSortType.newest
     @State private var searchText = ""
     @State private var isSearching = false
@@ -107,19 +99,17 @@ struct RestaurantListView: View {
     }
     
     @ViewBuilder
-    func filterButton(filterType: FilterType) -> some View {
-        let isSelected = seletedFilterTypes.contains(filterType)
+    func filterButton(filterType: GameCategory) -> some View {
+        let isSelected = filterType == seletedFilterTypes
         
         Button {
             withAnimation(.easeInOut) {
-                if isSelected {
-                    seletedFilterTypes.remove(filterType)
-                } else {
-                    seletedFilterTypes.insert(filterType)
-                }
+                seletedFilterTypes = isSelected ? nil : filterType
             }
+            
+            fetchList()
         } label: {
-            Text(filterType.rawValue)
+            Text(filterType.name)
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(isSelected ? Color("background-shape-color") : Color("main-point-color"))
@@ -148,13 +138,9 @@ struct RestaurantListView: View {
     @ViewBuilder
     func filterButtonsBar() -> some View {
         HStack(spacing: 20) {
-            filterButton(filterType: .open)
-            
-            filterButton(filterType: .restaurant)
-            
-            filterButton(filterType: .cafe)
-            
-            filterButton(filterType: .bar)
+            ForEach(GameCategory.allCases, id: \.rawValue) { category in
+                filterButton(filterType: category)
+            }
             
             Spacer()
         }
@@ -173,8 +159,6 @@ struct RestaurantListView: View {
                     listSortElement(listSortType: .oldest)
                     
                     listSortElement(listSortType: .ascendingName)
-                    
-                    listSortElement(listSortType: .byDistance)
                 }
             } label: {
                 HStack(spacing: 5) {
@@ -201,8 +185,6 @@ struct RestaurantListView: View {
     func subRestaurant(shop: ShopSimple) -> some View {
         Button {
             restaurantId = shop.id
-            
-//            showRestaurantDetailView = true
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 15) {
@@ -379,7 +361,7 @@ struct RestaurantListView: View {
             APIError.closeError(showError: &showError, error: &error)
         }
         
-        APIFunction.fetchShopSimples(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameCategory: 0 , isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
+        APIFunction.fetchShopSimples(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameCategory: seletedFilterTypes?.rawValue ?? 0, isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
             shopSimpleList = simpleShopResponse
             
             withAnimation(.easeInOut) {
@@ -391,7 +373,6 @@ struct RestaurantListView: View {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
         }
-
     }
 }
 

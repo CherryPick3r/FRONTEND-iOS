@@ -10,6 +10,7 @@ import WebKit
 
 struct WebView: UIViewRepresentable {
     @EnvironmentObject var userViewModel: UserViewModel
+    @EnvironmentObject var wKWebViewModel: WKWebViewModel
     
     let url: URL
     let onReceivedResponse: (HTTPURLResponse, inout Bool) throws -> Void
@@ -22,6 +23,7 @@ struct WebView: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
         webView.navigationDelegate = context.coordinator
+//        webView.navigationDelegate = wKWebViewModel
         return webView
     }
     
@@ -93,12 +95,16 @@ struct LoginWebView: View {
             if let url = URL(string: url) {
                 WebView(url: url, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
                     .environmentObject(userViewModel)
+                    .environmentObject(wKWebViewModel)
             } else {
                 Spacer()
                 
                 ProgressView()
                     .progressViewStyle(.circular)
                     .controlSize(.large)
+                    .onAppear() {
+                        userViewModel.platform = .notLogined
+                    }
                 
                 Spacer()
             }

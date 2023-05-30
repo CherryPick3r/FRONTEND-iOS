@@ -53,7 +53,6 @@ struct StartView: View {
                     categoryContents(height: height)
                         .frame(width: width, height: height)
                 }
-                .modifier(BackgroundModifier())
                 .offset(y: contentOffsetY)
                 .gesture(
                     DragGesture()
@@ -80,6 +79,7 @@ struct StartView: View {
                         })
                 )
                 .modifier(BackgroundModifier())
+                .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -95,7 +95,9 @@ struct StartView: View {
                     gameCategory = nil
                 }
                 .task {
-                    checkPreferenceGame()
+                    if userViewModel.isAuthenticated {
+                        checkPreferenceGame()
+                    }
                 }
                 .sheet(isPresented: $showSignInView) {
                     signIn()
@@ -105,7 +107,6 @@ struct StartView: View {
                     LoginWebView(url: loginURL, onReceivedResponse: userViewModel.loginCallbackHandler(response:showLoginWebView:), showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
                         .environmentObject(userViewModel)
                 }
-                .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
                 .onChange(of: loginURL) { newValue in
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         showLoginWebView = loginURL != "" ? true : false
@@ -358,11 +359,7 @@ struct StartView: View {
             .padding(.top)
             
             Button {
-                let request = ASAuthorizationAppleIDProvider().createRequest()
-                request.requestedScopes = [.fullName, .email]
-
-                let controller = ASAuthorizationController(authorizationRequests: [request])
-                controller.performRequests()
+                appleLogin()
             } label: {
                 VStack {
                     Spacer()
@@ -512,6 +509,15 @@ struct StartView: View {
         }
     }
     
+    func appleLogin() {
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = userViewModel
+        controller.performRequests()
+    }
+    
     func kakaoLogin() {
         withAnimation(.easeInOut) {
             isLoading = true
@@ -530,6 +536,8 @@ struct StartView: View {
                 isLoading = false
             }
         } errorHandling: { apiError in
+            retryAction = kakaoLogin
+            
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
@@ -548,13 +556,14 @@ struct StartView: View {
         showSignInView = false
         
         APIFunction.fetchLoginResponse(platform: .google, subscriptions: &subscriptions) { loginResponse in
-            
             loginURL = loginResponse.loginURL
             
             withAnimation(.easeInOut) {
                 isLoading = false
             }
         } errorHandling: { apiError in
+            retryAction = kakaoLogin
+            
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
@@ -579,7 +588,6 @@ struct StartView: View {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
         }
-
     }
 }
 

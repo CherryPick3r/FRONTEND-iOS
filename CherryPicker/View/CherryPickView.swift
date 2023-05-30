@@ -554,10 +554,10 @@ struct CherryPickView: View {
             retryAction = nil
         }
         
-        APIFunction.doUserPreferenceStart(token: userViewModel.readToken, userEmail: userViewModel.readToken, subscriptions: &subscriptions) { game in
+        APIFunction.doUserPreferenceStart(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { game in
             preferenceGameResponse = game
             
-            showShopCard()
+            showPreferencCard()
         } errorHandling: { apiError in
             retryAction = fetchPreferenceGame
             

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import AuthenticationServices
 
 enum UserColorScheme: String {
     case system = "시스템 기본값"
@@ -14,9 +15,17 @@ enum UserColorScheme: String {
     case dark = "다크 모드"
 }
 
-class UserViewModel: ObservableObject {
+enum LoginedPlatform: Int {
+    case apple
+    case kakao
+    case google
+    case notLogined
+}
+
+class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelegate {
     @AppStorage("화면스타일") var userColorScheme: UserColorScheme = .system
-    @AppStorage("이메일") private var userEmail = "kakao_test@naver.com"
+    @AppStorage("이메일") private var userEmail = ""
+    @AppStorage("로그인플랫폼") var platform: LoginedPlatform = .notLogined
     
     @Published private var token = ""
     @Published var isAuthenticated = false
@@ -35,7 +44,9 @@ class UserViewModel: ObservableObject {
         }
     }
     
-    init() {
+    override init() {
+        super.init()
+        
         if let token = self.loadTokenFromKeychain() {
             self.token = token
             self.isAuthenticated = true
@@ -57,12 +68,16 @@ class UserViewModel: ObservableObject {
         }
         
         guard let token = response.value(forHTTPHeaderField: "Authorization") else {
+            print("Authorization fail")
             return
         }
         
         guard let email = response.value(forHTTPHeaderField: "UserEmail") else {
+            print("UserEmail fail")
             return
         }
+        
+        print(response.url)
         
         self.token = token
         isAuthenticated = true
@@ -138,5 +153,25 @@ class UserViewModel: ObservableObject {
         let result = String(data: retrievedData, encoding: .utf8)
         
         return result
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+            return
+        }
+        
+        guard let familyName = credential.fullName?.familyName, let givenName = credential.fullName?.givenName, let userEmail = credential.email else {
+            return
+        }
+        
+        appleLogin(userEmail: userEmail, userName: familyName + givenName)
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        
+    }
+    
+    private func appleLogin(userEmail: String, userName: String) {
+        
     }
 }
