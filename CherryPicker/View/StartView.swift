@@ -117,6 +117,15 @@ struct StartView: View {
                 .onChange(of: showLoginWebView) { newValue in
                     if !newValue {
                         loginURL = ""
+                        
+                        if !userViewModel.isAuthenticated {
+                            userViewModel.platform = .notLogined
+                        }
+                    }
+                }
+                .onChange(of: userViewModel.isAuthenticated) { newValue in
+                    if userViewModel.isAuthenticated {
+                        checkPreferenceGame()
                     }
                 }
                 .navigationDestination(for: NavigationPath.self) { navigationPath in
@@ -510,6 +519,8 @@ struct StartView: View {
     }
     
     func appleLogin() {
+        showSignInView = false
+        
         let request = ASAuthorizationAppleIDProvider().createRequest()
         request.requestedScopes = [.fullName, .email]
 
@@ -531,6 +542,10 @@ struct StartView: View {
         
         APIFunction.fetchLoginResponse(platform: .kakao, subscriptions: &subscriptions) { loginResponse in
             loginURL = loginResponse.loginURL
+            
+            DispatchQueue.main.async {
+                userViewModel.platform = .kakao
+            }
             
             withAnimation(.easeInOut) {
                 isLoading = false
@@ -558,6 +573,10 @@ struct StartView: View {
         APIFunction.fetchLoginResponse(platform: .google, subscriptions: &subscriptions) { loginResponse in
             loginURL = loginResponse.loginURL
             
+            DispatchQueue.main.async {
+                userViewModel.platform = .google
+            }
+            
             withAnimation(.easeInOut) {
                 isLoading = false
             }
@@ -584,6 +603,8 @@ struct StartView: View {
                 isFirstCherryPick = checkPreferenceGame.isPlayed == 0 ? true : false
             }
         } errorHandling: { apiError in
+            retryAction = checkPreferenceGame
+            
             withAnimation(.spring()) {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }

@@ -48,7 +48,7 @@ struct MenuView: View {
         .tint(Color("main-point-color"))
         .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
         .fullScreenCover(isPresented: $showWithdrawalView) {
-            WithdrawalView()
+            WithdrawalView(path: $path)
         }
         .task {
             fetchUserNickname()

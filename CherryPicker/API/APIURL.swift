@@ -8,7 +8,7 @@
 import Foundation
 
 enum APIURL {
-    case appleLogin
+    case appleLogin(userEmail: String, nickname: String)
     case kakoLogin
     case googleLogin
     case appleLoginCallback
@@ -35,8 +35,9 @@ enum APIURL {
         var serverURL = URLComponents(string: "https://cherrypick3r.shop")!
         
         switch self {
-        case .appleLogin:
+        case .appleLogin(let userEmail, let nickname):
             serverURL.path = "/api/v1/auth/apple/login"
+            serverURL.queryItems = [URLQueryItem(name: "userEmail", value: userEmail), URLQueryItem(name: "nickname", value: nickname)]
             break
         case .kakoLogin:
             serverURL.path = "/api/v1/auth/kakao/login"

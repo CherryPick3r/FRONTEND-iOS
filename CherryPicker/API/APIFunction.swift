@@ -48,8 +48,17 @@ enum APIFunction {
         }
     }
     
+    static func doAppleLogin(userEmail: String, nickname: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (String, String) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.doAppleLogin(userEmail: userEmail, nickname: nickname).subscribe(on: DispatchQueue.main).sink { completion in
+            completionHandler(completion: completion, errorHandling: errorHandling)
+        } receiveValue: { token, email in
+            receiveValue(token, email)
+        }
+        .store(in: &subscriptions)
+    }
+    
     static func fetchLoginResponse(platform: LoginPlatform, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (LoginResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchLoginResponse(platform: platform).subscribe(on: DispatchQueue.main).retry(1).sink { completion in
+        APIService.fetchLoginResponse(platform: platform).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -58,7 +67,7 @@ enum APIFunction {
     }
     
     static func fetchLoginCallback(platform: LoginPlatform, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (String) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchLoginCallback(platform: platform).subscribe(on: DispatchQueue.main).retry(1).sink { completion in
+        APIService.fetchLoginCallback(platform: platform).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)
@@ -156,8 +165,8 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func deleteUser(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (LoginResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.deleteUser(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
+    static func deleteUser(token: String, accessToken: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (Data) -> Void, errorHandling: @escaping (APIError) -> Void) {
+        APIService.deleteUser(token: token, accessToken: accessToken, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)
         } receiveValue: { data in
             receiveValue(data)

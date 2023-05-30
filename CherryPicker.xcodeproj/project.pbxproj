@@ -12,7 +12,6 @@
 		C50989CC2A20678800CC1C23 /* ErrorViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50989CB2A20678800CC1C23 /* ErrorViewModifier.swift */; };
 		C514AC452A24F6FC00148661 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C514AC442A24F6FC00148661 /* Assets.xcassets */; };
 		C514AC472A2512D800148661 /* CheckPreferenceGameResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C514AC462A2512D800148661 /* CheckPreferenceGameResponse.swift */; };
-		C514AC492A251F4200148661 /* WKWebViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C514AC482A251F4200148661 /* WKWebViewModel.swift */; };
 		C5360E112A239EFC0009CC3C /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5360E102A239EFC0009CC3C /* LoginWebView.swift */; };
 		C5550F4E2A09EF3B005F9335 /* RestaurantListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5550F4D2A09EF3B005F9335 /* RestaurantListView.swift */; };
 		C57C261B2A1F484F00E73FCB /* PreviewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C57C261A2A1F484F00E73FCB /* PreviewModel.swift */; };
@@ -60,7 +59,6 @@
 		C50989CB2A20678800CC1C23 /* ErrorViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorViewModifier.swift; sourceTree = "<group>"; };
 		C514AC442A24F6FC00148661 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C514AC462A2512D800148661 /* CheckPreferenceGameResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckPreferenceGameResponse.swift; sourceTree = "<group>"; };
-		C514AC482A251F4200148661 /* WKWebViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKWebViewModel.swift; sourceTree = "<group>"; };
 		C514AC4A2A253FF300148661 /* CherryPicker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CherryPicker.entitlements; sourceTree = "<group>"; };
 		C5360E102A239EFC0009CC3C /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
 		C5550F4D2A09EF3B005F9335 /* RestaurantListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantListView.swift; sourceTree = "<group>"; };
@@ -173,7 +171,6 @@
 			isa = PBXGroup;
 			children = (
 				C58F419729FFB52D00A98B2F /* UserViewModel.swift */,
-				C514AC482A251F4200148661 /* WKWebViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -331,7 +328,6 @@
 				C5FFC65E2A076E9100933C9D /* UserAnalyzeView.swift in Sources */,
 				C58C0DE62A1DEB7200167C8E /* LoginResponse.swift in Sources */,
 				C5F792622A17059C0081F63A /* RollingTextView.swift in Sources */,
-				C514AC492A251F4200148661 /* WKWebViewModel.swift in Sources */,
 				C57C261B2A1F484F00E73FCB /* PreviewModel.swift in Sources */,
 				C58C0E0E2A1F094000167C8E /* UserNicknameResponse.swift in Sources */,
 				C58F419A29FFC17C00A98B2F /* CherryPickView.swift in Sources */,
