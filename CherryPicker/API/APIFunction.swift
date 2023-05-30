@@ -66,15 +66,6 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
-    static func fetchLoginCallback(platform: LoginPlatform, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (String) -> Void, errorHandling: @escaping (APIError) -> Void) {
-        APIService.fetchLoginCallback(platform: platform).subscribe(on: DispatchQueue.main).sink { completion in
-            completionHandler(completion: completion, errorHandling: errorHandling)
-        } receiveValue: { data in
-            receiveValue(data)
-        }
-        .store(in: &subscriptions)
-    }
-    
     static func checkPreferenceGame(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receieveValue: @escaping (CheckPreferenceGameResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
         APIService.checkPreferenceGame(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)

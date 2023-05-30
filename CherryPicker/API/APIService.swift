@@ -20,15 +20,6 @@ enum LoginPlatform: Int {
             return APIURL.googleLogin
         }
     }
-    
-    var callBackURL: APIURL {
-        switch self {
-        case .kakao:
-            return APIURL.kakoLoginCallback
-        case .google:
-            return APIURL.googleLogincCallback
-        }
-    }
 }
 
 enum APIService {
@@ -107,35 +98,6 @@ enum APIService {
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
         }
         .decode(type: LoginResponse.self, decoder: JSONDecoder())
-        .mapError { error in
-            APIError.convert(error: error)
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    static func fetchLoginCallback(platform: LoginPlatform) -> AnyPublisher<String, APIError> {
-        let request = request(apiURL: platform.callBackURL)
-        
-        return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw APIError.invalidResponse
-            }
-            
-            guard httpResponse.statusCode == 200 else {
-                switch httpResponse.statusCode {
-                case 400:
-                    throw APIError.authenticationFailure
-                default:
-                    throw APIError.unknown(statusCode: httpResponse.statusCode)
-                }
-            }
-            
-            guard let token = httpResponse.value(forHTTPHeaderField: "Authorization") else {
-                throw APIError.invalidResponse
-            }
-            
-            return token
-        }
         .mapError { error in
             APIError.convert(error: error)
         }

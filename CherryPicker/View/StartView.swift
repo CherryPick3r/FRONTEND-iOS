@@ -208,8 +208,10 @@ struct StartView: View {
     @ViewBuilder
     func startContents(height: CGFloat) -> some View {
         VStack {
-            Text("🍒")
-                .font(.system(size: 100))
+            Image("cherry-picker-logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 150, height: 150)
                 .padding(.top, 50)
             
             Spacer()

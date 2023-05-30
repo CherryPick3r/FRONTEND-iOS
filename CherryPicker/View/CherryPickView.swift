@@ -19,6 +19,12 @@ enum UserSelection {
     case hate
 }
 
+enum DragDirection {
+    case left
+    case right
+    case none
+}
+
 struct CherryPickView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     
@@ -52,9 +58,9 @@ struct CherryPickView: View {
     @State private var isLoading = true
     @State private var retryAction: (() -> Void)?
     @State private var tutorialIsDone = false
+    @State private var dragDirection = DragDirection.none
     
     var body: some View {
-        NavigationStack {
             GeometryReader { reader in
                 let height = reader.size.height == 551 ?  reader.size.height / 11 * 10 : reader.size.height / 6 * 5
                 let width = reader.size.width
@@ -62,9 +68,27 @@ struct CherryPickView: View {
                 
                 if tutorialIsDone {
                     tutorialDone()
+                        .tint(Color("main-point-color"))
                         .frame(width: width)
                 } else {
                     VStack {
+                        HStack {
+                            Spacer()
+                            
+                            closeButton()
+                        }
+                        .padding(.horizontal)
+                        
+                        HStack {
+                            Image("cherry-picker-title")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 250)
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        
                         Spacer()
                         
                         if !isLoading {
@@ -112,15 +136,25 @@ struct CherryPickView: View {
                     }
                     .modifier(BackgroundModifier())
                     .navigationTitle(cherryPickMode == .cherryPick ? "CherryPicker" : "초기취향 선택")
-                    .toolbar {
-                        ToolbarItem {
-                            closeButton()
-                        }
-                    }
+                    .tint(Color("main-point-color"))
                     .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
                     .onAppear() {
                         if cherryPickMode == .tutorial {
                             shopCardResponse = ShopCardResponse.preview
+                        }
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            withAnimation(.spring(response: 1.1)) {
+                                cardOffsetX = 30
+                                cardDgree = 3
+                            }
+                        }
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            withAnimation(.spring(response: 0.5)) {
+                                cardOffsetX = 0
+                                cardDgree = 0
+                            }
                         }
                     }
                     .task {
@@ -133,8 +167,6 @@ struct CherryPickView: View {
                     }
                 }
             }
-        }
-        .tint(Color("main-point-color"))
     }
     
     @ViewBuilder
@@ -209,7 +241,8 @@ struct CherryPickView: View {
             }
         } label: {
             Label("닫기", systemImage: "xmark.circle.fill")
-                .font(.title2)
+                .labelStyle(.iconOnly)
+                .font(.title)
                 .shadow(color: .black.opacity(0.15), radius: 5)
         }
     }
@@ -266,13 +299,29 @@ struct CherryPickView: View {
     func likeAndHateIndicators() -> some View {
         HStack {
             if showIndicators {
-                likeOrHateIndicator(thumb: "hand.thumbsdown.fill")
+                if dragDirection == .right {
+                    Spacer()
+                }
+                
+                if dragDirection == .right || dragDirection == .none {
+                    likeOrHateIndicator(thumb: "hand.thumbsdown.fill")
+                        .scaleEffect(dragDirection == .right ? 1.5 : 1)
+                }
             }
             
-            Spacer()
+            if dragDirection == .none {
+                Spacer()
+            }
             
             if showIndicators {
-                likeOrHateIndicator(thumb: "hand.thumbsup.fill")
+                if dragDirection == .left || dragDirection == .none {
+                    likeOrHateIndicator(thumb: "hand.thumbsup.fill")
+                        .scaleEffect(dragDirection == .left ? 1.5 : 1)
+                }
+                
+                if dragDirection == .left {
+                    Spacer()
+                }
             }
         }
         .opacity(indicatorsOpacity)
@@ -331,8 +380,8 @@ struct CherryPickView: View {
                     } label: {
                         Label("즐겨찾기", systemImage: isClipped ? "bookmark.fill" : "bookmark")
                             .labelStyle(.iconOnly)
-                            .font(.title)
                             .modifier(ParticleModifier(systemImage: "bookmark.fill", status: isClipped))
+                            .font(.title)
                     }
                 }
                 
@@ -416,7 +465,6 @@ struct CherryPickView: View {
         .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: userSelection == .like ? .trailing : .leading).combined(with: .opacity)))
         .onDisappear() {
             withAnimation(.easeInOut) {
-                indicatorsOpacity = 1.0
                 isLoading = false
                 isClipped = false
             }
@@ -436,9 +484,21 @@ struct CherryPickView: View {
         cardOffsetX = moveX
         cardOffsetY = moveY / 10
         
-        cardDgree = moveX / 50
+        if cardOffsetX < 0 {
+            withAnimation(.spring()) {
+                dragDirection = .right
+            }
+        } else if cardOffsetX > 0 {
+            withAnimation(.spring()) {
+                dragDirection = .left
+            }
+        } else {
+            withAnimation(.spring()) {
+                dragDirection = .none
+            }
+        }
         
-        indicatorsOpacity = moveX > 0 ? (maxOffset - moveX) / maxOffset : (maxOffset + moveX) / maxOffset
+        cardDgree = moveX / 50
     }
     
     func decisionUserSelection(moveX: CGFloat, maxOffset: CGFloat) {
@@ -477,6 +537,7 @@ struct CherryPickView: View {
         withAnimation(.spring()) {
             cardOffsetX = .zero
             cardOffsetY = .zero
+            dragDirection = .none
         }
         
         withAnimation(.easeInOut) {
@@ -486,6 +547,7 @@ struct CherryPickView: View {
     
     func showShopCard() {
         if let shopCard = gameResponse?.recommendShops?.popLast() {
+            dragDirection = .none
             withAnimation(.spring()) {
                 shopCardResponse = shopCard
                 isLoading = false
@@ -495,6 +557,7 @@ struct CherryPickView: View {
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 withAnimation(.easeInOut) {
+                    indicatorsOpacity = 1
                     showIndicators = true
                 }
             }
@@ -507,6 +570,7 @@ struct CherryPickView: View {
     
     func showPreferencCard() {
         if let preferencCard = preferenceGameResponse?.preferenceCards.popLast() {
+            dragDirection = .none
             withAnimation(.spring()) {
                 preferencCardResponse = preferencCard
                 isLoading = false
@@ -516,6 +580,7 @@ struct CherryPickView: View {
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 withAnimation(.easeInOut) {
+                    indicatorsOpacity = 1
                     showIndicators = true
                 }
             }
@@ -574,6 +639,10 @@ struct CherryPickView: View {
     
     func doSwipped() {
         if let game = gameResponse {
+            withAnimation(.easeInOut) {
+                indicatorsOpacity = 0
+            }
+            
             withAnimation(.spring()) {
                 APIError.closeError(showError: &showError, error: &error)
                 retryAction = nil
@@ -614,6 +683,10 @@ struct CherryPickView: View {
     
     func doPreferenceSwipped() {
         if let game = preferenceGameResponse {
+            withAnimation(.easeInOut) {
+                indicatorsOpacity = 0
+            }
+            
             withAnimation(.spring()) {
                 APIError.closeError(showError: &showError, error: &error)
                 retryAction = nil
