@@ -80,6 +80,7 @@ struct StartView: View {
                 )
                 .modifier(BackgroundModifier())
                 .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
+                .modifier(ErrorViewModifier(showError: $userViewModel.showError, error: $userViewModel.error, retryAction: $userViewModel.retryAction))
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -209,7 +210,7 @@ struct StartView: View {
             Image("cherry-picker-logo")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 150, height: 150)
+                .frame(width: height / 7, height: height / 7)
                 .padding(.top, 50)
             
             Spacer()

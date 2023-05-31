@@ -152,7 +152,6 @@ struct RestaurantDetailView: View {
                     showIndicators = true
                 }
             }
-            
         }
     }
     
@@ -440,7 +439,7 @@ struct RestaurantDetailView: View {
         .onAppear() {
             updateSubMenus(detailSubMenuDisable: detailSubMenuDisable)
         }
-        .onChange(of: showDetailInformation) { newValue in
+        .onChange(of: isLoading) { newValue in
             updateSubMenus(detailSubMenuDisable: detailSubMenuDisable)
         }
     }
