@@ -13,14 +13,14 @@ enum TagTitle: String, CaseIterable, Codable {
     case itsHearty = "푸짐해요"
     case valueForMoneyRestaurant = "가성비 맛집"
     case fresh = "신선해요"
-    case bar = "술집"
+    case bar = "좋은 술집"
     case goodToDrinkAlone = "혼술 맛집"
     case goodForGroups = "단체모임"
     case exoticRestaurant = "이색맛집"
     case theConceptIsUnique = "컨셉이 독특해요"
     case courseMealRestaurant = "코스요리 맛집"
     case localFood = "로컬맛집"
-    case perfectForASpecialOccasion = "특별한 날 가기 좋아요"
+    case perfectForASpecialOccasion = "특별한 날"
     case specialMenu = "특별메뉴"
     case beKind = "친절해요"
     case emotionalPhoto = "감성사진"
@@ -34,6 +34,8 @@ enum TagTitle: String, CaseIterable, Codable {
     case deliciousDessert = "맛있는 디저트"
     case deliciousDrink = "맛있는 음료"
     case easyToPark = "주차하기 편해요"
+    case wordOfMouth = "입소문"
+    case goodMusic = "좋은 음악"
     
     var tagColor: [Color] {
         switch self {
@@ -89,6 +91,10 @@ enum TagTitle: String, CaseIterable, Codable {
             return [Color("caffeine-vampire-tag-color"), Color("mini-influencer-tag-color"), Color("food-explorer-tag-color")]
         case .easyToPark:
             return [Color("etc-tag-color")]
+        case .wordOfMouth:
+            return [Color("mini-influencer-tag-color"), Color("food-explorer-tag-color")]
+        case .goodMusic:
+            return [Color("caffeine-vampire-tag-color")]
         }
     }
 }

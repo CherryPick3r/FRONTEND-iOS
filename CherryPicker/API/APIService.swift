@@ -58,6 +58,16 @@ enum APIService {
         return data
     }
     
+    static var dateJSONDecoder: JSONDecoder {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(formatter)
+        
+        return decoder
+    }
+    
     static func doAppleLogin(userEmail: String, nickname: String) -> AnyPublisher<(String, String), APIError> {
         let request = request(apiURL: APIURL.appleLogin(userEmail: userEmail, nickname: nickname))
         
@@ -201,7 +211,7 @@ enum APIService {
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
         }
-        .decode(type: SimpleShopResponse.self, decoder: JSONDecoder())
+        .decode(type: SimpleShopResponse.self, decoder: dateJSONDecoder)
         .mapError { error in
             APIError.convert(error: error)
         }
@@ -214,7 +224,7 @@ enum APIService {
         return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
             try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
         }
-        .decode(type: UserAnalyzeResponse.self, decoder: JSONDecoder())
+        .decode(type: UserAnalyzeResponse.self, decoder: dateJSONDecoder)
         .mapError { error in
             APIError.convert(error: error)
         }

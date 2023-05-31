@@ -238,7 +238,7 @@ struct StartView: View {
                 .padding(.bottom, isCategoryContent ? 140 : 80)
         }
         .overlay(alignment: .bottom) {
-            if !isCategoryContent {
+            if !isFirstCherryPick && !isCategoryContent {
                 categoryIndicator(height: height)
             }
         }
@@ -276,7 +276,7 @@ struct StartView: View {
             }
         }
         .overlay(alignment: .top) {
-            if isCategoryContent {
+            if !isFirstCherryPick && isCategoryContent {
                 categoryIndicator(height: height)
             }
         }
@@ -462,7 +462,6 @@ struct StartView: View {
                 .frame(width: 280, height: 60)
                 .padding(.vertical)
             }
-
             
             Spacer()
         }

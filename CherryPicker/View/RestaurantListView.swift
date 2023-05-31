@@ -381,11 +381,15 @@ struct RestaurantListView: View {
             withAnimation(.easeInOut) {
                 switch selectedSortType {
                 case .newest:
-                    shopSimpleList = simpleShopResponse
+                    shopSimpleList.shopSimples.sort { lhs, rhs in
+                        return lhs.dateTime > rhs.dateTime
+                    }
                     break
                 case .oldest:
                     shopSimpleList = simpleShopResponse
-                    shopSimpleList.shopSimples.reverse()
+                    shopSimpleList.shopSimples.sort { lhs, rhs in
+                        return lhs.dateTime < rhs.dateTime
+                    }
                     break
                 case .ascendingName:
                     shopSimpleList = simpleShopResponse

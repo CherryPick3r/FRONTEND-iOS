@@ -14,6 +14,7 @@ struct ShopSimple: Codable, Identifiable {
     let shopAddress: String
     let operatingHours: String
     let mainPhotoUrl: String
+    let dateTime: Date
     
     var operatingHoursArray: [String]? {
         let hoursArray = operatingHours.split(separator: "\n").map { hour in
@@ -65,9 +66,16 @@ struct ShopSimple: Codable, Identifiable {
         return hours[regularHolidayIndex]
     }
     
+    var shortDateTimeString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yy/MM/dd"
+        
+        return formatter.string(from: dateTime)
+    }
+    
     enum CodingKeys: String, CodingKey {
         case id = "shopId"
-        case shopName, shopCategory, shopAddress, operatingHours, mainPhotoUrl
+        case shopName, shopCategory, shopAddress, operatingHours, mainPhotoUrl, dateTime
     }
 }
 
