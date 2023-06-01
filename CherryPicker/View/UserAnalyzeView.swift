@@ -175,7 +175,7 @@ struct UserAnalyzeView: View {
                     .foregroundColor(Color("main-text-color"))
                 + Text(userAnalyze.userClass.rawValue)
                     .fontWeight(.bold)
-                    .foregroundColor(Color("food-explorer-tag-color"))
+                    .foregroundColor(userAnalyze.userClass.color)
                 + Text(" 유형과 비슷해요!")
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-text-color"))
