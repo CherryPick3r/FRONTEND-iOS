@@ -442,6 +442,9 @@ struct RestaurantDetailView: View {
         .onChange(of: isLoading) { newValue in
             updateSubMenus(detailSubMenuDisable: detailSubMenuDisable)
         }
+        .onChange(of: showDetailInformation) { newValue in
+            updateSubMenus(detailSubMenuDisable: detailSubMenuDisable)
+        }
     }
     
     @ViewBuilder

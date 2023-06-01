@@ -39,7 +39,12 @@ struct RadarChartGrid: Shape {
 
 struct RadarChartPath: Shape {
     let data: [Double]
-    let maximum = 1.0
+    let maximum: Double
+    
+    init(data: [Double], maximum: Double) {
+        self.data = data
+        self.maximum = maximum
+    }
     
     func path(in rect: CGRect) -> Path {
         let dataCount = data.count
@@ -74,20 +79,11 @@ struct RadarChartView: View {
     let dataColor: Color
     let gridLineWidth: CGFloat
     let dataLineWidth: CGFloat
-    let labels: [String]
-    let tagColors: [Color] = [
-        Color("food-explorer-tag-color"),
-        Color("mini-influencer-tag-color"),
-        Color("healthy-food-tag-color"),
-        Color("etc-tag-color"),
-        Color("caffeine-vampire-tag-color"),
-        Color("solo-tag-color"),
-        Color("drunkard-tag-color")
-    ]
+    let labels: [UserClass]
     
     @State private var dataLoad = false
     
-    init(data: [Double], gridColor: Color, dataColor: Color, gridLineWidth: CGFloat, dataLineWidth: CGFloat, labels: [String]) {
+    init(data: [Double], gridColor: Color, dataColor: Color, gridLineWidth: CGFloat, dataLineWidth: CGFloat, labels: [UserClass]) {
         self.data = data
         self.gridColor = gridColor
         self.dataColor = dataColor
@@ -107,14 +103,14 @@ struct RadarChartView: View {
             ZStack {
                 ForEach(0..<7) { index in
                     let point = CGPoint(x: midX + cos(CGFloat(index) * 2 * .pi / CGFloat(7) - .pi / 2) * radius, y: midY + sin(CGFloat(index) * 2 * .pi / CGFloat(7) - .pi / 2) * radius)
-                    let label = labels[index]
-                    let isMax = data.max() ?? 0.0 == data[index]
+                    let label = labels[index].rawValue
+                    let isMax = data.max() ?? 1.0 == data[index]
                     
                     Text(label)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .position(x: point.x, y: point.y)
-                        .foregroundColor(isMax ? tagColors[index] : Color("secondary-text-color-weak"))
+                        .foregroundColor(isMax ? labels[index].color : Color("secondary-text-color-weak"))
                             .shadow(color: .black.opacity(isMax ? 0.25 : 0), radius: 5)
                 }
                 
@@ -122,7 +118,7 @@ struct RadarChartView: View {
                     .stroke(style: StrokeStyle(lineWidth: gridLineWidth, dash: [5]))
                     .foregroundColor(gridColor)
                 
-                RadarChartPath(data: data)
+                RadarChartPath(data: data, maximum: (data.max() ?? 1.0))
                     .fill(dataColor.opacity(0.5))
                     .frame(height: dataLoad ? nil : 0)
                     .onAppear() {
@@ -131,7 +127,7 @@ struct RadarChartView: View {
                         }
                     }
                 
-                RadarChartPath(data: data)
+                RadarChartPath(data: data, maximum: (data.max() ?? 1.0))
                     .stroke(dataColor, lineWidth: dataLineWidth)
                     .frame(height: dataLoad ? nil : 0)
                     .onAppear() {
@@ -147,6 +143,6 @@ struct RadarChartView: View {
 
 struct RadarChartView_Previews: PreviewProvider {
     static var previews: some View {
-        RadarChartView(data: [0.2, 0.5, 0.8, 0.6, 0.4, 0.2, 0.1], gridColor: Color("main-point-color-weak"), dataColor: Color("main-point-color").opacity(0.5), gridLineWidth: 0.5, dataLineWidth: 2, labels: ["맛집탐방러", "미니인플루언서", "건강식", "기타", "카페인 뱀파이어", "혼밥러", "술고래"])
+        RadarChartView(data: [0.2, 0.5, 0.8, 0.6, 0.4, 0.2, 0.1], gridColor: Color("main-point-color-weak"), dataColor: Color("main-point-color").opacity(0.5), gridLineWidth: 0.5, dataLineWidth: 2, labels: UserClass.allCases)
     }
 }

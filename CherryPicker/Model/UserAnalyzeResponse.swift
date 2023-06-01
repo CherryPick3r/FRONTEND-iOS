@@ -10,7 +10,7 @@ import Foundation
 struct UserAnalyzeResponse: Codable {
     let userNickname: String
     let userPercentile: Double
-    let userClass: String
+    let userClass: UserClass
     let userAnalyzeValues: [Double]
     let cherrypickClippingTotalCount: Int
     let cherrypickCount: Int

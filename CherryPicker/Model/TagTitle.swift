@@ -9,7 +9,7 @@ import SwiftUI
 
 enum TagTitle: String, CaseIterable, Codable {
     case foodComesOutFast = "음식이 빨리 나와요"
-    case suitableForEationAlone = "혼밥하기 좋아요"
+    case suitableForEationAlone = "혼밥"
     case itsHearty = "푸짐해요"
     case valueForMoneyRestaurant = "가성비 맛집"
     case fresh = "신선해요"
@@ -36,65 +36,71 @@ enum TagTitle: String, CaseIterable, Codable {
     case easyToPark = "주차하기 편해요"
     case wordOfMouth = "입소문"
     case goodMusic = "좋은 음악"
+    case niceRestaurant = "맛있는 식당"
+    case withFriend = "친구랑 가기 좋아요"
     
     var tagColor: [Color] {
         switch self {
         case .foodComesOutFast:
-            return [Color("solo-tag-color")]
+            return [UserClass.solo.color]
         case .suitableForEationAlone:
-            return [Color("solo-tag-color")]
+            return [UserClass.solo.color]
         case .itsHearty:
-            return [Color("solo-tag-color")]
+            return [UserClass.solo.color]
         case .valueForMoneyRestaurant:
-            return [Color("solo-tag-color")]
+            return [UserClass.solo.color]
         case .fresh:
-            return [Color("healthy-food-tag-color")]
+            return [UserClass.healtyFood.color]
         case .bar:
-            return [Color("drunkard-tag-color")]
+            return [UserClass.drunkard.color]
         case .goodToDrinkAlone:
-            return [Color("drunkard-tag-color")]
+            return [UserClass.drunkard.color]
         case .goodForGroups:
-            return [Color("drunkard-tag-color")]
+            return [UserClass.drunkard.color]
         case .exoticRestaurant:
-            return [Color("food-explorer-tag-color")]
+            return [UserClass.foodExplorer.color]
         case .theConceptIsUnique:
-            return [Color("food-explorer-tag-color")]
+            return [UserClass.foodExplorer.color]
         case .courseMealRestaurant:
-            return [Color("food-explorer-tag-color")]
+            return [UserClass.foodExplorer.color]
         case .localFood:
-            return [Color("food-explorer-tag-color")]
+            return [UserClass.foodExplorer.color]
         case .perfectForASpecialOccasion:
-            return [Color("food-explorer-tag-color")]
+            return [UserClass.foodExplorer.color]
         case .specialMenu:
-            return [Color("food-explorer-tag-color")]
+            return [UserClass.foodExplorer.color]
         case .beKind:
-            return [Color("food-explorer-tag-color")]
+            return [UserClass.foodExplorer.color]
         case .emotionalPhoto:
-            return [Color("mini-influencer-tag-color")]
+            return [UserClass.miniInfluencer.color]
         case .comfortableSpace:
-            return [Color("mini-influencer-tag-color"), Color("caffeine-vampire-tag-color")]
+            return [UserClass.miniInfluencer.color, UserClass.caffeineVampire.color]
         case .calmAtmosphere:
-            return [Color("caffeine-vampire-tag-color")]
+            return [UserClass.caffeineVampire.color]
         case .cozyAtmosphere:
-            return [Color("caffeine-vampire-tag-color")]
+            return [UserClass.caffeineVampire.color]
         case .niceToStayLong:
-            return [Color("caffeine-vampire-tag-color")]
+            return [UserClass.caffeineVampire.color]
         case .cafeGoodPlaceToStudy:
-            return [Color("caffeine-vampire-tag-color")]
+            return [UserClass.caffeineVampire.color]
         case .cafe:
-            return [Color("caffeine-vampire-tag-color")]
+            return [UserClass.caffeineVampire.color]
         case .goodCoffeePlace:
-            return [Color("caffeine-vampire-tag-color")]
+            return [UserClass.caffeineVampire.color]
         case .deliciousDessert:
-            return [Color("caffeine-vampire-tag-color"), Color("mini-influencer-tag-color"), Color("food-explorer-tag-color")]
+            return [UserClass.caffeineVampire.color, UserClass.miniInfluencer.color, UserClass.foodExplorer.color]
         case .deliciousDrink:
-            return [Color("caffeine-vampire-tag-color"), Color("mini-influencer-tag-color"), Color("food-explorer-tag-color")]
+            return [UserClass.caffeineVampire.color, UserClass.miniInfluencer.color, UserClass.foodExplorer.color]
         case .easyToPark:
-            return [Color("etc-tag-color")]
+            return [UserClass.etc.color]
         case .wordOfMouth:
-            return [Color("mini-influencer-tag-color"), Color("food-explorer-tag-color")]
+            return [UserClass.miniInfluencer.color, UserClass.foodExplorer.color]
         case .goodMusic:
-            return [Color("caffeine-vampire-tag-color")]
+            return [UserClass.caffeineVampire.color]
+        case .niceRestaurant:
+            return [UserClass.drunkard.color]
+        case .withFriend:
+            return [UserClass.drunkard.color]
         }
     }
 }

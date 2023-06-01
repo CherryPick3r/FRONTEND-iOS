@@ -85,9 +85,9 @@ struct UserAnalyzeView: View {
                     
                     weeklyStats(userAnalyze: userAnalyze)
                     
-                    if !userAnalyze.userTags.isEmpty {
-                        weeklyTag(userAnalyze: userAnalyze)
-                    }
+//                    if !userAnalyze.userTags.isEmpty {
+//                        weeklyTag(userAnalyze: userAnalyze)
+//                    }
                 }
             }
             
@@ -105,14 +105,8 @@ struct UserAnalyzeView: View {
     
     @ViewBuilder
     func userInitialPreference(userAnalyze: UserAnalyzeResponse) -> some View {
-        let tag1 = TagTitle.allCases.randomElement() ?? .comfortableSpace
-        let tag2 = TagTitle.allCases.randomElement() ?? .comfortableSpace
-        let tag3 = TagTitle.allCases.randomElement() ?? .comfortableSpace
-        let tag4 = TagTitle.allCases.randomElement() ?? .comfortableSpace
-        let tag5 = TagTitle.allCases.randomElement() ?? .comfortableSpace
-        
         VStack(alignment: .leading) {
-            Text("상위 \(userAnalyze.userPercentile)%의 취향이에요!")
+            Text("상위 \(String(format: "%.2f", userAnalyze.userPercentile))%의 취향이에요!")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color("main-point-color"))
@@ -129,24 +123,12 @@ struct UserAnalyzeView: View {
                 }
                 
                 Group {
-                    Text(tag1.rawValue)
-                        .modifier(TagTitleColorModifier(text: tag1.rawValue, font: userPreferenceLoad ? .title2 : nil, colors: tag1.tagColor))
-                    
-                    Text(tag2.rawValue)
-                        .modifier(TagTitleColorModifier(text: tag2.rawValue, font: userPreferenceLoad ? .title3 : nil, colors: tag2.tagColor))
-                        .opacity(0.9)
-                    
-                    Text(tag3.rawValue)
-                        .modifier(TagTitleColorModifier(text: tag3.rawValue, font: userPreferenceLoad ? .subheadline : nil, colors: tag3.tagColor))
-                        .opacity(0.8)
-                    
-                    Text(tag4.rawValue)
-                        .modifier(TagTitleColorModifier(text: tag4.rawValue, font: userPreferenceLoad ? .footnote : nil, colors: tag4.tagColor))
-                        .opacity(0.7)
-                    
-                    Text(tag5.rawValue)
-                        .modifier(TagTitleColorModifier(text: tag5.rawValue, font: userPreferenceLoad ? .caption : nil, colors: tag5.tagColor))
-                        .opacity(0.6)
+                    ForEach(userAnalyze.userTags, id: \.rawValue) { tag in
+                        if let index = userAnalyze.userTags.firstIndex(of: tag), index < 5 {
+                            Text(tag.rawValue)
+                                .modifier(TagTitleColorModifier(userPreferenceLoad: $userPreferenceLoad, text: tag.rawValue, colors: tag.tagColor, index: index))
+                        }
+                    }
                 }
                 .shadow(color: .black.opacity(0.1), radius: 10)
             }
@@ -172,10 +154,10 @@ struct UserAnalyzeView: View {
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color"))
                 
-                Text(" \(userAnalyze.userClass)")
+                Text(" \(userAnalyze.userClass.rawValue)")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(Color("food-explorer-tag-color"))
+                    .foregroundColor(userAnalyze.userClass.color)
                 
                 Text("이신가요?")
                     .font(.title2)
@@ -191,7 +173,7 @@ struct UserAnalyzeView: View {
                 Text("\(userAnalyze.userNickname)님의 즐겨찾기 목록 분석 결과, ")
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-text-color"))
-                + Text(userAnalyze.userClass)
+                + Text(userAnalyze.userClass.rawValue)
                     .fontWeight(.bold)
                     .foregroundColor(Color("food-explorer-tag-color"))
                 + Text(" 유형과 비슷해요!")
@@ -199,7 +181,7 @@ struct UserAnalyzeView: View {
                     .foregroundColor(Color("main-text-color"))
                 
                 VStack {
-                    RadarChartView(data: userAnalyze.userAnalyzeValues, gridColor: Color("main-point-color-weak").opacity(0.8), dataColor: Color("main-point-color"), gridLineWidth: 0.5, dataLineWidth: 1, labels: ["맛집탐방러", "미니인플루언서", "건강식", "기타", "카페인 뱀파이어", "혼밥러", "술고래"])
+                    RadarChartView(data: userAnalyze.userAnalyzeValues, gridColor: Color("main-point-color-weak").opacity(0.8), dataColor: Color("main-point-color"), gridLineWidth: 0.5, dataLineWidth: 1, labels: UserClass.allCases)
                         .frame(height: 150)
                 }
                 .padding(.vertical, 40)
