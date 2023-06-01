@@ -14,7 +14,7 @@ struct UserAnalyzeView: View {
     @State private var subscriptions = Set<AnyCancellable>()
     @State private var userPreferenceLoad = false
     @State private var tagsOffsetX = CGFloat.zero
-    @State private var userAnalyze = UserAnalyzeResponse.preview
+    @State private var userAnalyzeResponse: UserAnalyzeResponse?
     @State private var isLoading = true
     @State private var error: APIError?
     @State private var showError = false
@@ -26,10 +26,29 @@ struct UserAnalyzeView: View {
     
     var body: some View {
         ViewThatFits(in: .vertical) {
-            content()
-            
-            ScrollView {
-                content()
+            if let userAnalyze = userAnalyzeResponse {
+                content(userAnalyze: userAnalyze)
+                
+                ScrollView {
+                    content(userAnalyze: userAnalyze)
+                }
+            } else {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .controlSize(.large)
+                            .tint(Color("main-point-color"))
+                        
+                        Spacer()
+                    }
+                    
+                    Spacer()
+                }
             }
         }
         .background(Color("background-color"))
@@ -41,7 +60,7 @@ struct UserAnalyzeView: View {
     }
     
     @ViewBuilder
-    func content() -> some View {
+    func content(userAnalyze: UserAnalyzeResponse) -> some View {
         VStack {
             HStack {
                 Text("\(userAnalyze.userNickname)님은,")
@@ -60,14 +79,14 @@ struct UserAnalyzeView: View {
                     .tint(Color("main-point-color"))
             } else {
                 LazyVGrid(columns: columns) {
-                    userInitialPreference()
+                    userInitialPreference(userAnalyze: userAnalyze)
                     
-                    userType()
+                    userType(userAnalyze: userAnalyze)
                     
-                    weeklyStats()
+                    weeklyStats(userAnalyze: userAnalyze)
                     
-                    if !userAnalyze.weeklyTags.isEmpty {
-                        weeklyTag()
+                    if !userAnalyze.userTags.isEmpty {
+                        weeklyTag(userAnalyze: userAnalyze)
                     }
                 }
             }
@@ -85,7 +104,7 @@ struct UserAnalyzeView: View {
     }
     
     @ViewBuilder
-    func userInitialPreference() -> some View {
+    func userInitialPreference(userAnalyze: UserAnalyzeResponse) -> some View {
         let tag1 = TagTitle.allCases.randomElement() ?? .comfortableSpace
         let tag2 = TagTitle.allCases.randomElement() ?? .comfortableSpace
         let tag3 = TagTitle.allCases.randomElement() ?? .comfortableSpace
@@ -145,7 +164,7 @@ struct UserAnalyzeView: View {
     }
     
     @ViewBuilder
-    func userType() -> some View {
+    func userType(userAnalyze: UserAnalyzeResponse) -> some View {
         VStack(alignment: .leading) {
             HStack(spacing: 0) {
                 Text("혹시...")
@@ -153,7 +172,7 @@ struct UserAnalyzeView: View {
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-point-color"))
                 
-                Text(" 맛집탐방러")
+                Text(" \(userAnalyze.userClass)")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(Color("food-explorer-tag-color"))
@@ -172,7 +191,7 @@ struct UserAnalyzeView: View {
                 Text("\(userAnalyze.userNickname)님의 즐겨찾기 목록 분석 결과, ")
                     .fontWeight(.bold)
                     .foregroundColor(Color("main-text-color"))
-                + Text("맛집탐방러")
+                + Text(userAnalyze.userClass)
                     .fontWeight(.bold)
                     .foregroundColor(Color("food-explorer-tag-color"))
                 + Text(" 유형과 비슷해요!")
@@ -180,7 +199,7 @@ struct UserAnalyzeView: View {
                     .foregroundColor(Color("main-text-color"))
                 
                 VStack {
-                    RadarChartView(data: [0.8, 0.2, 0.1, 0.15, 0.4, 0.3, 0.5], gridColor: Color("main-point-color-weak").opacity(0.8), dataColor: Color("main-point-color"), gridLineWidth: 0.5, dataLineWidth: 1, labels: ["맛집탐방러", "미니인플루언서", "건강식", "기타", "카페인 뱀파이어", "혼밥러", "술고래"])
+                    RadarChartView(data: userAnalyze.userAnalyzeValues, gridColor: Color("main-point-color-weak").opacity(0.8), dataColor: Color("main-point-color"), gridLineWidth: 0.5, dataLineWidth: 1, labels: ["맛집탐방러", "미니인플루언서", "건강식", "기타", "카페인 뱀파이어", "혼밥러", "술고래"])
                         .frame(height: 150)
                 }
                 .padding(.vertical, 40)
@@ -194,7 +213,7 @@ struct UserAnalyzeView: View {
     }
     
     @ViewBuilder
-    func weeklyStats() -> some View {
+    func weeklyStats(userAnalyze: UserAnalyzeResponse) -> some View {
         let subCherryPicks = userAnalyze.cherrypickCount < 3 ? userAnalyze.recentCherrypickShops[0..<userAnalyze.cherrypickCount] : userAnalyze.recentCherrypickShops[0..<3]
         
         let subClippingShops = userAnalyze.clippingCount < 3 ? userAnalyze.recentClippingShops[0..<userAnalyze.clippingCount] : userAnalyze.recentClippingShops[0..<3]
@@ -234,7 +253,7 @@ struct UserAnalyzeView: View {
                     }
                     
                     ForEach(Array(subCherryPicks)) { cherrypick in
-                        restaurantListElement(title: cherrypick.shopName, date: "23/04/13")
+                        restaurantListElement(title: cherrypick.shopName, date: cherrypick.shortDateTimeString)
                     }
                 }
                 .padding(.bottom)
@@ -265,7 +284,7 @@ struct UserAnalyzeView: View {
                     }
                     
                     ForEach(Array(subClippingShops)) { clippingShop in
-                        restaurantListElement(title: clippingShop.shopName, date: "23/04/13")
+                        restaurantListElement(title: clippingShop.shopName, date: clippingShop.shortDateTimeString)
                     }
                 }
             }
@@ -315,12 +334,12 @@ struct UserAnalyzeView: View {
     }
     
     @ViewBuilder
-    func weeklyTag() -> some View {
-        let weeklyTagsCount = userAnalyze.weeklyTags.count
+    func weeklyTag(userAnalyze: UserAnalyzeResponse) -> some View {
+        let weeklyTagsCount = userAnalyze.userTags.count
         let count = Int(floor(Double(weeklyTagsCount) / 3.0))
-        let firstLineeTags = count == 0 ? userAnalyze.weeklyTags : Array(userAnalyze.weeklyTags[0..<count])
-        let secondeLineTags = count == 0 ? nil : userAnalyze.weeklyTags[count..<count * 2]
-        let thirdLineTags = count == 0 ? nil : userAnalyze.weeklyTags[count * 2..<weeklyTagsCount]
+        let firstLineeTags = count == 0 ? userAnalyze.userTags : Array(userAnalyze.userTags[0..<count])
+        let secondeLineTags = count == 0 ? nil : userAnalyze.userTags[count..<count * 2]
+        let thirdLineTags = count == 0 ? nil : userAnalyze.userTags[count * 2..<weeklyTagsCount]
         
         VStack(alignment: .leading) {
             Text("이번주에 이런 키워드를 찾았어요")
@@ -369,9 +388,11 @@ struct UserAnalyzeView: View {
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }
+        print(userViewModel.readToken)
+        print(userViewModel.readUserEmail)
         
         APIFunction.fetchUserAnalyze(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { userAnalyzeResponse in
-            userAnalyze = userAnalyzeResponse
+            self.userAnalyzeResponse = userAnalyzeResponse
             
             withAnimation(.easeInOut) {
                 isLoading = false

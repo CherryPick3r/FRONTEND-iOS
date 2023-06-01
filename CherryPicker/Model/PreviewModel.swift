@@ -80,24 +80,3 @@ extension ShopDetailResponse {
         return ShopDetailResponse(shopId: 1, shopName: "이이요", shopCategory: "일식당", oneLineReview: "식사로도 좋고 간술하기에도 좋은 이자카야 \"이이요\"", shopAddress: "서울 광진구 능동로19길 36 1층", totalCherryPickCount: Int.random(in: 10...1000), operatingHours: "", topTags: TagPair.preview, shopClipping: .isNotClipped, shopMenus: MenuSimple.preview, shopMainPhotoURLs: ["", "", ""], shopNaverId: 38738686, shopKakaoId: 861945610)
     }
 }
-
-extension ShopSimple {
-    static var preview: ShopSimples {
-        var shops = ShopSimples()
-        
-        for i in 0..<20 {
-            shops.append(ShopSimple(id: i, shopName: "이이요", shopCategory: "일식장", shopAddress: "서울 광진구 능동로19길 36 1층", operatingHours: "", mainPhotoUrl: "https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyMzA1MjFfMTQ3%2FMDAxNjg0NjUwOTY2NDg5.fxWxtx6LQ8GYxlLuUw5w1fOFU-GwK6qrBU1n9WrPm5gg.txLdPEFPBXxkMNw7Nk-dFx1FiyrTxZwKk1Pa1Rbzl7Ig.JPEG%2F474CB7D3-B7A6-4AC6-A2DC-458B927E31D6.jpeg"))
-        }
-        
-        return shops
-    }
-}
-
-extension UserAnalyzeResponse {
-    static var preview: UserAnalyzeResponse {
-        let cherrypickCount = Int.random(in: 0...100)
-        let clippingCount = Int.random(in: 0...100)
-        
-        return UserAnalyzeResponse(userNickname: "체리체리1q2w3e", userPercentile: Double.random(in: 0.0...100.0), cherrypickClippingTotalCount: cherrypickCount + clippingCount, cherrypickCount: cherrypickCount, recentCherrypickShops: ShopSimple.preview, clippingCount: clippingCount, recentClippingShops: ShopSimple.preview, weeklyTags: TagTitle.allCases)
-    }
-}
