@@ -338,6 +338,9 @@ struct CherryPickView: View {
                     image
                         .resizable()
                         .scaledToFill()
+                        .frame(width: width / 2)
+                        .frame(maxWidth: 250)
+                        .clipped()
                 } placeholder: {
                     ZStack {
                         Color("main-point-color-weak")
@@ -352,6 +355,9 @@ struct CherryPickView: View {
                     image
                         .resizable()
                         .scaledToFill()
+                        .frame(width: width / 2)
+                        .frame(maxWidth: 250)
+                        .clipped()
                 } placeholder: {
                     ZStack {
                         Color("main-point-color-weak")

@@ -27,6 +27,7 @@ struct RestaurantListView: View {
     @FocusState private var searchFocus: Bool
     
     @State var listMode: ListMode
+    
     @State private var subscriptions = Set<AnyCancellable>()
     @State private var seletedFilterTypes: GameCategory?
     @State private var selectedSortType = ListSortType.newest
@@ -189,8 +190,14 @@ struct RestaurantListView: View {
         Button {
             restaurantId = shop.id
         } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 15) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(shop.shortDateTimeString)
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("secondary-text-color-weak"))
+                        .padding(.bottom, 5)
+                    
                     HStack(alignment: .bottom) {
                         Text(shop.shopName)
                             .font(.headline)
@@ -202,25 +209,36 @@ struct RestaurantListView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(Color("secondary-text-color-weak"))
                     }
+                    .padding(.bottom, 10)
                     
                     Label(shop.shopAddress, systemImage: "map")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                        .padding(.bottom, 10)
                     
-                    HStack(spacing: 15) {
-                        Label("오늘 : \(shop.todayHour ?? "정보가 없어요.")", systemImage: "clock")
+                    HStack(alignment: .top) {
+                        Image(systemName: "clock")
                             .font(.footnote)
                             .fontWeight(.semibold)
                             .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                         
-                        if let regularHoliday = shop.regularHoliday {
-                            Text(regularHoliday)
+                        VStack(spacing: 5) {
+                            Text("오늘 : \(shop.todayHour ?? "정보가 없어요.")")
                                 .font(.footnote)
                                 .fontWeight(.semibold)
-                                .foregroundColor(Color("main-point-color-strong"))
+                                .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                            
+                            if let regularHoliday = shop.regularHoliday {
+                                Text(regularHoliday)
+                                    .font(.footnote)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(Color("main-point-color-strong"))
+                            }
                         }
                     }
+                    
+                    
                 }
                 
                 Spacer()
@@ -285,7 +303,7 @@ struct RestaurantListView: View {
             .foregroundColor(Color("main-point-color"))
         } else {
             LazyVGrid(columns: columns) {
-                ForEach(shopSimpleList.shopSimples) { shop in
+                ForEach(shopSimpleList.shopSimples, id: \.dateTime) { shop in
                     subRestaurant(shop: shop)
                 }
             }
@@ -379,6 +397,7 @@ struct RestaurantListView: View {
         
         APIFunction.fetchShopSimples(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameCategory: seletedFilterTypes?.rawValue ?? 0, isResultRequest: listMode == .cherryPick, subscriptions: &subscriptions) { simpleShopResponse in
             withAnimation(.easeInOut) {
+                shopSimpleList = simpleShopResponse
                 switch selectedSortType {
                 case .newest:
                     shopSimpleList.shopSimples.sort { lhs, rhs in
