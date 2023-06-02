@@ -11,6 +11,9 @@ import AuthenticationServices
 
 enum NavigationPath {
     case menuView
+    case userAnalyzeView
+    case userCherrypickList
+    case userClippingList
 }
 
 struct StartView: View {
@@ -128,7 +131,19 @@ struct StartView: View {
                     }
                 }
                 .navigationDestination(for: NavigationPath.self) { navigationPath in
-                    MenuView(path: $path)
+                    switch navigationPath {
+                    case .menuView:
+                        MenuView(path: $path)
+                    case .userAnalyzeView:
+                        UserAnalyzeView(path: $path)
+                    case .userCherrypickList:
+                        RestaurantListView(listMode: .cherryPick)
+                    case .userClippingList:
+                        RestaurantListView(listMode: .bookmark)
+                    }
+                    
+                    
+                    
                 }
             }
         }
@@ -615,6 +630,6 @@ struct StartView: View {
 struct StartView_Previews: PreviewProvider {
     static var previews: some View {
         StartView(isCherryPick: .constant(false), gameCategory: .constant(nil), isFirstCherryPick: .constant(false))
-            .environmentObject(UserViewModel())
+            .environmentObject(UserViewModel.preivew)
     }
 }

@@ -127,6 +127,18 @@ enum APIService {
         .eraseToAnyPublisher()
     }
     
+    static func restartPreferenceGame(token: String, userEmail: String) -> AnyPublisher<Data, APIError> {
+        let request = request(apiURL: .restartPreferenceGame(userEmail: userEmail), httpMethod: "POST", bearerToken: token)
+        
+        return URLSession.shared.dataTaskPublisher(for: request).tryMap { data, response in
+            try urlSessionHandling(data: data, response: response, error400: .authenticationFailure)
+        }
+        .mapError { error in
+            APIError.convert(error: error)
+        }
+        .eraseToAnyPublisher()
+    }
+    
     static func doUserPreferenceStart(token: String, userEmail: String) -> AnyPublisher<UserPreferenceStartResponse, APIError> {
         let request = request(apiURL: .preferenceCherryPickStartGame(userEmail: userEmail), httpMethod: "POST", bearerToken: token)
         

@@ -23,12 +23,14 @@ enum LoginedPlatform: Int {
 }
 
 class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelegate {
-    @AppStorage("화면스타일") var userColorScheme: UserColorScheme = .system
     @AppStorage("이메일") private var userEmail = ""
+    
+    @AppStorage("화면스타일") var userColorScheme: UserColorScheme = .system
     @AppStorage("로그인플랫폼") var platform: LoginedPlatform = .notLogined
     
     @Published private var token = ""
     @Published private var accessToken = ""
+    
     @Published var isAuthenticated = false
     @Published var isUserConfirmed = false
     @Published var error: APIError?
@@ -89,7 +91,6 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         }
         
         guard let email = response.value(forHTTPHeaderField: "UserEmail") else {
-            
             return
         }
         

@@ -60,6 +60,8 @@ struct WithdrawalView: View {
             .toolbar {
                 ToolbarItem {
                     Button {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        
                         dismiss()
                     } label: {
                         Text("닫기")
@@ -151,6 +153,8 @@ struct WithdrawalView: View {
                 .padding(.bottom)
                 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    
                     guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
                         return
                     }
@@ -187,6 +191,8 @@ struct WithdrawalView: View {
                     .padding(.bottom)
                 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    
                     showSignInView = true
                 } label: {
                     HStack {
@@ -227,6 +233,8 @@ struct WithdrawalView: View {
     @ViewBuilder
     func withdrawalButton() -> some View {
         Button {
+            UISelectionFeedbackGenerator().selectionChanged()
+            
             deleteUser()
         } label: {
             HStack {
@@ -416,6 +424,6 @@ struct WithdrawalView: View {
 struct WithdrawalView_Previews: PreviewProvider {
     static var previews: some View {
         WithdrawalView(path: .constant([.menuView]))
-            .environmentObject(UserViewModel())
+            .environmentObject(UserViewModel.preivew)
     }
 }

@@ -46,6 +46,7 @@ struct RestaurantDetailView: View {
     @State private var imagePage = 0
     @State private var isClipped = false
     @State private var restaurant = ShopDetailResponse.preview
+    @State private var isAddressCopied = false
     
     private let restaurantId: Int
     
@@ -361,28 +362,68 @@ struct RestaurantDetailView: View {
                 .foregroundColor(Color("secondary-text-color-strong"))
             
             VStack(alignment: .leading, spacing: showDetailInformation ? 15 : 5) {
-                Label(restaurant.shopAddress, systemImage: "map")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
-                
                 HStack {
-                    Label("오늘 : \(restaurant.todayHour ?? "정보가 없어요.")", systemImage: "clock")
+                    Label(restaurant.shopAddress, systemImage: "map")
+                        .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                    
+                    Spacer()
+                    
+                    if showDetailInformation {
+                        Button {
+                            UIPasteboard.general.string = restaurant.shopAddress
+                            UINotificationFeedbackGenerator().notificationOccurred(.success)
+                            
+                            withAnimation(.easeInOut) {
+                                isAddressCopied = true
+                            }
+                        } label: {
+                            if isAddressCopied {
+                                Label("복사완료", systemImage: "checkmark")
+                                    .foregroundColor(Color("main-point-color-weak"))
+                                    .onAppear() {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                            withAnimation(.easeInOut) {
+                                                isAddressCopied = false
+                                            }
+                                        }
+                                    }
+                            } else {
+                                Label("클립보드", systemImage: "doc.on.clipboard")
+                                    .labelStyle(.iconOnly)
+                                    .foregroundColor(Color("main-point-color-weak"))
+                            }
+                        }
+                    }
+                }
+                .font(.footnote)
+                .fontWeight(.semibold)
+                
+                HStack(alignment: .top) {
+                    Image(systemName: "clock")
                         .font(.footnote)
                         .fontWeight(.semibold)
                         .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                     
-                    if let regularHoliday = restaurant.regularHoliday {
-                        Text(regularHoliday)
+                        Text("오늘 : \(restaurant.todayHour ?? "정보가 없어요.")")
                             .font(.footnote)
                             .fontWeight(.semibold)
-                            .foregroundColor(Color("main-point-color-strong"))
-                    }
+                            .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
+                            .allowsTightening(true)
+                        
+                        if let regularHoliday = restaurant.regularHoliday {
+                            Text(regularHoliday)
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color("main-point-color-strong"))
+                                .allowsTightening(true)
+                        }
                     
                     Spacer()
                     
                     if showDetailInformation && restaurant.operatingHoursArray != nil {
                         moreButton {
+                            UISelectionFeedbackGenerator().selectionChanged()
+                            
                             withAnimation(.spring()) {
                                 showDetailHours = true
                             }
@@ -423,6 +464,8 @@ struct RestaurantDetailView: View {
                 
                 if showDetailInformation && restaurant.shopMenus.count > 5 {
                     moreButton {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        
                         withAnimation(.spring()) {
                             showDetailMenu = true
                         }
@@ -466,6 +509,8 @@ struct RestaurantDetailView: View {
                 Spacer()
                 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    
                     withAnimation(.spring()) {
                         showDetailHours = false
                     }
@@ -525,6 +570,8 @@ struct RestaurantDetailView: View {
                 Spacer()
                 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    
                     withAnimation(.spring()) {
                         showDetailMenu = false
                     }
@@ -604,7 +651,7 @@ struct RestaurantDetailView: View {
             Label("닫기", systemImage: "xmark.circle.fill")
                 .labelStyle(.iconOnly)
                 .font(.largeTitle)
-                .foregroundColor(Color("main-point-color"))
+                .foregroundStyle(Color("background-shape-color"), Color("main-point-color"))
                 .shadow(color: .black.opacity(0.25), radius: 5)
         }
         .padding(.vertical, 10)
@@ -616,30 +663,38 @@ struct RestaurantDetailView: View {
         VStack(spacing: 10) {
             Group {
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    
                     showSelectMapDialog = true
                 } label: {
-                    Label("지도", systemImage: "location")
+                    Label("지도", systemImage: "mappin.and.ellipse")
                         .labelStyle(.iconOnly)
                 }
                 .confirmationDialog("지도 선택", isPresented: $showSelectMapDialog) {
                     Button("네이버 지도") {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        
                         openMapApplication(urlScheme: "nmap://place?id=\(restaurant.shopNaverId)", websiteURL: "https://m.place.naver.com/restaurant/\(restaurant.shopNaverId)/home")
                     }
                     
                     Button("카카오 지도") {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        
                         openMapApplication(urlScheme: "kakaomap://place?id=\(restaurant.shopKakaoId)", websiteURL: "https://place.map.kakao.com/\(restaurant.shopKakaoId)")
                     }
                 }
                 
                 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    
                     let activityViewController = UIActivityViewController(activityItems: ["https://m.place.naver.com/restaurant/\(restaurant.shopNaverId)/home"], applicationActivities: nil)
                     UIApplication.shared.windows.first?.rootViewController?.present(activityViewController, animated: true, completion: nil)
                 } label: {
                     Label("공유하기", systemImage: "square.and.arrow.up")
                         .labelStyle(.iconOnly)
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, 3)
                 
                 Button {
                     clippingAction()
@@ -709,7 +764,7 @@ struct RestaurantDetailView: View {
                         Label("닫기", systemImage: "xmark.circle.fill")
                             .labelStyle(.iconOnly)
                             .font(.largeTitle)
-                            .foregroundColor(.white)
+                            .foregroundStyle(Color("main-point-color"), .white)
                             .shadow(color: .black.opacity(0.25), radius: 5)
                     }
                     .padding()
@@ -722,6 +777,8 @@ struct RestaurantDetailView: View {
             HStack {
                 if imagePage != 0 {
                     Button {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        
                         withAnimation(.easeInOut) {
                             imagePage -= 1
                         }
@@ -729,7 +786,7 @@ struct RestaurantDetailView: View {
                         Label("이전", systemImage: "chevron.backward.circle.fill")
                             .labelStyle(.iconOnly)
                             .font(.largeTitle)
-                            .foregroundColor(.white)
+                            .foregroundStyle(Color("main-point-color"), .white)
                             .shadow(color: .black.opacity(0.25), radius: 5)
                     }
                 }
@@ -738,6 +795,8 @@ struct RestaurantDetailView: View {
                 
                 if imagePage != restaurant.shopMainPhotoURLs.endIndex - 1 {
                     Button {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        
                         withAnimation(.easeInOut) {
                             imagePage += 1
                         }
@@ -745,7 +804,7 @@ struct RestaurantDetailView: View {
                         Label("다음", systemImage: "chevron.forward.circle.fill")
                             .labelStyle(.iconOnly)
                             .font(.largeTitle)
-                            .foregroundColor(.white)
+                            .foregroundStyle(Color("main-point-color"), .white)
                             .shadow(color: .black.opacity(0.25), radius: 5)
                     }
                 }
@@ -841,6 +900,8 @@ struct RestaurantDetailView: View {
     }
     
     func restartAction() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        
         withAnimation(.easeInOut) {
             showInformation = false
             showIndicators = false
@@ -850,6 +911,8 @@ struct RestaurantDetailView: View {
     }
     
     func closeAction() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        
         withAnimation(.easeInOut) {
             showInformation = false
             showIndicators = false
@@ -914,6 +977,8 @@ struct RestaurantDetailView: View {
     }
     
     func closeImages() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        
         withAnimation(.spring()) {
             showImages = false
             showInformation = true
@@ -1018,6 +1083,6 @@ struct RestaurantDetailView: View {
 struct RestaurantDetailView_Previews: PreviewProvider {
     static var previews: some View {
         RestaurantDetailView(isCherryPick: .constant(false), isCherryPickDone: .constant(true), restaurantId: 3)
-            .environmentObject(UserViewModel())
+            .environmentObject(UserViewModel.preivew)
     }
 }

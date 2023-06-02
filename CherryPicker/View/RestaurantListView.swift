@@ -112,6 +112,8 @@ struct RestaurantListView: View {
             }
             
             fetchList()
+            
+            UISelectionFeedbackGenerator().selectionChanged()
         } label: {
             Text(filterType.name)
                 .font(.caption)
@@ -188,6 +190,8 @@ struct RestaurantListView: View {
     @ViewBuilder
     func subRestaurant(shop: ShopSimple) -> some View {
         Button {
+            UISelectionFeedbackGenerator().selectionChanged()
+            
             restaurantId = shop.id
         } label: {
             HStack(alignment: .top) {
@@ -223,7 +227,7 @@ struct RestaurantListView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(colorScheme == .light ? Color("main-point-color-weak") : Color("main-point-color"))
                         
-                        VStack(spacing: 5) {
+                        VStack(alignment: .leading, spacing: 5) {
                             Text("오늘 : \(shop.todayHour ?? "정보가 없어요.")")
                                 .font(.footnote)
                                 .fontWeight(.semibold)
@@ -339,6 +343,8 @@ struct RestaurantListView: View {
                 .overlay(alignment: .trailing) {
                     if searchText != "" {
                         Button {
+                            UISelectionFeedbackGenerator().selectionChanged()
+                            
                             withAnimation(.easeInOut) {
                                 searchText = ""
                             }
@@ -364,6 +370,8 @@ struct RestaurantListView: View {
     }
     
     func openSearching() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        
         withAnimation(.spring()) {
             isSearching = true
         }
@@ -372,6 +380,8 @@ struct RestaurantListView: View {
     }
     
     func closeSearching() {
+        UISelectionFeedbackGenerator().selectionChanged()
+        
         if isSearching {
             searchFocus = false
             
@@ -434,7 +444,7 @@ struct RestaurantListView_Previews: PreviewProvider {
         NavigationStack {
             RestaurantListView(listMode: .cherryPick)
                 .navigationBarTitleDisplayMode(.inline)
-                .environmentObject(UserViewModel())
+                .environmentObject(UserViewModel.preivew)
         }
     }
 }

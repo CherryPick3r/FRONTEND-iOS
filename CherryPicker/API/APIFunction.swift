@@ -75,6 +75,14 @@ enum APIFunction {
         .store(in: &subscriptions)
     }
     
+    static func restartPreferenceGame(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receiveValue: @escaping (Data) -> Void, errorHanding: @escaping (APIError) -> Void) {
+        APIService.restartPreferenceGame(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
+            completionHandler(completion: completion, errorHandling: errorHanding)
+        } receiveValue: { data in
+            receiveValue(data)
+        }
+    }
+    
     static func doUserPreferenceStart(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receieveValue: @escaping (UserPreferenceStartResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
         APIService.doUserPreferenceStart(token: token, userEmail: userEmail).subscribe(on: DispatchQueue.main).sink { completion in
             completionHandler(completion: completion, errorHandling: errorHandling)

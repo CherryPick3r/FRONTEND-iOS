@@ -11,8 +11,11 @@ import Combine
 struct UserAnalyzeView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     
+    @Binding var path: [NavigationPath]
+    
     @State private var subscriptions = Set<AnyCancellable>()
     @State private var userPreferenceLoad = false
+    @State private var showRestartDialog = false
     @State private var tagsOffsetX = CGFloat.zero
     @State private var userAnalyzeResponse: UserAnalyzeResponse?
     @State private var isLoading = true
@@ -115,12 +118,32 @@ struct UserAnalyzeView: View {
             
             VStack(alignment: .center, spacing: 15) {
                 HStack {
-                    Text("\(userAnalyze.userNickname)님의 취향태그")
-                        .font(.caption)
-                        .foregroundColor(Color("secondary-text-color-weak"))
+                    Text("\(userAnalyze.userNickname)님의 초기 취향태그")
                     
                     Spacer()
+                    
+                    Button {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        
+                        showRestartDialog = true
+                    } label: {
+                        Label("다시하기", systemImage: "gobackward")
+                    }
+                    .confirmationDialog("다시하기", isPresented: $showRestartDialog) {
+                        Button("다시하기", role: .destructive) {
+                            UISelectionFeedbackGenerator().selectionChanged()
+                            restartUserPreferenceGame()
+                        }
+                        
+                        Button("취소", role: .cancel) {
+                            UISelectionFeedbackGenerator().selectionChanged()
+                        }
+                    } message: {
+                        Text("다시 하시겠어요?\n\(userAnalyze.userNickname)님의 초기취향이 초기화 돼요!")
+                    }
                 }
+                .font(.caption)
+                .foregroundColor(Color("secondary-text-color-weak"))
                 
                 Group {
                     ForEach(userAnalyze.userTags, id: \.rawValue) { tag in
@@ -224,9 +247,7 @@ struct UserAnalyzeView: View {
                         Spacer()
                         
                         if userAnalyze.recentCherrypickShops.count > 0 {
-                            NavigationLink {
-                                RestaurantListView(listMode: .cherryPick)
-                            } label: {
+                            NavigationLink(value: NavigationPath.userCherrypickList) {
                                 Text("더보기")
                                     .font(.footnote)
                                     .foregroundColor(Color("main-point-color"))
@@ -255,9 +276,7 @@ struct UserAnalyzeView: View {
                         Spacer()
                         
                         if userAnalyze.recentClippingShops.count > 0 {
-                            NavigationLink {
-                                RestaurantListView(listMode: .bookmark)
-                            } label: {
+                            NavigationLink(value: NavigationPath.userClippingList) {
                                 Text("더보기")
                                     .font(.footnote)
                                     .foregroundColor(Color("main-point-color"))
@@ -370,8 +389,6 @@ struct UserAnalyzeView: View {
         withAnimation(.spring()) {
             APIError.closeError(showError: &showError, error: &error)
         }
-        print(userViewModel.readToken)
-        print(userViewModel.readUserEmail)
         
         APIFunction.fetchUserAnalyze(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { userAnalyzeResponse in
             self.userAnalyzeResponse = userAnalyzeResponse
@@ -386,6 +403,23 @@ struct UserAnalyzeView: View {
                 APIError.showError(showError: &showError, error: &error, catchError: apiError)
             }
         }
+    }
+    
+    func restartUserPreferenceGame() {
+        retryAction = nil
+        withAnimation(.spring()) {
+            APIError.closeError(showError: &showError, error: &error)
+        }
+        
+        APIFunction.restartPreferenceGame(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { data in
+            path.removeAll()
+        } errorHanding: { apiError in
+            retryAction = restartUserPreferenceGame
+            
+            withAnimation(.spring()) {
+                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            }
+        }
 
     }
 }
@@ -393,9 +427,9 @@ struct UserAnalyzeView: View {
 struct UserAnalyzeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            UserAnalyzeView()
+            UserAnalyzeView(path: .constant([.menuView, .userAnalyzeView]))
                 .navigationBarTitleDisplayMode(.inline)
-                .environmentObject(UserViewModel())
+                .environmentObject(UserViewModel.preivew)
         }
         .tint(Color("main-point-color"))
     }
