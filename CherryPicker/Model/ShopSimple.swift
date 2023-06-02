@@ -63,7 +63,25 @@ struct ShopSimple: Codable, Identifiable {
             return nil
         }
         
-        return hours[regularHolidayIndex]
+        let holidayHour = hours[regularHolidayIndex]
+        
+        if holidayHour.contains("월") ||
+            holidayHour.contains("화") ||
+            holidayHour.contains("수") ||
+            holidayHour.contains("목") ||
+            holidayHour.contains("금") ||
+            holidayHour.contains("토") ||
+            holidayHour.contains("일") {
+            return holidayHour
+        } else {
+            let holiday = hours[hours.index(before: regularHolidayIndex)]
+            
+            if holiday.contains("요일") {
+                return "\(holidayHour) : \(holiday)"
+            } else {
+                return "\(holidayHour) : \(holiday)요일"
+            }
+        }
     }
     
     var shortDateTimeString: String {

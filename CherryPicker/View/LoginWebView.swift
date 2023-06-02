@@ -108,6 +108,7 @@ struct LoginWebView_Previews: PreviewProvider {
         LoginWebView(url: "https://www.apple.com", onReceivedResponse: { _, _ in
             
         }, showError: .constant(false), error: .constant(nil), showLoginWebView: .constant(true))
-            .environmentObject(UserViewModel())
+        //            .environmentObject(UserViewModel.preivew)
+                    .environmentObject(UserViewModel())
     }
 }

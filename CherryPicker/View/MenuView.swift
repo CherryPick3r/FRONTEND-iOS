@@ -53,19 +53,6 @@ struct MenuView: View {
         .task {
             fetchUserNickname()
         }
-        .confirmationDialog("로그아웃", isPresented: $showLogoutDialog) {
-            Button("로그아웃", role: .destructive) {
-                userViewModel.deleteUserInfo()
-                
-                path.removeLast()
-            }
-            
-            Button("취소", role: .cancel) {
-                
-            }
-        } message: {
-            Text("로그아웃 하시겠아요?")
-        }
         .sheet(isPresented: $isUserNameEditing) {
             VStack {
                 HStack {
@@ -104,6 +91,11 @@ struct MenuView: View {
             }
             .presentationDetents([.medium])
         }
+        .onChange(of: isUserNameEditing) { newValue in
+            if !newValue {
+                fetchUserNickname()
+            }
+        }
     }
     
     @ViewBuilder
@@ -139,15 +131,17 @@ struct MenuView: View {
     func userMenu() -> some View {
         VStack(spacing: 20) {
             HStack(spacing: 0) {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .controlSize(.mini)
-                } else {
-                    Text(userName)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("main-point-color"))
+                Group {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .controlSize(.mini)
+                    } else {
+                        Text(userName)
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color("main-point-color"))
+                    }
                 }
                 
                 Text("님")
@@ -155,6 +149,7 @@ struct MenuView: View {
                     .foregroundColor(Color("main-point-color"))
                 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
                     isUserNameEditing = true
                 } label: {
                     Label("수정", systemImage: "pencil.line")
@@ -166,9 +161,7 @@ struct MenuView: View {
                 Spacer()
             }
             
-            NavigationLink {
-                UserAnalyzeView()
-            } label: {
+            NavigationLink(value: NavigationPath.userAnalyzeView) {
                 HStack {
                     Text("취향분석")
                     
@@ -196,6 +189,7 @@ struct MenuView: View {
                 Spacer()
                 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
                     showDisplayStyleDialog = true
                 } label: {
                     Text(userViewModel.userColorScheme.rawValue)
@@ -203,14 +197,17 @@ struct MenuView: View {
                 }
                 .confirmationDialog("화면 스타일 선택", isPresented: $showDisplayStyleDialog) {
                     Button("시스템 기본값") {
+                        UISelectionFeedbackGenerator().selectionChanged()
                         userViewModel.userColorScheme = .system
                     }
                     
                     Button("라이트 모드") {
+                        UISelectionFeedbackGenerator().selectionChanged()
                         userViewModel.userColorScheme = .light
                     }
                     
                     Button("다크 모드") {
+                        UISelectionFeedbackGenerator().selectionChanged()
                         userViewModel.userColorScheme = .dark
                     }
                 }
@@ -285,6 +282,7 @@ struct MenuView: View {
     @ViewBuilder
     func logoutButton() -> some View {
         Button {
+            UISelectionFeedbackGenerator().selectionChanged()
             showLogoutDialog = true
         } label: {
             HStack {
@@ -309,11 +307,27 @@ struct MenuView: View {
             }
         }
         .padding()
+        .confirmationDialog("로그아웃", isPresented: $showLogoutDialog) {
+            Button("로그아웃", role: .destructive) {
+                UISelectionFeedbackGenerator().selectionChanged()
+                userViewModel.deleteUserInfo()
+                
+                path.removeLast()
+            }
+            
+            Button("취소", role: .cancel) {
+                UISelectionFeedbackGenerator().selectionChanged()
+            }
+        } message: {
+            Text("로그아웃 하시겠아요?")
+        }
     }
     
     @ViewBuilder
     func withdrawalButton() -> some View {
         Button {
+            UISelectionFeedbackGenerator().selectionChanged()
+            
             showWithdrawalView = true
         } label: {
             HStack {
@@ -385,7 +399,8 @@ struct MenuView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             MenuView(path: .constant([.menuView]))
-                .environmentObject(UserViewModel())
+            //            .environmentObject(UserViewModel.preivew)
+                        .environmentObject(UserViewModel())
         }
         .tint(Color("main-point-color"))
         .navigationBarTitleDisplayMode(.inline)

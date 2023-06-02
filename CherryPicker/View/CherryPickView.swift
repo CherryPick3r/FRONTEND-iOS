@@ -41,8 +41,8 @@ struct CherryPickView: View {
     @State private var showIndicators = false
     @State private var likeAndHateButtonsScale = CGFloat(1.2)
     @State private var likeAndHateButtonsSubScale = CGFloat(1.1)
-    @State private var likeThumbOffset = CGFloat(10)
-    @State private var hateThumbOffset = CGFloat(-10)
+    @State private var likeThumbOffset = CGFloat(15)
+    @State private var hateThumbOffset = CGFloat(-15)
     @State private var cardOffsetX = CGFloat.zero
     @State private var cardOffsetY = CGFloat.zero
     @State private var cardDgree = 0.0
@@ -62,8 +62,9 @@ struct CherryPickView: View {
     
     var body: some View {
             GeometryReader { reader in
-                let height = reader.size.height == 551 ?  reader.size.height / 11 * 10 : reader.size.height / 6 * 5
                 let width = reader.size.width
+                let height = reader.size.height
+                let cardHeight = height == 551 ?  height / 11 * 10 : height / 6 * 5
                 let cardImageWidth = width / 4 * 2.8
                 
                 if tutorialIsDone {
@@ -77,17 +78,18 @@ struct CherryPickView: View {
                             
                             closeButton()
                         }
+                        .padding(.top, 10)
                         .padding(.horizontal)
                         
                         HStack {
                             Image("cherry-picker-title")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 250)
                             
                             Spacer()
                         }
                         .padding(.horizontal)
+                        .frame(width: width, height: height / 20)
                         
                         Spacer()
                         
@@ -102,11 +104,11 @@ struct CherryPickView: View {
                                     }
                                     
                                     if let shopCard = shopCardResponse, showRestaurantCard {
-                                        restaurantCard(width: cardImageWidth, height: height, shopCard: shopCard)
+                                        restaurantCard(width: cardImageWidth, height: cardHeight, shopCard: shopCard)
                                     }
                                 }
                                 .frame(maxHeight: 800)
-                                .frame(height: height)
+                                .frame(height: cardHeight)
                                 
                                 Spacer()
                             }
@@ -242,7 +244,8 @@ struct CherryPickView: View {
         } label: {
             Label("닫기", systemImage: "xmark.circle.fill")
                 .labelStyle(.iconOnly)
-                .font(.title)
+                .font(.largeTitle)
+                .foregroundStyle(Color("background-shape-color"), Color("main-point-color"))
                 .shadow(color: .black.opacity(0.15), radius: 5)
         }
     }
@@ -280,7 +283,7 @@ struct CherryPickView: View {
             Image(systemName: thumb)
                 .padding(isLikeButton ? .leading : .trailing, 15)
                 .offset(x: isLikeButton ? likeThumbOffset : hateThumbOffset)
-                .animation(Animation.spring(dampingFraction: 0.991).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
+                .animation(Animation.spring(dampingFraction: 0.979).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
                 .onAppear {
                     if isLikeButton {
                         likeThumbOffset = 0
@@ -529,8 +532,8 @@ struct CherryPickView: View {
         withAnimation(.spring()) {
             likeAndHateButtonsScale = 1.2
             likeAndHateButtonsSubScale = 1.1
-            likeThumbOffset = 10.0
-            hateThumbOffset = -10.0
+            likeThumbOffset = 15.0
+            hateThumbOffset = -15.0
             
             showRestaurantCard = false
         }
@@ -758,6 +761,7 @@ struct CherryPickView_Previews: PreviewProvider {
     static var previews: some View {
         CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), restaurantId: .constant(0), gameCategory: .constant(.group), isFirstCherryPick: .constant(false), cherryPickMode: .cherryPick)
             .tint(Color("main-point-color"))
-            .environmentObject(UserViewModel())
+        //            .environmentObject(UserViewModel.preivew)
+                    .environmentObject(UserViewModel())
     }
 }
