@@ -43,7 +43,6 @@
 		C58F419A29FFC17C00A98B2F /* CherryPickView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58F419929FFC17C00A98B2F /* CherryPickView.swift */; };
 		C59D211B29C9D83A00275DBA /* CherryPickerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59D211A29C9D83A00275DBA /* CherryPickerApp.swift */; };
 		C59D212229C9D83B00275DBA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C59D212129C9D83B00275DBA /* Preview Assets.xcassets */; };
-		C59FBBB32A296B2E00F36A7C /* UserViewModelPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59FBBB22A296B2E00F36A7C /* UserViewModelPreview.swift */; };
 		C5B579752A0A65A10034BA8E /* WithdrawalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B579742A0A65A10034BA8E /* WithdrawalView.swift */; };
 		C5B96CB12A1116CB00045C93 /* ParticleEffectModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */; };
 		C5C2D4672A1F89F600266DD8 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C2D4662A1F89F600266DD8 /* ErrorView.swift */; };
@@ -95,7 +94,6 @@
 		C59D211729C9D83A00275DBA /* CherryPicker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CherryPicker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C59D211A29C9D83A00275DBA /* CherryPickerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CherryPickerApp.swift; sourceTree = "<group>"; };
 		C59D212129C9D83B00275DBA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		C59FBBB22A296B2E00F36A7C /* UserViewModelPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserViewModelPreview.swift; sourceTree = "<group>"; };
 		C5B579742A0A65A10034BA8E /* WithdrawalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithdrawalView.swift; sourceTree = "<group>"; };
 		C5B96CB02A1116CB00045C93 /* ParticleEffectModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleEffectModifier.swift; sourceTree = "<group>"; };
 		C5C2D4662A1F89F600266DD8 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
@@ -219,7 +217,6 @@
 			isa = PBXGroup;
 			children = (
 				C59D212129C9D83B00275DBA /* Preview Assets.xcassets */,
-				C59FBBB22A296B2E00F36A7C /* UserViewModelPreview.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -353,7 +350,6 @@
 				C5C2D4672A1F89F600266DD8 /* ErrorView.swift in Sources */,
 				C58C0DFA2A1E3CDA00167C8E /* GameResponse.swift in Sources */,
 				C58C0E122A1F0AA900167C8E /* UserNicknameChangeResponse.swift in Sources */,
-				C59FBBB32A296B2E00F36A7C /* UserViewModelPreview.swift in Sources */,
 				C58F419329FF9E5400A98B2F /* MenuView.swift in Sources */,
 				C58C0E1A2A1F167200167C8E /* APIFunction.swift in Sources */,
 				C514AC472A2512D800148661 /* CheckPreferenceGameResponse.swift in Sources */,
