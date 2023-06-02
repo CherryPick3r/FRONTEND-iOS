@@ -110,7 +110,7 @@ struct RadarChartView: View {
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .position(x: point.x, y: point.y)
-                        .foregroundColor(isMax ? labels[index].color : Color("secondary-text-color-weak"))
+                        .foregroundColor(isMax && data[index] != 0.0 ? labels[index].color : Color("secondary-text-color-weak"))
                             .shadow(color: .black.opacity(isMax ? 0.25 : 0), radius: 5)
                 }
                 

@@ -170,22 +170,30 @@ struct UserAnalyzeView: View {
     
     @ViewBuilder
     func userType(userAnalyze: UserAnalyzeResponse) -> some View {
+        let isNoneUserClass = userAnalyze.userAnalyzeValues == [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         VStack(alignment: .leading) {
             HStack(spacing: 0) {
-                Text("혹시...")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-point-color"))
-                
-                Text(" \(userAnalyze.userClass.rawValue)")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(userAnalyze.userClass.color)
-                
-                Text("이신가요?")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-point-color"))
+                if isNoneUserClass {
+                    Text("즐겨찾기에 매장을 추가해보세요!")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-point-color"))
+                } else {
+                    Text("혹시...")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-point-color"))
+                    
+                    Text(" \(userAnalyze.userClass.rawValue)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(userAnalyze.userClass.color)
+                    
+                    Text("이신가요?")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-point-color"))
+                }
                 
                 Spacer()
             }
@@ -193,15 +201,21 @@ struct UserAnalyzeView: View {
             .padding(.leading, 5)
             
             VStack(alignment: .leading) {
-                Text("\(userAnalyze.userNickname)님의 즐겨찾기 목록 분석 결과, ")
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-text-color"))
-                + Text(userAnalyze.userClass.rawValue)
-                    .fontWeight(.bold)
-                    .foregroundColor(userAnalyze.userClass.color)
-                + Text(" 유형과 비슷해요!")
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("main-text-color"))
+                if isNoneUserClass {
+                    Text("\(userAnalyze.userNickname)님의 즐겨찾기 목록이 아직 없어요.")
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-text-color"))
+                } else {
+                    Text("\(userAnalyze.userNickname)님의 즐겨찾기 목록 분석 결과, ")
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-text-color"))
+                    + Text(userAnalyze.userClass.rawValue)
+                        .fontWeight(.bold)
+                        .foregroundColor(userAnalyze.userClass.color)
+                    + Text(" 유형과 비슷해요!")
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("main-text-color"))
+                }
                 
                 VStack {
                     RadarChartView(data: userAnalyze.userAnalyzeValues, gridColor: Color("main-point-color-weak").opacity(0.8), dataColor: Color("main-point-color"), gridLineWidth: 0.5, dataLineWidth: 1, labels: UserClass.allCases)
