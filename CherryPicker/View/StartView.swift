@@ -630,6 +630,7 @@ struct StartView: View {
 struct StartView_Previews: PreviewProvider {
     static var previews: some View {
         StartView(isCherryPick: .constant(false), gameCategory: .constant(nil), isFirstCherryPick: .constant(false))
-            .environmentObject(UserViewModel.preivew)
+//            .environmentObject(UserViewModel.preivew)
+            .environmentObject(UserViewModel())
     }
 }

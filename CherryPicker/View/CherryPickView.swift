@@ -761,6 +761,7 @@ struct CherryPickView_Previews: PreviewProvider {
     static var previews: some View {
         CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), restaurantId: .constant(0), gameCategory: .constant(.group), isFirstCherryPick: .constant(false), cherryPickMode: .cherryPick)
             .tint(Color("main-point-color"))
-            .environmentObject(UserViewModel.preivew)
+        //            .environmentObject(UserViewModel.preivew)
+                    .environmentObject(UserViewModel())
     }
 }

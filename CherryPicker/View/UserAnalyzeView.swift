@@ -429,7 +429,8 @@ struct UserAnalyzeView_Previews: PreviewProvider {
         NavigationStack {
             UserAnalyzeView(path: .constant([.menuView, .userAnalyzeView]))
                 .navigationBarTitleDisplayMode(.inline)
-                .environmentObject(UserViewModel.preivew)
+            //            .environmentObject(UserViewModel.preivew)
+                        .environmentObject(UserViewModel())
         }
         .tint(Color("main-point-color"))
     }

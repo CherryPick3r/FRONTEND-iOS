@@ -424,6 +424,7 @@ struct WithdrawalView: View {
 struct WithdrawalView_Previews: PreviewProvider {
     static var previews: some View {
         WithdrawalView(path: .constant([.menuView]))
-            .environmentObject(UserViewModel.preivew)
+        //            .environmentObject(UserViewModel.preivew)
+                    .environmentObject(UserViewModel())
     }
 }

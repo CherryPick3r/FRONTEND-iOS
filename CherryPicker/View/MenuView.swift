@@ -399,7 +399,8 @@ struct MenuView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             MenuView(path: .constant([.menuView]))
-                .environmentObject(UserViewModel.preivew)
+            //            .environmentObject(UserViewModel.preivew)
+                        .environmentObject(UserViewModel())
         }
         .tint(Color("main-point-color"))
         .navigationBarTitleDisplayMode(.inline)

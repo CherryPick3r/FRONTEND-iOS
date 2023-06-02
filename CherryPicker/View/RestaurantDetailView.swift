@@ -1083,6 +1083,7 @@ struct RestaurantDetailView: View {
 struct RestaurantDetailView_Previews: PreviewProvider {
     static var previews: some View {
         RestaurantDetailView(isCherryPick: .constant(false), isCherryPickDone: .constant(true), restaurantId: 3)
-            .environmentObject(UserViewModel.preivew)
+        //            .environmentObject(UserViewModel.preivew)
+                    .environmentObject(UserViewModel())
     }
 }

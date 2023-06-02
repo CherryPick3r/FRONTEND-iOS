@@ -444,7 +444,8 @@ struct RestaurantListView_Previews: PreviewProvider {
         NavigationStack {
             RestaurantListView(listMode: .cherryPick)
                 .navigationBarTitleDisplayMode(.inline)
-                .environmentObject(UserViewModel.preivew)
+            //            .environmentObject(UserViewModel.preivew)
+                        .environmentObject(UserViewModel())
         }
     }
 }
