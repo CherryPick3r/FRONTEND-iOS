@@ -9,7 +9,7 @@ import Foundation
 
 struct UserPreferenceResponse: Codable {
     let preferenceGameId: Int
-    let totalRound: Int
-    let curRound: Int
+    var totalRound: Int
+    var curRound: Int
     let gameStatus: Int
 }
