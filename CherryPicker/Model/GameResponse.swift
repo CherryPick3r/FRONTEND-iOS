@@ -9,8 +9,8 @@ import Foundation
 
 struct GameResponse: Codable {
     let gameId: Int
-    let totalRound: Int
-    let curRound: Int
+    var totalRound: Int
+    var curRound: Int
     let gameStatus: Int
     var recommendShopIds: [Int]?
     var recommendShops: ShopCardResponses?

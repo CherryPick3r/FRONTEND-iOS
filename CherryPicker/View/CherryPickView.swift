@@ -26,6 +26,8 @@ enum DragDirection {
 }
 
 struct CherryPickView: View {
+    @Namespace var heroEffect
+    
     @EnvironmentObject var userViewModel: UserViewModel
     
     @Binding var isCherryPick: Bool
@@ -59,6 +61,8 @@ struct CherryPickView: View {
     @State private var retryAction: (() -> Void)?
     @State private var tutorialIsDone = false
     @State private var dragDirection = DragDirection.none
+    @State private var progressIndicatorScale = CGFloat(1.2)
+    @State private var thumbScale = 1.0
     
     var body: some View {
             GeometryReader { reader in
@@ -72,28 +76,23 @@ struct CherryPickView: View {
                         .tint(Color("main-point-color"))
                         .frame(width: width)
                 } else {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            
-                            closeButton()
-                        }
-                        .padding(.top, 10)
-                        .padding(.horizontal)
-                        
-                        HStack {
-                            Image("cherry-picker-title")
-                                .resizable()
-                                .scaledToFit()
-                            
-                            Spacer()
-                        }
-                        .padding(.horizontal)
-                        .frame(width: width, height: height / 20)
+                    VStack(spacing: 0) {
+                        navigationTitle(width: width, height: height)
                         
                         Spacer()
                         
                         if !isLoading {
+                            if showIndicators {
+                                if let game = gameResponse {
+                                    progressBar(progress: width * CGFloat((game.curRound / game.totalRound)))
+                                } else if let game = preferenceGameResponse {
+                                    progressBar(progress: width * CGFloat((game.curRound / game.totalRound)))
+                                }
+                                else {
+                                    progressBar(progress: 0)
+                                }
+                            }
+                            
                             HStack {
                                 Spacer()
                                 
@@ -141,9 +140,24 @@ struct CherryPickView: View {
                     .tint(Color("main-point-color"))
                     .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
                     .onAppear() {
-                        if cherryPickMode == .tutorial {
-                            shopCardResponse = ShopCardResponse.preview
-                        }
+                        //임시
+//                        dragDirection = .none
+//                        withAnimation(.spring()) {
+//                            shopCardResponse = ShopCardResponse.preview
+//                            isLoading = false
+//                            showRestaurantCard = true
+//                        }
+//
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+//                            withAnimation(.easeInOut) {
+//                                indicatorsOpacity = 1
+//                                showIndicators = true
+//                            }
+//                        }
+//
+//                        if cherryPickMode == .tutorial {
+//                            shopCardResponse = ShopCardResponse.preview
+//                        }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             withAnimation(.spring(response: 1.1)) {
@@ -169,6 +183,54 @@ struct CherryPickView: View {
                     }
                 }
             }
+    }
+    
+    @ViewBuilder
+    func navigationTitle(width: CGFloat, height: CGFloat) -> some View {
+        HStack {
+            Image("cherry-picker-title")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 250)
+                .padding(.bottom, 15)
+            
+            Spacer()
+            
+            closeButton()
+        }
+        .padding(.top, 10)
+        .padding(.horizontal)
+        .frame(width: width, height: height / 20 * 2 / 3)
+        .fixedSize(horizontal: true, vertical: true)
+        .padding(.top)
+    }
+    
+    @ViewBuilder
+    func progressBar(progress: CGFloat) -> some View {
+        ZStack {
+            Rectangle()
+                .fill(Color("main-point-color-weak"))
+                .frame(width: progress, height: 2)
+            
+            HStack {
+                Circle()
+                    .fill(Color("main-point-color"))
+                    .frame(width: 12, height: 12)
+                    .padding(5)
+                    .background {
+                        Circle()
+                            .fill(Color("main-point-color-weak"))
+                    }
+                    .scaleEffect(progressIndicatorScale)
+                    .animation(Animation.spring(dampingFraction: 2).repeatForever(autoreverses: true), value: progressIndicatorScale)
+                    .onAppear {
+                        progressIndicatorScale = 1.0
+                    }
+                    .offset(x: -10 + progress)
+                
+                Spacer()
+            }
+        }
     }
     
     @ViewBuilder
@@ -281,9 +343,10 @@ struct CherryPickView: View {
                 }
             
             Image(systemName: thumb)
+                .matchedGeometryEffect(id: thumb, in: heroEffect)
                 .padding(isLikeButton ? .leading : .trailing, 15)
                 .offset(x: isLikeButton ? likeThumbOffset : hateThumbOffset)
-                .animation(Animation.spring(dampingFraction: 0.979).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
+                .animation(Animation.spring(dampingFraction: 0.9785).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
                 .onAppear {
                     if isLikeButton {
                         likeThumbOffset = 0
@@ -302,13 +365,19 @@ struct CherryPickView: View {
     func likeAndHateIndicators() -> some View {
         HStack {
             if showIndicators {
-                if dragDirection == .right {
+                if dragDirection == .left {
                     Spacer()
+                    
+                    Image(systemName: "hand.thumbsdown.fill")
+                        .scaledToFill()
+                        .frame(width: 100)
+                        .foregroundColor(Color("main-point-color"))
+                        .scaleEffect(thumbScale)
+                        .matchedGeometryEffect(id: "hand.thumbsdown.fill", in: heroEffect)
                 }
                 
-                if dragDirection == .right || dragDirection == .none {
+                if dragDirection == .none {
                     likeOrHateIndicator(thumb: "hand.thumbsdown.fill")
-                        .scaleEffect(dragDirection == .right ? 1.5 : 1)
                 }
             }
             
@@ -317,12 +386,18 @@ struct CherryPickView: View {
             }
             
             if showIndicators {
-                if dragDirection == .left || dragDirection == .none {
+                if dragDirection == .none {
                     likeOrHateIndicator(thumb: "hand.thumbsup.fill")
-                        .scaleEffect(dragDirection == .left ? 1.5 : 1)
                 }
                 
-                if dragDirection == .left {
+                if dragDirection == .right {
+                    Image(systemName: "hand.thumbsup.fill")
+                        .scaledToFill()
+                        .frame(width: 100)
+                        .foregroundColor(Color("main-point-color"))
+                        .scaleEffect(thumbScale)
+                        .matchedGeometryEffect(id: "hand.thumbsup.fill", in: heroEffect)
+                    
                     Spacer()
                 }
             }
@@ -458,6 +533,10 @@ struct CherryPickView: View {
                     DispatchQueue.global(qos: .userInteractive).async {
                         let moveX = drag.translation.width
                         
+                        if moveX > -maxOffset && moveX < maxOffset {
+                            thumbScale =  1 + ((moveX >= 0 ? moveX : -moveX) / (maxOffset / 3))
+                        }
+                        
                         swipingCard(moveX: moveX, moveY: drag.translation.height, maxOffset: maxOffset)
                         
                         decisionUserSelection(moveX: moveX, maxOffset: maxOffset)
@@ -475,6 +554,7 @@ struct CherryPickView: View {
                         
                         withAnimation(.spring()) {
                             cardDgree = 0
+                            thumbScale = 1
                         }
                     }
                 })
@@ -503,11 +583,11 @@ struct CherryPickView: View {
         
         if cardOffsetX < 0 {
             withAnimation(.spring()) {
-                dragDirection = .right
+                dragDirection = .left
             }
         } else if cardOffsetX > 0 {
             withAnimation(.spring()) {
-                dragDirection = .left
+                dragDirection = .right
             }
         } else {
             withAnimation(.spring()) {
@@ -560,6 +640,11 @@ struct CherryPickView: View {
         withAnimation(.easeInOut) {
             indicatorsOpacity = 1.0
         }
+        
+        likeAndHateButtonsScale = 1.0
+        likeAndHateButtonsSubScale = 1.0
+        likeThumbOffset = 0
+        hateThumbOffset = 0
     }
     
     func showShopCard() {
@@ -619,7 +704,9 @@ struct CherryPickView: View {
         }
         
         APIFunction.doStartGame(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, gameMode: gameCategory?.rawValue ?? 0, subscriptions: &subscriptions) { game in
-            gameResponse = game
+            withAnimation(.spring()) {
+                gameResponse = game
+            }
             
             showShopCard()
         } errorHandling: { apiError in
@@ -642,7 +729,9 @@ struct CherryPickView: View {
         }
         
         APIFunction.doUserPreferenceStart(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { game in
-            preferenceGameResponse = game
+            withAnimation(.spring()) {
+                preferenceGameResponse = game
+            }
             
             showPreferencCard()
         } errorHandling: { apiError in
@@ -674,8 +763,15 @@ struct CherryPickView: View {
                 if data.recommendShopIds != nil || data.recommendShops != nil {
                     disappearingCard()
                     
-                    gameResponse = data
+                    withAnimation(.spring()) {
+                        gameResponse = data
+                    }
                 } else if let shopId = data.recommendedShopId {
+                    withAnimation(.spring()) {
+                        gameResponse?.curRound = data.curRound
+                        gameResponse?.totalRound = data.totalRound
+                    }
+                    
                     disappearingCard()
                     
                     restaurantId = shopId
@@ -685,6 +781,11 @@ struct CherryPickView: View {
                         isCherryPickDone = true
                     }
                 } else {
+                    withAnimation(.spring()) {
+                        gameResponse?.curRound = data.curRound
+                        gameResponse?.totalRound = data.totalRound
+                    }
+                    
                     disappearingCard()
                 }
             } errorHandling: { apiError in
@@ -716,6 +817,11 @@ struct CherryPickView: View {
             
             APIFunction.doUserPreferenceSwipe(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, preferenceGameId: game.preferenceGameId, swipeType: userSelection, subscriptions: &subscriptions) { data in
                 if game.preferenceCards.isEmpty {
+                    withAnimation(.spring()) {
+                        preferenceGameResponse?.curRound = data.curRound
+                        preferenceGameResponse?.totalRound = data.totalRound
+                    }
+                    
                     disappearingCard()
                     
                     isFirstCherryPick = false
