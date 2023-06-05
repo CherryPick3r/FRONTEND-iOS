@@ -140,25 +140,6 @@ struct CherryPickView: View {
                     .tint(Color("main-point-color"))
                     .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
                     .onAppear() {
-                        //임시
-//                        dragDirection = .none
-//                        withAnimation(.spring()) {
-//                            shopCardResponse = ShopCardResponse.preview
-//                            isLoading = false
-//                            showRestaurantCard = true
-//                        }
-//
-//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-//                            withAnimation(.easeInOut) {
-//                                indicatorsOpacity = 1
-//                                showIndicators = true
-//                            }
-//                        }
-//
-//                        if cherryPickMode == .tutorial {
-//                            shopCardResponse = ShopCardResponse.preview
-//                        }
-                        
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             withAnimation(.spring(response: 1.1)) {
                                 cardOffsetX = 30

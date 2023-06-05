@@ -141,9 +141,6 @@ struct StartView: View {
                     case .userClippingList:
                         RestaurantListView(listMode: .bookmark)
                     }
-                    
-                    
-                    
                 }
             }
         }
