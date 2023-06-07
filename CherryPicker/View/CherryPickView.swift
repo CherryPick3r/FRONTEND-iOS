@@ -61,7 +61,6 @@ struct CherryPickView: View {
     @State private var retryAction: (() -> Void)?
     @State private var tutorialIsDone = false
     @State private var dragDirection = DragDirection.none
-    @State private var progressIndicatorScale = CGFloat(1.2)
     @State private var thumbScale = 1.0
     @State private var gameProgressValue = CGFloat.zero
     
@@ -82,12 +81,9 @@ struct CherryPickView: View {
                         .padding(.bottom)
                     
                     if showIndicators {
-                        if gameResponse != nil {
+                        if gameResponse != nil || preferenceGameResponse != nil {
                             progressBar(progress: width * gameProgressValue)
-                        } else if preferenceGameResponse != nil {
-                            progressBar(progress: width * gameProgressValue)
-                        }
-                        else {
+                        } else {
                             progressBar(progress: 0)
                         }
                     }
@@ -190,29 +186,12 @@ struct CherryPickView: View {
     
     @ViewBuilder
     func progressBar(progress: CGFloat) -> some View {
-        ZStack(alignment: .leading) {
+        HStack {
             Rectangle()
                 .fill(Color("main-point-color-weak"))
                 .frame(width: progress, height: 6)
             
-            HStack {
-                Circle()
-                    .fill(Color("main-point-color"))
-                    .frame(width: 10, height: 10)
-                    .padding(3)
-                    .background {
-                        Circle()
-                            .fill(Color("main-point-color-weak"))
-                    }
-                    .scaleEffect(progressIndicatorScale)
-                    .animation(Animation.spring(dampingFraction: 2).repeatForever(autoreverses: true), value: progressIndicatorScale)
-                    .onAppear {
-                        progressIndicatorScale = 1.0
-                    }
-                    .offset(x: -10 + progress)
-                
-                Spacer()
-            }
+            Spacer()
         }
         .shadow(color: .black.opacity(0.1), radius: 10)
     }
@@ -312,7 +291,7 @@ struct CherryPickView: View {
                 ], startPoint: isLikeButton ? .top : .bottom, endPoint: isLikeButton ? .bottom : .top)
                     .opacity(0.7))
                 .scaleEffect(likeAndHateButtonsSubScale)
-                .animation(Animation.spring(dampingFraction: 1.5).repeatForever(autoreverses: true), value: likeAndHateButtonsSubScale)
+                .animation(Animation.spring(dampingFraction: 1.515).repeatForever(autoreverses: true), value: likeAndHateButtonsSubScale)
                 .onAppear {
                     self.likeAndHateButtonsSubScale = 1.0
                 }
@@ -330,7 +309,7 @@ struct CherryPickView: View {
                 .matchedGeometryEffect(id: thumb, in: heroEffect)
                 .padding(isLikeButton ? .leading : .trailing, 15)
                 .offset(x: isLikeButton ? likeThumbOffset : hateThumbOffset)
-                .animation(Animation.spring(dampingFraction: 0.9785).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
+                .animation(Animation.spring(dampingFraction: 0.975).repeatForever(autoreverses: true), value: isLikeButton ? likeThumbOffset : hateThumbOffset)
                 .onAppear {
                     if isLikeButton {
                         likeThumbOffset = 0
@@ -593,12 +572,12 @@ struct CherryPickView: View {
     }
     
     func disappearingCard() {
+        likeAndHateButtonsScale = 1.2
+        likeAndHateButtonsSubScale = 1.1
+        likeThumbOffset = 15
+        hateThumbOffset = -15
+        
         withAnimation(.spring()) {
-            likeAndHateButtonsScale = 1.2
-            likeAndHateButtonsSubScale = 1.1
-            likeThumbOffset = 15.0
-            hateThumbOffset = -15.0
-            
             showRestaurantCard = false
         }
         
@@ -613,6 +592,7 @@ struct CherryPickView: View {
     }
     
     func cancelDecisionUserSelection() {
+        
         userSelection = .none
         
         withAnimation(.spring()) {
@@ -624,11 +604,6 @@ struct CherryPickView: View {
         withAnimation(.easeInOut) {
             indicatorsOpacity = 1.0
         }
-        
-        likeAndHateButtonsScale = 1.0
-        likeAndHateButtonsSubScale = 1.0
-        likeThumbOffset = 0
-        hateThumbOffset = 0
     }
     
     func showShopCard() {
@@ -766,8 +741,6 @@ struct CherryPickView: View {
                 } else {
                     disappearingCard()
                 }
-                
-                print(gameProgressValue)
             } errorHandling: { apiError in
                 retryAction = doSwipped
                 cancelDecisionUserSelection()

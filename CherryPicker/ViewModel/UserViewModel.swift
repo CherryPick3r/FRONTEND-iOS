@@ -62,7 +62,7 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
     override init() {
         super.init()
         
-        if let token = self.loadTokenFromKeychain(key: UIDevice.current.identifierForVendor!.uuidString) {
+        if let token = self.loadTokenFromKeychain(key: tokenAccessKey) {
             self.token = token
             self.isAuthenticated = true
         } else {
@@ -103,7 +103,6 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         
         saveTokenToKeychain(key: self.tokenAccessKey, token: token)
         
-        
         self.userEmail = email
         self.accessToken = accessToken
         
@@ -137,7 +136,7 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         
         guard status == errSecSuccess else {
             self.deleteTokenFromKeychain()
-            self.saveTokenToKeychain(key: self.tokenAccessKey, token: token)
+            self.saveTokenToKeychain(key: key, token: token)
             
             return
         }
