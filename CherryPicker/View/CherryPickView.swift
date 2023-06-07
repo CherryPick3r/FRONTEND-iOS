@@ -63,107 +63,109 @@ struct CherryPickView: View {
     @State private var dragDirection = DragDirection.none
     @State private var progressIndicatorScale = CGFloat(1.2)
     @State private var thumbScale = 1.0
+    @State private var gameProgressValue = CGFloat.zero
     
     var body: some View {
-            GeometryReader { reader in
-                let width = reader.size.width
-                let height = reader.size.height
-                let cardHeight = height == 551 ?  height / 11 * 10 : height / 6 * 5
-                let cardImageWidth = width / 4 * 2.8
-                
-                if tutorialIsDone {
-                    tutorialDone()
-                        .tint(Color("main-point-color"))
-                        .frame(width: width)
-                } else {
-                    VStack(spacing: 0) {
-                        navigationTitle(width: width, height: height)
-                        
-                        Spacer()
-                        
-                        if !isLoading {
-                            if showIndicators {
-                                if let game = gameResponse {
-                                    progressBar(progress: width * CGFloat((game.curRound / game.totalRound)))
-                                } else if let game = preferenceGameResponse {
-                                    progressBar(progress: width * CGFloat((game.curRound / game.totalRound)))
-                                }
-                                else {
-                                    progressBar(progress: 0)
-                                }
-                            }
-                            
-                            HStack {
-                                Spacer()
-                                
-                                ZStack {
-                                    if showIndicators {
-                                        likeAndHateIndicators()
-                                            .frame(maxWidth: 630)
-                                    }
-                                    
-                                    if let shopCard = shopCardResponse, showRestaurantCard {
-                                        restaurantCard(width: cardImageWidth, height: cardHeight, shopCard: shopCard)
-                                    }
-                                }
-                                .frame(maxHeight: 800)
-                                .frame(height: cardHeight)
-                                
-                                Spacer()
-                            }
-                            .frame(width: width)
-                            
+        GeometryReader { reader in
+            let width = reader.size.width
+            let height = reader.size.height
+            let cardHeight = height == 551 ?  height / 11 * 10 : height / 6 * 5
+            let cardImageWidth = width / 4 * 2.8
+            
+            if tutorialIsDone {
+                tutorialDone()
+                    .tint(Color("main-point-color"))
+                    .frame(width: width)
+            } else {
+                VStack(spacing: 0) {
+                    navigationTitle(width: width, height: height)
+                        .padding(.bottom)
+                    
+                    if showIndicators {
+                        if gameResponse != nil {
+                            progressBar(progress: width * gameProgressValue)
+                        } else if preferenceGameResponse != nil {
+                            progressBar(progress: width * gameProgressValue)
+                        }
+                        else {
+                            progressBar(progress: 0)
+                        }
+                    }
+                    
+                    if !isLoading {
+                        HStack {
                             Spacer()
                             
-                            if showIndicators {
-                                Text("스와이프로 취향을 알려주세요!")
-                                    .fontWeight(.bold)
-                                    .foregroundColor(Color("secondary-text-color-strong"))
-                                    .opacity(indicatorsOpacity)
-                            }
-                        } else {
-                            HStack {
-                                Spacer()
+                            ZStack {
+                                if showIndicators {
+                                    likeAndHateIndicators()
+                                        .frame(maxWidth: 630)
+                                }
                                 
-                                ProgressView()
-                                    .progressViewStyle(.circular)
-                                    .controlSize(.large)
-                                
-                                Spacer()
+                                if let shopCard = shopCardResponse, showRestaurantCard {
+                                    restaurantCard(width: cardImageWidth, height: cardHeight, shopCard: shopCard)
+                                }
                             }
+                            .frame(maxHeight: 800)
+                            .frame(height: cardHeight)
+                            
+                            Spacer()
                         }
+                        .frame(width: width)
                         
                         Spacer()
-                    }
-                    .modifier(BackgroundModifier())
-                    .navigationTitle(cherryPickMode == .cherryPick ? "CherryPicker" : "초기취향 선택")
-                    .tint(Color("main-point-color"))
-                    .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
-                    .onAppear() {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                            withAnimation(.spring(response: 1.1)) {
-                                cardOffsetX = 30
-                                cardDgree = 3
-                            }
-                        }
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                            withAnimation(.spring(response: 0.5)) {
-                                cardOffsetX = 0
-                                cardDgree = 0
-                            }
+                        if showIndicators {
+                            Text("스와이프로 취향을 알려주세요!")
+                                .fontWeight(.bold)
+                                .foregroundColor(Color("secondary-text-color-strong"))
+                                .opacity(indicatorsOpacity)
+                        }
+                    } else {
+                        Spacer()
+                        
+                        HStack {
+                            Spacer()
+                            
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .controlSize(.large)
+                            
+                            Spacer()
                         }
                     }
-                    .task {
-                        switch cherryPickMode {
-                        case .tutorial:
-                            fetchPreferenceGame()
-                        case .cherryPick:
-                            fetchGame()
+                    
+                    Spacer()
+                }
+                .modifier(BackgroundModifier())
+                .navigationTitle(cherryPickMode == .cherryPick ? "CherryPicker" : "초기취향 선택")
+                .tint(Color("main-point-color"))
+                .modifier(ErrorViewModifier(showError: $showError, error: $error, retryAction: $retryAction))
+                .onAppear() {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        withAnimation(.spring(response: 1.1)) {
+                            cardOffsetX = 30
+                            cardDgree = 3
+                        }
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        withAnimation(.spring(response: 0.5)) {
+                            cardOffsetX = 0
+                            cardDgree = 0
                         }
                     }
                 }
+                .task {
+                    switch cherryPickMode {
+                    case .tutorial:
+                        fetchPreferenceGame()
+                    case .cherryPick:
+                        fetchGame()
+                    }
+                }
             }
+        }
     }
     
     @ViewBuilder
@@ -188,16 +190,16 @@ struct CherryPickView: View {
     
     @ViewBuilder
     func progressBar(progress: CGFloat) -> some View {
-        ZStack {
+        ZStack(alignment: .leading) {
             Rectangle()
                 .fill(Color("main-point-color-weak"))
-                .frame(width: progress, height: 2)
+                .frame(width: progress, height: 6)
             
             HStack {
                 Circle()
                     .fill(Color("main-point-color"))
-                    .frame(width: 12, height: 12)
-                    .padding(5)
+                    .frame(width: 10, height: 10)
+                    .padding(3)
                     .background {
                         Circle()
                             .fill(Color("main-point-color-weak"))
@@ -212,6 +214,7 @@ struct CherryPickView: View {
                 Spacer()
             }
         }
+        .shadow(color: .black.opacity(0.1), radius: 10)
     }
     
     @ViewBuilder
@@ -741,6 +744,10 @@ struct CherryPickView: View {
             }
             
             APIFunction.doGameSwipe(token: userViewModel.readToken, gameId: game.gameId, shopId: shopCard.shopId, swipeType: userSelection, subscriptions: &subscriptions) { data in
+                withAnimation(.spring()) {
+                    gameProgressValue = CGFloat(Double(data.curRound) / Double(data.totalRound))
+                }
+                
                 if data.recommendShopIds != nil || data.recommendShops != nil {
                     disappearingCard()
                     
@@ -748,11 +755,6 @@ struct CherryPickView: View {
                         gameResponse = data
                     }
                 } else if let shopId = data.recommendedShopId {
-                    withAnimation(.spring()) {
-                        gameResponse?.curRound = data.curRound
-                        gameResponse?.totalRound = data.totalRound
-                    }
-                    
                     disappearingCard()
                     
                     restaurantId = shopId
@@ -762,13 +764,10 @@ struct CherryPickView: View {
                         isCherryPickDone = true
                     }
                 } else {
-                    withAnimation(.spring()) {
-                        gameResponse?.curRound = data.curRound
-                        gameResponse?.totalRound = data.totalRound
-                    }
-                    
                     disappearingCard()
                 }
+                
+                print(gameProgressValue)
             } errorHandling: { apiError in
                 retryAction = doSwipped
                 cancelDecisionUserSelection()
@@ -797,12 +796,11 @@ struct CherryPickView: View {
             }
             
             APIFunction.doUserPreferenceSwipe(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, preferenceGameId: game.preferenceGameId, swipeType: userSelection, subscriptions: &subscriptions) { data in
+                withAnimation(.spring()) {
+                    gameProgressValue = CGFloat(Double(data.curRound) / Double(data.totalRound))
+                }
+                
                 if game.preferenceCards.isEmpty {
-                    withAnimation(.spring()) {
-                        preferenceGameResponse?.curRound = data.curRound
-                        preferenceGameResponse?.totalRound = data.totalRound
-                    }
-                    
                     disappearingCard()
                     
                     isFirstCherryPick = false
