@@ -42,7 +42,7 @@ struct KeywordTagsView: View {
             keywordTagGauge(title: tagTitle4, integerPart: $tagIntegerPart4, realPart: $tagRealPart4, value: tagValue4)
             keywordTagGauge(title: tagTitle5, integerPart: $tagIntegerPart5, realPart: $tagRealPart5, value: tagValue5)
         }
-        .frame(height: 200)
+        .frame(maxHeight: 250)
         .onAppear() {
             tagTitle1 = topTags[0].description
             tagTitle2 = topTags[1].description
@@ -106,8 +106,8 @@ struct KeywordTagsView: View {
                 }
                 .padding(10)
             }
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 

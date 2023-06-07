@@ -23,12 +23,12 @@ enum LoginedPlatform: Int {
 }
 
 class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelegate {
-    @AppStorage("이메일") private var userEmail = ""
+    @AppStorage("이메일") private var userEmail = "kakao_rlaehgud33@naver.com"
     
     @AppStorage("화면스타일") var userColorScheme: UserColorScheme = .system
     @AppStorage("로그인플랫폼") var platform: LoginedPlatform = .notLogined
     
-    @Published private var token = ""
+    @Published private var token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIycnJobXdtcWdqQHByaXZhdGVyZWxheS5hcHBsZWlkLmNvbSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNjg1NTExMTI3LCJleHAiOjE2ODU1MTI5Mjd9.RCWHPtNrGE_ZMvlb8SVMgB_XKwubz4TD3sBE7luGJFk"
     @Published private var accessToken = ""
     
     @Published var isAuthenticated = false
@@ -62,7 +62,7 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
     override init() {
         super.init()
         
-        if let token = self.loadTokenFromKeychain(key: UIDevice.current.identifierForVendor!.uuidString) {
+        if let token = self.loadTokenFromKeychain(key: tokenAccessKey) {
             self.token = token
             self.isAuthenticated = true
         } else {
@@ -103,7 +103,6 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         
         saveTokenToKeychain(key: self.tokenAccessKey, token: token)
         
-        
         self.userEmail = email
         self.accessToken = accessToken
         
@@ -137,7 +136,7 @@ class UserViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelega
         
         guard status == errSecSuccess else {
             self.deleteTokenFromKeychain()
-            self.saveTokenToKeychain(key: self.tokenAccessKey, token: token)
+            self.saveTokenToKeychain(key: key, token: token)
             
             return
         }

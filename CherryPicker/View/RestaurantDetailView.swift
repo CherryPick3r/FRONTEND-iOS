@@ -19,9 +19,6 @@ struct RestaurantDetailView: View {
     @Binding var isCherryPick: Bool
     @Binding var isCherryPickDone: Bool
     
-    private let isResultView: Bool
-    private let maxOffsetY = CGFloat(250)
-    
     @State private var subscriptions = Set<AnyCancellable>()
     @State private var showDetailInformation = false
     @State private var showInformation = false
@@ -48,10 +45,9 @@ struct RestaurantDetailView: View {
     @State private var restaurant = ShopDetailResponse.preview
     @State private var isAddressCopied = false
     
+    private let isResultView: Bool
+    private let maxOffsetY = CGFloat(250)
     private let restaurantId: Int
-    
-    //임시
-    @State private var isSharing = false
     
     init(isCherryPick: Binding<Bool> = .constant(false), isCherryPickDone: Binding<Bool> = .constant(false), isResultView: Bool = true, restaurantId: Int) {
         self._isCherryPick = isCherryPick

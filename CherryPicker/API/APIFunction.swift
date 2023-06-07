@@ -81,6 +81,7 @@ enum APIFunction {
         } receiveValue: { data in
             receiveValue(data)
         }
+        .store(in: &subscriptions)
     }
     
     static func doUserPreferenceStart(token: String, userEmail: String, subscriptions: inout Set<AnyCancellable>, receieveValue: @escaping (UserPreferenceStartResponse) -> Void, errorHandling: @escaping (APIError) -> Void) {
