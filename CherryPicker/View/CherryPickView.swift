@@ -689,6 +689,7 @@ struct CherryPickView: View {
         
         APIFunction.doUserPreferenceStart(token: userViewModel.readToken, userEmail: userViewModel.readUserEmail, subscriptions: &subscriptions) { game in
             withAnimation(.spring()) {
+                shopCardResponse = ShopCardResponse.preview
                 preferenceGameResponse = game
             }
             
@@ -817,7 +818,7 @@ struct CherryPickView: View {
 
 struct CherryPickView_Previews: PreviewProvider {
     static var previews: some View {
-        CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), restaurantId: .constant(0), gameCategory: .constant(.group), isFirstCherryPick: .constant(false), cherryPickMode: .cherryPick)
+        CherryPickView(isCherryPick: .constant(true), isCherryPickDone: .constant(false), restaurantId: .constant(0), gameCategory: .constant(.group), isFirstCherryPick: .constant(false), cherryPickMode: .tutorial)
             .tint(Color("main-point-color"))
         //            .environmentObject(UserViewModel.preivew)
                     .environmentObject(UserViewModel())
