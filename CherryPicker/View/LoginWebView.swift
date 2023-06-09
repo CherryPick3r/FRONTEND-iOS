@@ -85,7 +85,7 @@ struct LoginWebView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                if let url = URL(string: url.removingPercentEncoding ?? "") {
+                if let url = URL(string: url.removingPercentEncoding?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") {
                     WebView(url: url, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
                         .environmentObject(userViewModel)
                 } else {
