@@ -86,11 +86,15 @@ struct LoginWebView: View {
         NavigationStack {
             VStack {
                 WebView(url: URL(string: url.removingPercentEncoding!)!, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
-                    .environmentObject(userViewModel)
+                        .environmentObject(userViewModel)
             }
             .modifier(BackgroundModifier())
         }
         .tint(Color("main-point-color"))
+        .onAppear() {
+            print(url.removingPercentEncoding)
+            print(URL(string: url.removingPercentEncoding!))
+        }
     }
 }
 
