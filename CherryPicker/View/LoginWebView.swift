@@ -85,16 +85,24 @@ struct LoginWebView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                WebView(url: URL(string: url.removingPercentEncoding!)!, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
-                        .environmentObject(userViewModel)
+                if let urlString = url.removingPercentEncoding {
+                    Text(urlString)
+                } else {
+                    Text("url.removingPercentEncoding")
+                }
+                
+                if let url = URL(string: url.removingPercentEncoding ?? "") {
+                    Text("\(url)")
+                } else {
+                    Text("ULR Parsing")
+                }
+                
+//                WebView(url: URL(string: url.removingPercentEncoding!)!, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
+//                        .environmentObject(userViewModel)
             }
             .modifier(BackgroundModifier())
         }
         .tint(Color("main-point-color"))
-        .onAppear() {
-            print(url.removingPercentEncoding)
-            print(URL(string: url.removingPercentEncoding!))
-        }
     }
 }
 
