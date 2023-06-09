@@ -85,24 +85,8 @@ struct LoginWebView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                if let url = URL(string: url.removingPercentEncoding ?? "") {
-                    WebView(url: url, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
-                        .environmentObject(userViewModel)
-                } else {
-                    Spacer()
-                    
-                    HStack {
-                        Spacer()
-                        
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .controlSize(.large)
-                        
-                        Spacer()
-                    }
-                    
-                    Spacer()
-                }
+                WebView(url: URL(string: url.removingPercentEncoding!)!, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
+                    .environmentObject(userViewModel)
             }
             .modifier(BackgroundModifier())
         }
