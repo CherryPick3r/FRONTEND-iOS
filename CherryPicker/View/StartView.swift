@@ -14,6 +14,8 @@ enum NavigationPath {
     case userAnalyzeView
     case userCherrypickList
     case userClippingList
+    case termsOfUse
+    case privacyPolicy
 }
 
 struct StartView: View {
@@ -140,6 +142,10 @@ struct StartView: View {
                         RestaurantListView(listMode: .cherryPick)
                     case .userClippingList:
                         RestaurantListView(listMode: .bookmark)
+                    case .termsOfUse:
+                        TermsOfUseView(path: $path)
+                    case .privacyPolicy:
+                        PrivacyPolicyView(path: $path)
                     }
                 }
             }

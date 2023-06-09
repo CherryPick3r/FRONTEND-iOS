@@ -199,22 +199,7 @@ struct MenuView: View {
                     .foregroundColor(Color("secondary-text-color-strong"))
             }
             
-            NavigationLink {
-                
-            } label: {
-                HStack {
-                    Text("공지사항")
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.forward")
-                        .font(.title3)
-                }
-            }
-            
-            NavigationLink {
-                
-            } label: {
+            NavigationLink(value: NavigationPath.termsOfUse) {
                 HStack {
                     Text("서비스 이용약관")
                     
@@ -225,9 +210,7 @@ struct MenuView: View {
                 }
             }
             
-            NavigationLink {
-                
-            } label: {
+            NavigationLink(value: NavigationPath.privacyPolicy) {
                 HStack {
                     Text("개인정보 처리방침")
                     
