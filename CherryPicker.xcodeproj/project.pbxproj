@@ -203,8 +203,8 @@
 		C59D211929C9D83A00275DBA /* CherryPicker */ = {
 			isa = PBXGroup;
 			children = (
-				C5E78EAA2A25E92F00FC425F /* Delegate */,
 				C514AC4A2A253FF300148661 /* CherryPicker.entitlements */,
+				C5E78EAA2A25E92F00FC425F /* Delegate */,
 				C58C0DE42A1DEB5E00167C8E /* Model */,
 				C5C867B92A1DE45A00BC486E /* API */,
 				C5B579762A0B61BD0034BA8E /* ComponentView */,

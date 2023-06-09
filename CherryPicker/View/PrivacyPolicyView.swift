@@ -345,7 +345,6 @@ struct PrivacyPolicyView: View {
         }
         .navigationTitle("개인정보 처리방침")
         .navigationBarTitleDisplayMode(.large)
-        
     }
     
     @ViewBuilder

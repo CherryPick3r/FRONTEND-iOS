@@ -20,6 +20,7 @@ struct WebView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
+        webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
         webView.navigationDelegate = context.coordinator
         return webView
     }
@@ -84,15 +85,21 @@ struct LoginWebView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                if let url = URL(string: url) {
+                if let url = URL(string: url.removingPercentEncoding?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") {
                     WebView(url: url, onReceivedResponse: onReceivedResponse, showError: $showError, error: $error, showLoginWebView: $showLoginWebView)
                         .environmentObject(userViewModel)
                 } else {
                     Spacer()
                     
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .controlSize(.large)
+                    HStack {
+                        Spacer()
+                        
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .controlSize(.large)
+                        
+                        Spacer()
+                    }
                     
                     Spacer()
                 }
