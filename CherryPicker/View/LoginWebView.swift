@@ -91,8 +91,15 @@ struct LoginWebView: View {
                 } else {
                     Spacer()
                     
-                    ProgressView()
-                        .progressViewStyle(.circular)
+                    HStack {
+                        Spacer()
+                        
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .controlSize(.large)
+                        
+                        Spacer()
+                    }
                     
                     Spacer()
                 }
