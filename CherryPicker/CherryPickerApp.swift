@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import KakaoSDKCommon
+import KakaoSDKAuth
 
 @main
 struct CherryPickerApp: App {
@@ -16,6 +18,7 @@ struct CherryPickerApp: App {
         appearance.titleTextAttributes = [.foregroundColor: UIColor(Color("main-point-color"))]
         appearance.largeTitleTextAttributes = [.foregroundColor: UIColor(Color("main-point-color"))]
         UINavigationBar.appearance().standardAppearance = appearance
+        KakaoSDK.initSDK(appKey: <#T##String#>)
     }
     
     var body: some Scene {
