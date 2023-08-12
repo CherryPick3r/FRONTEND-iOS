@@ -352,7 +352,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\necho \"KAKAO_NATIVE_APP_KEY=67558e44d8ba6443cacecbd606dd33ea\" >> $PROJECT_DIR/.env\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\necho \"KAKAO_NATIVE_APP_KEY=2fcd2b1767ab142860a5525b5f549ce5\" >> $PROJECT_DIR/.env\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

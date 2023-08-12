@@ -18,7 +18,12 @@ struct CherryPickerApp: App {
         appearance.titleTextAttributes = [.foregroundColor: UIColor(Color("main-point-color"))]
         appearance.largeTitleTextAttributes = [.foregroundColor: UIColor(Color("main-point-color"))]
         UINavigationBar.appearance().standardAppearance = appearance
-        KakaoSDK.initSDK(appKey: <#T##String#>)
+        
+        guard let kakaoNativeAppKey = ProcessInfo.processInfo.environment["KAKAO_NATIVE_APP_KEY"] else {
+            fatalError("API key not found")
+        }
+        
+        KakaoSDK.initSDK(appKey: kakaoNativeAppKey)
     }
     
     var body: some Scene {
@@ -26,6 +31,11 @@ struct CherryPickerApp: App {
             AppView()
                 .environmentObject(userViewModel)
                 .preferredColorScheme(colorScheme)
+                .onOpenURL(perform: { url in
+                    if AuthApi.isKakaoTalkLoginUrl(url) {
+                        _ = AuthController.handleOpenUrl(url: url)
+                    }
+                })
         }
     }
     

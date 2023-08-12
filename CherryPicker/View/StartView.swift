@@ -8,6 +8,9 @@
 import SwiftUI
 import Combine
 import AuthenticationServices
+import KakaoSDKCommon
+import KakaoSDKAuth
+import KakaoSDKUser
 
 enum NavigationPath {
     case menuView
@@ -548,33 +551,75 @@ struct StartView: View {
     }
     
     func kakaoLogin() {
-        withAnimation(.easeInOut) {
-            isLoading = true
-        }
-        
-        withAnimation(.spring()) {
-            APIError.closeError(showError: &showError, error: &error)
-        }
-        
-        showSignInView = false
-        
-        APIFunction.fetchLoginResponse(platform: .kakao, subscriptions: &subscriptions) { loginResponse in
-            loginURL = loginResponse.loginURL
-            
-            DispatchQueue.main.async {
-                userViewModel.platform = .kakao
+        if UserApi.isKakaoTalkLoginAvailable() {
+            UserApi.shared.loginWithKakaoTalk { oauthToken, authError in
+                guard let kakaoLoginError = authError, let accessToken = oauthToken?.accessToken else {
+                    withAnimation(.spring()) {
+                        APIError.showError(showError: &showError, error: &error, catchError: .loginFail)
+                    }
+                    
+                    return
+                }
             }
             
-            withAnimation(.easeInOut) {
-                isLoading = false
+            UserApi.shared.me { user, userError in
+                if let userName = user?.kakaoAccount?.profile?.nickname {
+                    print(userName)
+                }
+                
+                if let email = user?.kakaoAccount?.email {
+                    print(email)
+                }
             }
-        } errorHandling: { apiError in
-            retryAction = kakaoLogin
+        } else {
+            UserApi.shared.loginWithKakaoAccount { oauthToken, authError in
+                guard let kakaoLoginError = authError, let accessToken = oauthToken?.accessToken else {
+                    withAnimation(.spring()) {
+                        APIError.showError(showError: &showError, error: &error, catchError: .loginFail)
+                    }
+                    
+                    return
+                }
+            }
             
-            withAnimation(.spring()) {
-                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+            UserApi.shared.me { user, userError in
+                if let userName = user?.kakaoAccount?.profile?.nickname {
+                    print(userName)
+                }
+                
+                if let email = user?.kakaoAccount?.email {
+                    print(email)
+                }
             }
         }
+        
+//        withAnimation(.easeInOut) {
+//            isLoading = true
+//        }
+//        
+//        withAnimation(.spring()) {
+//            APIError.closeError(showError: &showError, error: &error)
+//        }
+//        
+//        showSignInView = false
+//        
+//        APIFunction.fetchLoginResponse(platform: .kakao, subscriptions: &subscriptions) { loginResponse in
+//            loginURL = loginResponse.loginURL
+//            
+//            DispatchQueue.main.async {
+//                userViewModel.platform = .kakao
+//            }
+//            
+//            withAnimation(.easeInOut) {
+//                isLoading = false
+//            }
+//        } errorHandling: { apiError in
+//            retryAction = kakaoLogin
+//            
+//            withAnimation(.spring()) {
+//                APIError.showError(showError: &showError, error: &error, catchError: apiError)
+//            }
+//        }
     }
     
     func googleLogin() {
